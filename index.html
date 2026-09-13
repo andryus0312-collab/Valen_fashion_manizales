@@ -663,7 +663,7 @@
                 document.getElementById('admin-password').value = '';
             }).catch((error) => {
                 console.error('Login error:', error);
-                errorEl.innerText = '🚨 Correo o contraseña incorrectos.';
+                errorEl.innerText = '🚨 ' + error.code + ' — ' + error.message;
                 errorEl.classList.remove('hidden');
                 btn.disabled = false;
                 btn.innerText = 'Ingresar 🔑';
