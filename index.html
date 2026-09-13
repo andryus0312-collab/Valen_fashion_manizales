@@ -29,7 +29,7 @@
                     <h1 class="text-3xl sm:text-4xl font-extrabold tracking-wide text-white">Valen Fashion</h1>
                     <p class="text-xs sm:text-sm text-purple-300 font-medium tracking-widest uppercase mt-1">✨ Mereces lo que sueñas 🤍</p>
                 </div>
-                
+
                 <div class="flex items-center gap-3 pt-2">
                     <a href="https://wa.me/573229247605" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all flex items-center gap-1.5">
                         <span>💬 WhatsApp Directo</span>
@@ -64,93 +64,7 @@
         </footer>
 
         <!-- MODAL DE ADMINISTRACIÓN -->
-        <div id="admin-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
-            <div class="bg-gradient-to-b from-[#1f0a24] to-[#120516] border-2 border-purple-500/50 p-6 sm:p-8 rounded-[2.5rem] shadow-[0_0_50px_rgba(168,85,247,0.35)] w-full max-w-lg space-y-6 max-h-[90vh] overflow-y-auto relative">
-                
-                <div class="flex justify-between items-center border-b border-purple-500/20 pb-4 relative z-10">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white text-lg">⚙️</div>
-                        <div>
-                            <h3 class="text-xl font-black text-white">Panel de Control</h3>
-                            <p class="text-[10px] text-pink-400 font-semibold uppercase">Gestión de Valen Fashion</p>
-                        </div>
-                    </div>
-                    <button onclick="toggleAdminModal(false)" class="w-9 h-9 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/30 flex items-center justify-center">✕</button>
-                </div>
-
-                <!-- FORMULARIO NUEVO PRODUCTO -->
-                <div class="space-y-4 relative z-10">
-                    <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">Añadir Nuevo Producto</h4>
-                    
-                    <div class="space-y-3">
-                        <input type="text" id="new-title" placeholder="Nombre del producto..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <input type="text" id="new-price" placeholder="Precio (Ej: $45.000)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <select id="new-category" class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                            <option value="hogar">🏠 Hogar</option>
-                            <option value="ninos">🧸 Niños</option>
-                            <option value="ropa">👗 Ropa / Cuerpo</option>
-                            <option value="tendidos">🛏️ Tendidos</option>
-                        </select>
-                        <textarea id="new-description" rows="3" placeholder="Descripción..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl p-4 text-xs text-white outline-none resize-none"></textarea>
-
-                        <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
-                            <label class="text-[11px] font-bold text-purple-300">📸 Fotografía del Producto</label>
-                            <div class="flex items-center gap-3">
-                                <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl">
-                                    <span>Seleccionar archivo</span>
-                                    <input type="file" accept="image/*" id="new-image-file" onchange="handleImageInput(event)" class="hidden">
-                                </label>
-                                <span id="image-status" class="text-[11px] text-slate-400 truncate flex-1">Ningún archivo</span>
-                            </div>
-                            <div id="image-preview-container" class="hidden relative h-36 rounded-xl overflow-hidden border border-pink-500/50 bg-black mt-2">
-                                <img id="image-preview" class="w-full h-full object-contain">
-                            </div>
-                        </div>
-
-                        <button onclick="publishProduct()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-xs py-4 px-6 rounded-2xl shadow-lg uppercase">
-                            Publicar Producto ✨
-                        </button>
-                    </div>
-                </div>
-
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                    <span class="flex-shrink mx-4 text-purple-400 text-[10px] uppercase font-bold">Eliminar</span>
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                </div>
-
-                <!-- ELIMINAR PRODUCTOS -->
-                <div class="space-y-3 relative z-10 pb-2">
-                    <div id="admin-products-list" class="max-h-48 overflow-y-auto space-y-2.5 pr-1">
-                        <!-- Renderizado dinámico -->
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- VISOR DE IMAGEN (LIGHTBOX) -->
-        <div id="lightbox" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl hidden flex-col items-center justify-between p-4" onclick="closeLightbox()">
-            <div class="w-full flex justify-between items-center z-10">
-                <span id="lightbox-title" class="text-white font-medium text-sm"></span>
-                <button class="text-white text-2xl bg-[#1b0c1b] w-10 h-10 rounded-full flex items-center justify-center">✕</button>
-            </div>
-            <div class="relative flex-1 w-full flex items-center justify-center my-4">
-                <img id="lightbox-img" class="max-w-full max-h-full object-contain rounded-2xl">
-            </div>
-            <div></div>
-        </div>
-
-    </div>
-
-    <!-- SCRIPT CON CAPTURA TOTAL DE ERRORES -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyD4f9rBB-qxzyZZPmgNIK_twefNYLQTW4",
-            authDomain: "nuestroespacio-3f541.firebaseapp.com",
+        <div id="admin-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">uestroespacio-3f541.firebaseapp.com",
             databaseURL: "https://nuestroespacio-3f541-default-rtdb.firebaseio.com",
             projectId: "nuestroespacio-3f541",
             storageBucket: "nuestroespacio-3f541.appspot.com",
