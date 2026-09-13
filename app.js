@@ -1,9 +1,8 @@
-import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
-    apiKey: "AlzaSyD4f9rBB|qxzyZZPmgNIK_twefNYLQTW4",
+    apiKey: "AIzaSyD4f9rBB|qxzyZZPmgNIK_twefNYLQTW4",
     authDomain: "nuestroespacio-3f541.firebaseapp.com",
     projectId: "nuestroespacio-3f541",
     storageBucket: "nuestroespacio-3f541.appspot.com",
@@ -14,6 +13,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+const { createApp } = Vue;
 
 createApp({
     data() {
@@ -27,7 +28,7 @@ createApp({
             ],
             selectedCategory: 'all',
             products: [],
-            isAdmin: false, // Controla si se muestra el panel de admin
+            isAdmin: false,
             showAdminModal: false,
             newProduct: {
                 title: '',
@@ -48,7 +49,6 @@ createApp({
         }
     },
     mounted() {
-        // Detectar si se ingresó con el link secreto de administrador (ej: ?admin=1)
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('admin') === '1') {
             this.isAdmin = true;
