@@ -35,7 +35,8 @@
                     <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all flex items-center gap-1.5">
                         <span>📸 Instagram</span>
                     </a>
-                    <button @click="showAdminModal = true" class="bg-[#120814] hover:bg-purple-950 text-purple-300 border border-purple-500/40 text-xs px-3 py-2 rounded-full transition-all" title="Panel de Administración">
+                    <!-- Botón Admin oculto para clientes, solo aparece con ?admin=1 -->
+                    <button v-if="isAdmin" @click="showAdminModal = true" class="bg-[#120814] hover:bg-purple-950 text-purple-300 border border-purple-500/40 text-xs px-3 py-2 rounded-full transition-all" title="Panel de Administración">
                         ⚙️ Admin
                     </button>
                 </div>
@@ -141,6 +142,38 @@
                             <div v-for="(p, idx) in products" :key="p.firebaseId" class="flex items-center justify-between bg-[#120814] p-2 rounded-xl border border-purple-950">
                                 <div class="flex items-center gap-2 overflow-hidden">
                                     <img :src="p.image" class="w-8 h-8 rounded-lg object-cover flex-shrink-0">
+                                    <span class="text-xs text-slate-200 truncate">{{ p.title }}</span>
+                                </div>
+                                <button @click="deleteProduct(p.firebaseId)" class="bg-rose-950/80 hover:bg-rose-600 text-rose-200 hover:text-white text-xs px-2.5 py-1 rounded-lg transition-colors">
+                                    🗑️ Borrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </transition>
+
+        <!-- VISOR DE IMAGEN (LIGHTBOX) -->
+        <div v-if="lightboxOpen" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-between p-4" @click="lightboxOpen = false">
+            <div class="w-full flex justify-between items-center z-10">
+                <span class="text-white font-medium text-sm">{{ lightboxTitle }}</span>
+                <button @click="lightboxOpen = false" class="text-white text-2xl bg-[#1b0c1b] hover:bg-purple-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors">✕</button>
+            </div>
+            <div class="relative flex-1 w-full flex items-center justify-center my-4">
+                <img :src="lightboxUrl" class="max-w-full max-h-full object-contain rounded-2xl">
+            </div>
+            <div></div>
+        </div>
+
+    </div>
+
+    <!-- Archivo de Lógica (JavaScript) -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+        <img :src="p.image" class="w-8 h-8 rounded-lg object-cover flex-shrink-0">
                                     <span class="text-xs text-slate-200 truncate">{{ p.title }}</span>
                                 </div>
                                 <button @click="deleteProduct(p.firebaseId)" class="bg-rose-950/80 hover:bg-rose-600 text-rose-200 hover:text-white text-xs px-2.5 py-1 rounded-lg transition-colors">
