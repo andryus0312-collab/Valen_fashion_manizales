@@ -7,8 +7,6 @@
     <title>Valen Fashion | Catálogo Oficial 🤍</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Vue 3 Global Build -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
@@ -16,7 +14,7 @@
 </head>
 <body class="text-slate-100 min-h-screen relative font-sans selection:bg-purple-500 selection:text-white bg-[#0f0512]">
 
-    <div id="app" class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 mx-auto max-w-7xl relative z-10">
+    <div class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 mx-auto max-w-7xl relative z-10">
 
         <!-- HEADER / PORTADA -->
         <header class="w-full bg-[#1b0c1b]/90 backdrop-blur-md border border-purple-500/30 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden mb-6">
@@ -39,7 +37,8 @@
                     <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all flex items-center gap-1.5">
                         <span>📸 Instagram</span>
                     </a>
-                    <button v-if="isAdmin" @click="showAdminModal = true" class="bg-[#120814] hover:bg-purple-950 text-purple-300 border border-purple-500/40 text-xs px-3 py-2 rounded-full transition-all" title="Panel de Administración">
+                    <!-- Botón Admin (solo con ?admin=1) -->
+                    <button id="btn-admin" onclick="toggleAdminModal(true)" class="hidden bg-[#120814] hover:bg-purple-950 text-purple-300 border border-purple-500/40 text-xs px-3 py-2 rounded-full transition-all" title="Panel de Administración">
                         ⚙️ Admin
                     </button>
                 </div>
@@ -47,33 +46,315 @@
         </header>
 
         <!-- FILTROS DE CATEGORÍAS -->
-        <nav class="w-full flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-none">
-            <button v-for="cat in categories" :key="cat.id" 
-                @click="selectedCategory = cat.id"
-                :class="selectedCategory === cat.id ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.5)] border-purple-400' : 'bg-[#1b0c1b]/80 text-slate-300 border-purple-900/50 hover:bg-purple-950/50'"
-                class="px-4 py-2 rounded-full text-xs font-bold border transition-all whitespace-nowrap">
-                {{ cat.name }}
-            </button>
+        <nav id="category-filters" class="w-full flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-none">
+            <!-- Renderizado dinámico -->
         </nav>
 
         <!-- CATÁLOGO DE PRODUCTOS -->
-        <main class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <div v-for="product in filteredProducts" :key="product.firebaseId || product.id" class="bg-[#1b0c1b]/85 backdrop-blur-md border border-purple-500/20 rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between group transition-all hover:border-purple-500/50">
-                
-                <div>
-                    <!-- Imagen del Producto -->
-                    <div class="relative aspect-square overflow-hidden bg-black cursor-pointer" @click="openLightbox(product.image, product.title)">
-                        <img :src="product.image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        <span class="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-purple-300 text-[10px] font-bold px-3 py-1 rounded-full border border-purple-500/30">
-                            {{ getCategoryName(product.category) }}
-                        </span>
-                    </div>
+        <main id="products-container" class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Renderizado dinámico -->
+        </main>
 
-                    <!-- Información -->
-                    <div class="p-5 space-y-2">
-                        <div class="flex items-start justify-between gap-2">
-                            <h3 class="text-lg font-bold text-white leading-snug">{{ product.title }}</h3>
-                            <span class="text-purple-400 font-extrabold text-base whitespace-nowrap">{{ product.price }}</span>
+        <!-- FOOTER -->
+        <footer class="w-full text-center py-6 border-t border-purple-950 text-xs text-slate-500 space-y-1">
+            <p>Valen Fashion Manizales • Todos los derechos reservados 🤍</p>
+            <p>Cra 38 #66-20, Manizales, Caldas</p>
+        </footer>
+
+        <!-- MODAL DE ADMINISTRACIÓN -->
+        <div id="admin-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
+            <div class="bg-gradient-to-b from-[#1f0a24] to-[#120516] border-2 border-purple-500/50 p-6 sm:p-8 rounded-[2.5rem] shadow-[0_0_50px_rgba(168,85,247,0.35)] w-full max-w-lg space-y-6 max-h-[90vh] overflow-y-auto relative">
+                
+                <div class="flex justify-between items-center border-b border-purple-500/20 pb-4 relative z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white text-lg">⚙️</div>
+                        <div>
+                            <h3 class="text-xl font-black text-white">Panel de Control</h3>
+                            <p class="text-[10px] text-pink-400 font-semibold uppercase">Gestión de Valen Fashion</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleAdminModal(false)" class="w-9 h-9 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/30 flex items-center justify-center">✕</button>
+                </div>
+
+                <!-- FORMULARIO NUEVO PRODUCTO -->
+                <div class="space-y-4 relative z-10">
+                    <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">Añadir Nuevo Producto</h4>
+                    
+                    <div class="space-y-3">
+                        <input type="text" id="new-title" placeholder="Nombre del producto..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
+                        <input type="text" id="new-price" placeholder="Precio (Ej: $45.000)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
+                        <select id="new-category" class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
+                            <option value="hogar">🏠 Hogar</option>
+                            <option value="ninos">🧸 Niños</option>
+                            <option value="ropa">👗 Ropa / Cuerpo</option>
+                            <option value="tendidos">🛏️ Tendidos</option>
+                        </select>
+                        <textarea id="new-description" rows="3" placeholder="Descripción..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl p-4 text-xs text-white outline-none resize-none"></textarea>
+
+                        <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
+                            <label class="text-[11px] font-bold text-purple-300">📸 Fotografía del Producto</label>
+                            <div class="flex items-center gap-3">
+                                <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl">
+                                    <span>Seleccionar archivo</span>
+                                    <input type="file" accept="image/*" id="new-image-file" onchange="handleImageInput(event)" class="hidden">
+                                </label>
+                                <span id="image-status" class="text-[11px] text-slate-400 truncate flex-1">Ningún archivo</span>
+                            </div>
+                            <div id="image-preview-container" class="hidden relative h-36 rounded-xl overflow-hidden border border-pink-500/50 bg-black mt-2">
+                                <img id="image-preview" class="w-full h-full object-contain">
+                            </div>
+                        </div>
+
+                        <button onclick="publishProduct()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-xs py-4 px-6 rounded-2xl shadow-lg uppercase">
+                            Publicar Producto ✨
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-purple-500/20"></div>
+                    <span class="flex-shrink mx-4 text-purple-400 text-[10px] uppercase font-bold">Eliminar</span>
+                    <div class="flex-grow border-t border-purple-500/20"></div>
+                </div>
+
+                <!-- ELIMINAR PRODUCTOS -->
+                <div class="space-y-3 relative z-10 pb-2">
+                    <div id="admin-products-list" class="max-h-48 overflow-y-auto space-y-2.5 pr-1">
+                        <!-- Renderizado dinámico -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VISOR DE IMAGEN (LIGHTBOX) -->
+        <div id="lightbox" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl hidden flex-col items-center justify-between p-4" onclick="closeLightbox()">
+            <div class="w-full flex justify-between items-center z-10">
+                <span id="lightbox-title" class="text-white font-medium text-sm"></span>
+                <button class="text-white text-2xl bg-[#1b0c1b] w-10 h-10 rounded-full flex items-center justify-center">✕</button>
+            </div>
+            <div class="relative flex-1 w-full flex items-center justify-center my-4">
+                <img id="lightbox-img" class="max-w-full max-h-full object-contain rounded-2xl">
+            </div>
+            <div></div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT EN JAVASCRIPT PURO (SIN VUE) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4f9rBB-qxzyZZPmgNIK_twefNYLQTW4",
+            authDomain: "nuestroespacio-3f541.firebaseapp.com",
+            projectId: "nuestroespacio-3f541",
+            storageBucket: "nuestroespacio-3f541.appspot.com",
+            messagingSenderId: "482638926414",
+            appId: "1:482638926414:web:2182581df2455d95b2a91f",
+            measurementId: "G-LPC6WBQTZ0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let allProducts = [];
+        let selectedCategory = 'all';
+        let base64Image = null;
+
+        const categories = [
+            { id: 'all', name: '✨ Todo' },
+            { id: 'hogar', name: '🏠 Hogar' },
+            { id: 'ninos', name: '🧸 Niños' },
+            { id: 'ropa', name: '👗 Ropa / Cuerpo' },
+            { id: 'tendidos', name: '🛏️ Tendidos' }
+        ];
+
+        // Detección de admin por URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === '1') {
+            document.getElementById('btn-admin').classList.remove('hidden');
+        }
+
+        // Renderizar Categorías
+        function renderCategories() {
+            const nav = document.getElementById('category-filters');
+            nav.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${cat.id}')" class="px-4 py-2 rounded-full text-xs font-bold border transition-all whitespace-nowrap ${selectedCategory === cat.id ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.5)] border-purple-400' : 'bg-[#1b0c1b]/80 text-slate-300 border-purple-900/50 hover:bg-purple-950/50'}">
+                    ${cat.name}
+                </button>
+            `).join('');
+        }
+
+        window.setCategory = function(catId) {
+            selectedCategory = catId;
+            renderCategories();
+            renderProducts();
+        }
+
+        // Renderizar Productos
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            const filtered = selectedCategory === 'all' 
+                ? allProducts 
+                : allProducts.filter(p => p.category === selectedCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-400 space-y-2">
+                        <p class="text-3xl">🛍️</p>
+                        <p class="text-sm">No hay productos disponibles en esta categoría por el momento.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => {
+                const catObj = categories.find(c => c.id === p.category);
+                const catName = catObj ? catObj.name : p.category;
+                const phone = "573229247605";
+                const text = encodeURIComponent(`¡Hola Valen! 🤍 Me interesa este producto de tu catálogo: *${p.title}* (${p.price}). ¿Aún lo tienes disponible?`);
+                const waLink = `https://wa.me/${phone}?text=${text}`;
+
+                return `
+                    <div class="bg-[#1b0c1b]/85 backdrop-blur-md border border-purple-500/20 rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between group transition-all hover:border-purple-500/50">
+                        <div>
+                            <div class="relative aspect-square overflow-hidden bg-black cursor-pointer" onclick="openLightbox('${p.image}', '${p.title.replace(/'/g, "\\'")}')">
+                                <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <span class="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-purple-300 text-[10px] font-bold px-3 py-1 rounded-full border border-purple-500/30">
+                                    ${catName}
+                                </span>
+                            </div>
+                            <div class="p-5 space-y-2">
+                                <div class="flex items-start justify-between gap-2">
+                                    <h3 class="text-lg font-bold text-white leading-snug">${p.title}</h3>
+                                    <span class="text-purple-400 font-extrabold text-base whitespace-nowrap">${p.price}</span>
+                                </div>
+                                <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-line">${p.description || ''}</p>
+                            </div>
+                        </div>
+                        <div class="p-5 pt-0">
+                            <a href="${waLink}" target="_blank" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs py-3 px-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
+                                <span>Pedir por WhatsApp 📱</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Renderizar lista en Admin
+        function renderAdminList() {
+            const list = document.getElementById('admin-products-list');
+            if (allProducts.length === 0) {
+                list.innerHTML = '<div class="text-center py-6 text-slate-500 text-xs">No hay productos registrados aún.</div>';
+                return;
+            }
+
+            list.innerHTML = allProducts.map(p => `
+                <div class="flex items-center justify-between bg-[#0d0310]/90 p-3 rounded-2xl border border-purple-500/30">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${p.image}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-purple-500/40">
+                        <div class="truncate">
+                            <p class="text-xs font-bold text-white truncate">${p.title}</p>
+                            <p class="text-[10px] text-pink-400 font-semibold">${p.price}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteProduct('${p.firebaseId}')" class="bg-rose-800 hover:bg-rose-700 text-rose-100 font-bold text-[11px] px-3.5 py-2 rounded-xl transition-all">
+                        🗑️ Borrar
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Escuchar base de datos Firebase
+        onValue(ref(db, 'valen_products'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                allProducts = Object.keys(data).map(key => ({
+                    firebaseId: key,
+                    ...data[key]
+                })).reverse();
+            } else {
+                allProducts = [];
+            }
+            renderCategories();
+            renderProducts();
+            renderAdminList();
+        });
+
+        // Funciones del Modal Admin y Acciones
+        window.toggleAdminModal = function(show) {
+            const modal = document.getElementById('admin-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        window.handleImageInput = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('image-status').innerText = "Imagen cargada ✨";
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const max = 1000;
+                    if (w > h && w > max) { h *= max/w; w = max; }
+                    else if (h > max) { w *= max/h; h = max; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    base64Image = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    document.getElementById('image-preview').src = base64Image;
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.publishProduct = function() {
+            const title = document.getElementById('new-title').value.trim();
+            const price = document.getElementById('new-price').value.trim();
+            const category = document.getElementById('new-category').value;
+            const description = document.getElementById('new-description').value.trim();
+
+            if (!title || !price || !base64Image) {
+                alert('Por favor completa el título, el precio y selecciona una imagen.');
+                return;
+            }
+
+            push(ref(db, 'valen_products'), {
+                title, price, category, description, image: base64Image
+            }).then(() => {
+                document.getElementById('new-title').value = '';
+                document.getElementById('new-price').value = '';
+                document.getElementById('new-description').value = '';
+                document.getElementById('new-image-file').value = '';
+                document.getElementById('image-status').innerText = 'Ningún archivo';
+                document.getElementById('image-preview-container').classList.add('hidden');
+                base64Image = null;
+                alert('¡Producto publicado con éxito! ✨');
+            });
+        }
+
+        window.deleteProduct = function(firebaseId) {
+            if (confirm('¿Estás seguro de eliminar este producto?')) {
+                remove(ref(db, `valen_products/${firebaseId}`));
+            }
+        }
+
+        // Lightbox
+        window.openLightbox = function(url,                             <span class="text-purple-400 font-extrabold text-base whitespace-nowrap">{{ product.price }}</span>
                         </div>
                         <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-line">{{ product.description }}</p>
                     </div>
