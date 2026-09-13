@@ -10,6 +10,9 @@
     <style>
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+        input[type="color"] { -webkit-appearance: none; appearance: none; padding: 0; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 9999px; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 9999px; }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen relative font-sans selection:bg-purple-500 selection:text-white bg-[#0f0512]">
@@ -22,15 +25,25 @@
             <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-pink-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="flex flex-col items-center space-y-3 relative z-10">
-                <div class="w-24 h-24 rounded-full border-2 border-purple-400 p-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="w-full h-full rounded-full object-cover">
+                <div id="profile-ring" class="w-24 h-24 rounded-full p-1 shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all" style="background:#a855f7">
+                    <div class="w-full h-full rounded-full overflow-hidden bg-black">
+                        <img id="profile-photo" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                    </div>
                 </div>
                 <div>
-                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-wide text-white">Valen Fashion</h1>
-                    <p class="text-xs sm:text-sm text-purple-300 font-medium tracking-widest uppercase mt-1">✨ Mereces lo que sueñas 🤍</p>
+                    <h1 id="profile-name" class="text-3xl sm:text-4xl font-extrabold tracking-wide text-white">Valen Fashion</h1>
+                    <p id="profile-tagline" class="text-xs sm:text-sm text-purple-300 font-medium tracking-widest uppercase mt-1">✨ Mereces lo que sueñas 🤍</p>
                 </div>
 
-                <div class="flex items-center gap-3 pt-2">
+                <!-- BIO ESTILO INSTAGRAM -->
+                <div class="max-w-md mx-auto text-center space-y-1.5 px-3">
+                    <p id="profile-category" class="text-xs font-bold text-pink-300 uppercase tracking-wide"></p>
+                    <p id="profile-bio" class="text-sm text-slate-200 whitespace-pre-line leading-relaxed"></p>
+                    <p id="profile-service" class="text-xs text-purple-300"></p>
+                    <p id="profile-address" class="text-xs text-slate-400"></p>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2 flex-wrap justify-center">
                     <a href="https://wa.me/573229247605" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all flex items-center gap-1.5">
                         <span>💬 WhatsApp Directo</span>
                     </a>
@@ -45,7 +58,7 @@
         </header>
 
         <!-- FILTROS DE CATEGORÍAS -->
-        <nav id="category-filters" class="w-full flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-none">
+        <nav id="category-filters" class="w-full flex items-center justify-center gap-3 overflow-x-auto pb-4 mb-4 scrollbar-none">
             <!-- Renderizado dinámico -->
         </nav>
 
@@ -78,7 +91,67 @@
                     <button onclick="toggleAdminModal(false)" class="w-9 h-9 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/30 flex items-center justify-center">✕</button>
                 </div>
 
-                <!-- FORMULARIO NUEVO PRODUCTO -->
+                <!-- ================= EDITAR PERFIL ================= -->
+                <div class="space-y-4 relative z-10">
+                    <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">✏️ Editar Perfil</h4>
+
+                    <!-- Foto de perfil -->
+                    <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
+                        <label class="text-[11px] font-bold text-purple-300">🖼️ Foto de Perfil</label>
+                        <div class="flex items-center gap-3">
+                            <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl">
+                                <span>Cambiar foto</span>
+                                <input type="file" accept="image/*" id="profile-image-file" onchange="handleProfileImageInput(event)" class="hidden">
+                            </label>
+                            <span id="profile-image-status" class="text-[11px] text-slate-400 truncate flex-1">Sin cambios</span>
+                        </div>
+                        <div id="profile-image-preview-container" class="hidden relative h-24 w-24 mx-auto rounded-full overflow-hidden border border-pink-500/50 bg-black mt-2">
+                            <img id="profile-image-preview" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <!-- Color del anillo -->
+                    <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
+                        <label class="text-[11px] font-bold text-purple-300">🎨 Color del Anillo</label>
+                        <div id="ring-presets" class="grid grid-cols-6 gap-2"></div>
+                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-purple-500/10">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-slate-400">Sólido</span>
+                                <input type="color" id="ring-custom-solid" oninput="selectCustomSolid()" value="#a855f7" class="w-8 h-8 rounded-full cursor-pointer">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-slate-400">Degradado</span>
+                                <input type="color" id="ring-custom-from" oninput="selectCustomGradient()" value="#a855f7" class="w-8 h-8 rounded-full cursor-pointer">
+                                <span class="text-slate-500 text-xs">→</span>
+                                <input type="color" id="ring-custom-to" oninput="selectCustomGradient()" value="#000000" class="w-8 h-8 rounded-full cursor-pointer">
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] text-slate-400">Vista:</span>
+                                <div id="ring-preview" class="w-9 h-9 rounded-full border border-purple-500/40"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Textos tipo Instagram -->
+                    <div class="space-y-3">
+                        <input type="text" id="profile-category-input" placeholder="Categoría (Ej: 🛍️ Compras y ventas minoristas)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
+                        <textarea id="profile-bio-input" rows="3" placeholder="Descripción / bio..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl p-4 text-xs text-white outline-none resize-none"></textarea>
+                        <input type="text" id="profile-service-input" placeholder="Info de servicio (Ej: 🚚 Domicilios en Manizales)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
+                        <input type="text" id="profile-address-input" placeholder="Dirección (Ej: 📍 Cra 38 #66-20)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
+                    </div>
+
+                    <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white font-black text-xs py-4 px-6 rounded-2xl shadow-[0_6px_0_#581c87,0_10px_25px_rgba(236,72,153,0.4)] active:translate-y-1.5 active:shadow-[0_2px_0_#581c87] transition-all uppercase disabled:opacity-50">
+                        Guardar Perfil 💾
+                    </button>
+                </div>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-purple-500/20"></div>
+                    <span class="flex-shrink mx-4 text-purple-400 text-[10px] uppercase font-bold">Productos</span>
+                    <div class="flex-grow border-t border-purple-500/20"></div>
+                </div>
+
+                <!-- ================= NUEVO PRODUCTO ================= -->
                 <div class="space-y-4 relative z-10">
                     <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">Añadir Nuevo Producto</h4>
 
@@ -146,7 +219,7 @@
     <!-- SCRIPT CON CAPTURA TOTAL DE ERRORES -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD4f9rBB-qxzyZZPmgNIK_twefNYLQTW4",
@@ -177,6 +250,8 @@
         let allProducts = [];
         let selectedCategory = 'all';
         let base64Image = null;
+        let profileBase64Image = null;
+        let selectedRing = null;
 
         const categories = [
             { id: 'all', name: '✨ Todo' },
@@ -186,19 +261,225 @@
             { id: 'tendidos', name: '🛏️ Tendidos' }
         ];
 
+        // Presets de color/degradado a juego con el logo (morado / negro / blanco)
+        const ringPresets = [
+            { name: 'Morado', mode: 'solid', color: '#a855f7' },
+            { name: 'Negro', mode: 'solid', color: '#000000' },
+            { name: 'Blanco', mode: 'solid', color: '#ffffff' },
+            { name: 'Rosa', mode: 'solid', color: '#ec4899' },
+            { name: 'Morado → Negro', mode: 'gradient', from: '#a855f7', to: '#000000' },
+            { name: 'Morado → Rosa', mode: 'gradient', from: '#a855f7', to: '#ec4899' },
+            { name: 'Negro → Morado', mode: 'gradient', from: '#000000', to: '#7e22ce' },
+            { name: 'Blanco → Morado', mode: 'gradient', from: '#ffffff', to: '#a855f7' }
+        ];
+
+        // Perfil por defecto (texto tomado del Instagram @valen_fashion_manizales)
+        const defaultProfile = {
+            photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+            name: 'Valen Fashion',
+            tagline: '✨ Mereces lo que sueñas 🤍',
+            category: '🛍️ Compras y ventas minoristas',
+            bio: 'Tenemos cosas hermosas y exclusivas para ti 💥\npara todos los gustos ♂️♀️',
+            service: '🚚 Contamos con servicio de domicilio en Manizales 💎',
+            address: '📍 Cra 38 #66-20, Manizales, Caldas',
+            ring: { mode: 'solid', color: '#a855f7' }
+        };
+
+        let currentProfile = defaultProfile;
+
         // Detección de admin por URL
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('admin') === '1') {
             document.getElementById('btn-admin').classList.remove('hidden');
         }
 
+        function ringToCss(ring) {
+            if (!ring) return defaultProfile.ring.color;
+            if (ring.mode === 'gradient') return `linear-gradient(135deg, ${ring.from}, ${ring.to})`;
+            return ring.color;
+        }
+
+        function findPresetIndex(ring) {
+            if (!ring) return -1;
+            return ringPresets.findIndex(p => {
+                if (p.mode !== ring.mode) return false;
+                if (p.mode === 'solid') return p.color === ring.color;
+                return p.from === ring.from && p.to === ring.to;
+            });
+        }
+
+        function renderRingPresets() {
+            const container = document.getElementById('ring-presets');
+            container.innerHTML = ringPresets.map((p, i) => {
+                const bg = p.mode === 'solid' ? p.color : `linear-gradient(135deg, ${p.from}, ${p.to})`;
+                return `<button type="button" onclick="selectRingPreset(${i})" title="${p.name}" class="ring-preset-btn w-9 h-9 rounded-full border-2 border-purple-500/30 hover:scale-110 transition-all" style="background:${bg}"></button>`;
+            }).join('');
+        }
+
+        function highlightRingPreset(idx) {
+            document.querySelectorAll('.ring-preset-btn').forEach((btn, i) => {
+                if (i === idx) {
+                    btn.classList.add('ring-2', 'ring-white', 'scale-110');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-white', 'scale-110');
+                }
+            });
+        }
+
+        function applyRingToPreview(ring) {
+            const el = document.getElementById('ring-preview');
+            if (el) el.style.background = ringToCss(ring);
+        }
+
+        window.selectRingPreset = function(idx) {
+            const p = ringPresets[idx];
+            selectedRing = p.mode === 'solid' ? { mode: 'solid', color: p.color } : { mode: 'gradient', from: p.from, to: p.to };
+            highlightRingPreset(idx);
+            applyRingToPreview(selectedRing);
+        }
+
+        window.selectCustomSolid = function() {
+            const color = document.getElementById('ring-custom-solid').value;
+            selectedRing = { mode: 'solid', color };
+            highlightRingPreset(-1);
+            applyRingToPreview(selectedRing);
+        }
+
+        window.selectCustomGradient = function() {
+            const from = document.getElementById('ring-custom-from').value;
+            const to = document.getElementById('ring-custom-to').value;
+            selectedRing = { mode: 'gradient', from, to };
+            highlightRingPreset(-1);
+            applyRingToPreview(selectedRing);
+        }
+
+        function renderProfile(profile) {
+            const p = profile || defaultProfile;
+            document.getElementById('profile-photo').src = p.photo || defaultProfile.photo;
+            document.getElementById('profile-name').innerText = p.name || defaultProfile.name;
+            document.getElementById('profile-tagline').innerText = p.tagline || defaultProfile.tagline;
+            document.getElementById('profile-category').innerText = p.category || '';
+            document.getElementById('profile-bio').innerText = p.bio || '';
+            document.getElementById('profile-service').innerText = p.service || '';
+            document.getElementById('profile-address').innerText = p.address || '';
+            document.getElementById('profile-ring').style.background = ringToCss(p.ring);
+        }
+
+        function prefillProfileForm() {
+            const p = currentProfile || defaultProfile;
+            document.getElementById('profile-category-input').value = p.category || '';
+            document.getElementById('profile-bio-input').value = p.bio || '';
+            document.getElementById('profile-service-input').value = p.service || '';
+            document.getElementById('profile-address-input').value = p.address || '';
+
+            document.getElementById('profile-image-preview-container').classList.add('hidden');
+            document.getElementById('profile-image-status').innerText = 'Sin cambios';
+            profileBase64Image = null;
+
+            selectedRing = p.ring || defaultProfile.ring;
+            renderRingPresets();
+            const idx = findPresetIndex(selectedRing);
+            highlightRingPreset(idx);
+            applyRingToPreview(selectedRing);
+
+            if (selectedRing.mode === 'solid') {
+                document.getElementById('ring-custom-solid').value = selectedRing.color;
+            } else {
+                document.getElementById('ring-custom-from').value = selectedRing.from;
+                document.getElementById('ring-custom-to').value = selectedRing.to;
+            }
+        }
+
+        window.handleProfileImageInput = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('profile-image-status').innerText = "Cargando imagen...";
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const max = 600;
+                    if (w > h && w > max) { h *= max / w; w = max; }
+                    else if (h > max) { w *= max / h; h = max; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    profileBase64Image = canvas.toDataURL('image/jpeg', 0.85);
+
+                    document.getElementById('profile-image-preview').src = profileBase64Image;
+                    document.getElementById('profile-image-preview-container').classList.remove('hidden');
+                    document.getElementById('profile-image-status').innerText = "Imagen cargada ✨";
+                };
+                img.onerror = () => {
+                    document.getElementById('profile-image-status').innerText = "Error al leer la imagen ⚠️";
+                };
+                img.src = ev.target.result;
+            };
+            reader.onerror = () => {
+                document.getElementById('profile-image-status').innerText = "Error al leer el archivo ⚠️";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.saveProfile = function() {
+            const category = document.getElementById('profile-category-input').value.trim();
+            const bio = document.getElementById('profile-bio-input').value.trim();
+            const service = document.getElementById('profile-service-input').value.trim();
+            const address = document.getElementById('profile-address-input').value.trim();
+
+            const updatedProfile = {
+                ...(currentProfile || defaultProfile),
+                category,
+                bio,
+                service,
+                address,
+                ring: selectedRing || (currentProfile && currentProfile.ring) || defaultProfile.ring
+            };
+            if (profileBase64Image) updatedProfile.photo = profileBase64Image;
+
+            const btn = document.getElementById('save-profile-btn');
+            btn.disabled = true;
+            btn.innerText = 'Guardando...';
+
+            set(ref(db, 'valen_profile'), updatedProfile).then(() => {
+                profileBase64Image = null;
+                document.getElementById('profile-image-status').innerText = 'Sin cambios';
+                document.getElementById('profile-image-preview-container').classList.add('hidden');
+                btn.disabled = false;
+                btn.innerText = 'Guardar Perfil 💾';
+                alert('✅ Perfil actualizado con éxito');
+            }).catch((error) => {
+                console.error('Error al guardar perfil:', error);
+                alert('🚨 Error al guardar el perfil: ' + error.message);
+                btn.disabled = false;
+                btn.innerText = 'Guardar Perfil 💾';
+            });
+        }
+
+        // Escucha cambios del perfil en tiempo real
+        onValue(ref(db, 'valen_profile'), (snapshot) => {
+            const data = snapshot.val();
+            currentProfile = data || defaultProfile;
+            renderProfile(currentProfile);
+        }, (error) => {
+            console.error('Firebase Profile Read Error:', error);
+            renderProfile(defaultProfile);
+        });
+
         function renderCategories() {
             const nav = document.getElementById('category-filters');
-            nav.innerHTML = categories.map(cat => `
-                <button onclick="setCategory('${cat.id}')" class="px-4 py-2 rounded-full text-xs font-bold border transition-all whitespace-nowrap ${selectedCategory === cat.id ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.5)] border-purple-400' : 'bg-[#1b0c1b]/80 text-slate-300 border-purple-900/50 hover:bg-purple-950/50'}">
+            nav.innerHTML = categories.map(cat => {
+                const active = selectedCategory === cat.id;
+                const activeClasses = 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-pink-400 shadow-[0_4px_0_#581c87,0_8px_18px_rgba(236,72,153,0.45)] active:translate-y-1 active:shadow-[0_1px_0_#581c87]';
+                const inactiveClasses = 'bg-[#1b0c1b] text-slate-300 border-purple-900/50 shadow-[0_4px_0_#2e1065] hover:bg-purple-950/60 active:translate-y-1 active:shadow-[0_1px_0_#2e1065]';
+                return `
+                <button onclick="setCategory('${cat.id}')" class="px-4 py-2.5 rounded-full text-xs font-bold border transition-all duration-150 whitespace-nowrap ${active ? activeClasses : inactiveClasses}">
                     ${cat.name}
                 </button>
-            `).join('');
+            `;
+            }).join('');
         }
 
         window.setCategory = function(catId) {
@@ -313,6 +594,7 @@
             if (show) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                prefillProfileForm();
             } else {
                 modal.classList.remove('flex');
                 modal.classList.add('hidden');
