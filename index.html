@@ -37,7 +37,6 @@
                     <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all flex items-center gap-1.5">
                         <span>📸 Instagram</span>
                     </a>
-                    <!-- Botón Admin (solo con ?admin=1) -->
                     <button id="btn-admin" onclick="toggleAdminModal(true)" class="hidden bg-[#120814] hover:bg-purple-950 text-purple-300 border border-purple-500/40 text-xs px-3 py-2 rounded-full transition-all" title="Panel de Administración">
                         ⚙️ Admin
                     </button>
@@ -54,7 +53,7 @@
         <main id="products-container" class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <div class="col-span-full py-16 text-center text-slate-400 space-y-2">
                 <p class="text-3xl animate-pulse">⏳</p>
-                <p class="text-sm">Conectando con el catálogo...</p>
+                <p class="text-sm">Iniciando sistema y conectando...</p>
             </div>
         </main>
 
@@ -144,13 +143,204 @@
 
     </div>
 
-    <!-- SCRIPT EN JAVASCRIPT PURO -->
+    <!-- SCRIPT CON CAPTURA TOTAL DE ERRORES -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD4f9rBB-qxzyZZPmgNIK_twefNYLQTW4",
+            authDomain: "nuestroespacio-3f541.firebaseapp.com",
+            databaseURL: "https://nuestroespacio-3f541-default-rtdb.firebaseio.com",
+            projectId: "nuestroespacio-3f541",
+            storageBucket: "nuestroespacio-3f541.appspot.com",
+            messagingSenderId: "482638926414",
+            appId: "1:482638926414:web:2182581df2455d95b2a91f",
+            measurementId: "G-LPC6WBQTZ0"
+        };
+
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+        } catch (initError) {
+            document.getElementById('products-container').innerHTML = `
+                <div class="col-span-full py-12 px-6 bg-rose-950/80 border-2 border-rose-500 rounded-3xl text-center space-y-3">
+                    <p class="text-3xl">🚨</p>
+                    <p class="text-base font-bold text-rose-200">Error al inicializar Firebase</p>
+                    <p class="text-xs text-slate-300 font-mono bg-black/40 p-3 rounded-xl overflow-x-auto">${initError.message}</p>
+                </div>
+            `;
+            throw initError;
+        }
+
+        let allProducts = [];
+        let selectedCategory = 'all';
+        let base64Image = null;
+
+        const categories = [
+            { id: 'all', name: '✨ Todo' },
+            { id: 'hogar', name: '🏠 Hogar' },
+            { id: 'ninos', name: '🧸 Niños' },
+            { id: 'ropa', name: '👗 Ropa / Cuerpo' },
+            { id: 'tendidos', name: '🛏️ Tendidos' }
+        ];
+
+        // Detección de admin por URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === '1') {
+            document.getElementById('btn-admin').classList.remove('hidden');
+        }
+
+        function renderCategories() {
+            const nav = document.getElementById('category-filters');
+            nav.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${cat.id}')" class="px-4 py-2 rounded-full text-xs font-bold border transition-all whitespace-nowrap ${selectedCategory === cat.id ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.5)] border-purple-400' : 'bg-[#1b0c1b]/80 text-slate-300 border-purple-900/50 hover:bg-purple-950/50'}">
+                    ${cat.name}
+                </button>
+            `).join('');
+        }
+
+        window.setCategory = function(catId) {
+            selectedCategory = catId;
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            const filtered = selectedCategory === 'all' 
+                ? allProducts 
+                : allProducts.filter(p => p.category === selectedCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-400 space-y-2">
+                        <p class="text-3xl">🛍️</p>
+                        <p class="text-sm">No hay productos disponibles en esta categoría todavía.</p>
+                        <p class="text-[11px] text-purple-400">Si eres admin, entra con ?admin=1 para publicar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => {
+                const catObj = categories.find(c => c.id === p.category);
+                const catName = catObj ? catObj.name : p.category;
+                const phone = "573229247605";
+                const text = encodeURIComponent(`¡Hola Valen! 🤍 Me interesa este producto de tu catálogo: *${p.title}* (${p.price}). ¿Aún lo tienes disponible?`);
+                const waLink = `https://wa.me/${phone}?text=${text}`;
+
+                return `
+                    <div class="bg-[#1b0c1b]/85 backdrop-blur-md border border-purple-500/20 rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between group transition-all hover:border-purple-500/50">
+                        <div>
+                            <div class="relative aspect-square overflow-hidden bg-black cursor-pointer" onclick="openLightbox('${p.image}', '${p.title.replace(/'/g, "\\'")}')">
+                                <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <span class="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-purple-300 text-[10px] font-bold px-3 py-1 rounded-full border border-purple-500/30">
+                                    ${catName}
+                                </span>
+                            </div>
+                            <div class="p-5 space-y-2">
+                                <div class="flex items-start justify-between gap-2">
+                                    <h3 class="text-lg font-bold text-white leading-snug">${p.title}</h3>
+                                    <span class="text-purple-400 font-extrabold text-base whitespace-nowrap">${p.price}</span>
+                                </div>
+                                <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-line">${p.description || ''}</p>
+                            </div>
+                        </div>
+                        <div class="p-5 pt-0">
+                            <a href="${waLink}" target="_blank" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs py-3 px-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
+                                <span>Pedir por WhatsApp 📱</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('admin-products-list');
+            if (!list) return;
+            if (allProducts.length === 0) {
+                list.innerHTML = '<div class="text-center py-6 text-slate-500 text-xs">No hay productos registrados aún.</div>';
+                return;
+            }
+
+            list.innerHTML = allProducts.map(p => `
+                <div class="flex items-center justify-between bg-[#0d0310]/90 p-3 rounded-2xl border border-purple-500/30">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${p.image}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-purple-500/40">
+                        <div class="truncate">
+                            <p class="text-xs font-bold text-white truncate">${p.title}</p>
+                            <p class="text-[10px] text-pink-400 font-semibold">${p.price}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteProduct('${p.firebaseId}')" class="bg-rose-800 hover:bg-rose-700 text-rose-100 font-bold text-[11px] px-3.5 py-2 rounded-xl transition-all">
+                        🗑️ Borrar
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Conexión a Firebase con visor de errores en pantalla
+        onValue(ref(db, 'valen_products'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                allProducts = Object.keys(data).map(key => ({
+                    firebaseId: key,
+                    ...data[key]
+                })).reverse();
+            } else {
+                allProducts = [];
+            }
+            renderCategories();
+            renderProducts();
+            renderAdminList();
+        }, (error) => {
+            console.error("Firebase Read Error:", error);
+            document.getElementById('products-container').innerHTML = `
+                <div class="col-span-full py-12 px-6 bg-rose-950/80 border-2 border-rose-500 rounded-3xl text-center space-y-3">
+                    <p class="text-3xl">⚠️</p>
+                    <p class="text-base font-bold text-rose-200">Error de conexión o permisos en Firebase</p>
+                    <p class="text-xs text-slate-300 font-mono bg-black/40 p-3 rounded-xl overflow-x-auto">${error.message}</p>
+                    <p class="text-xs text-purple-300 pt-2">Asegúrate de que la <strong>Realtime Database</strong> esté creada en tu consola de Firebase y las reglas permitan lectura/escritura.</p>
+                </div>
+            `;
+        });
+
+        window.toggleAdminModal = function(show) {
+            const modal = document.getElementById('admin-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        window.handleImageInput = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('image-status').innerText = "Imagen cargada ✨";
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const max = 1000;
+                    if (w > h && w > max) { h *= max/w; w = max; }
+                    else if (h > max) { w *= max/h; h = max; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    base64Image = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    document.getElementById('image-preview').src = base64Image;
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                };
+       PmgNIK_twefNYLQTW4",
             authDomain: "nuestroespacio-3f541.firebaseapp.com",
             databaseURL: "https://nuestroespacio-3f541-default-rtdb.firebaseio.com",
             projectId: "nuestroespacio-3f541",
