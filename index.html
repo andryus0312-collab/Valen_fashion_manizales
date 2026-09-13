@@ -9,10 +9,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Vue 3 Global Build -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Archivo de Estilos Personalizados -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body class="text-slate-100 min-h-screen relative font-sans selection:bg-purple-500 selection:text-white">
+<body class="text-slate-100 min-h-screen relative font-sans selection:bg-purple-500 selection:text-white bg-[#0f0512]">
 
     <div id="app" class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 mx-auto max-w-7xl relative z-10">
 
@@ -22,7 +24,7 @@
             <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-pink-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="flex flex-col items-center space-y-3 relative z-10">
-                <div class="w-24 h-24 brand-gradient-border">
+                <div class="w-24 h-24 rounded-full border-2 border-purple-400 p-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
                     <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="w-full h-full rounded-full object-cover">
                 </div>
                 <div>
@@ -103,7 +105,6 @@
             <div v-if="showAdminModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4" @click.self="showAdminModal = false">
                 <div class="bg-gradient-to-b from-[#1f0a24] to-[#120516] border-2 border-purple-500/50 p-6 sm:p-8 rounded-[2.5rem] shadow-[0_0_50px_rgba(168,85,247,0.35)] w-full max-w-lg space-y-6 max-h-[90vh] overflow-y-auto relative">
                     
-                    <!-- Glow decorativo superior -->
                     <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur-2xl opacity-40 pointer-events-none"></div>
 
                     <!-- Header -->
@@ -138,6 +139,170 @@
 
                             <div>
                                 <select v-model="newProduct.category" class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white focus:border-pink-500 focus:shadow-[0_0_20px_rgba(236,72,153,0.4)] outline-none transition-all cursor-pointer">
+                                    <option v-for="cat in categories.filter(c => c.id !== 'all')" :value="cat.id">{{ cat.name }}</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <textarea v-model="newProduct.description" rows="3" placeholder="Descripción general de la prenda u objeto..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl p-4 text-xs text-white placeholder-purple-400/50 focus:border-pink-500 focus:shadow-[0_0_20px_rgba(236,72,153,0.4)] outline-none transition-all resize-none"></textarea>
+                            </div>
+
+                            <!-- Selector de Foto -->
+                            <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
+                                <label class="text-[11px] font-bold text-purple-300 flex items-center gap-2">
+                                    <span>📸 Fotografía del Producto</span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all flex items-center gap-2">
+                                        <span>Seleccionar archivo</span>
+                                        <input type="file" accept="image/*" @change="handleProductImage" class="hidden">
+                                    </label>
+                                    <span class="text-[11px] text-slate-400 truncate flex-1">{{ newProduct.image ? 'Imagen cargada ✨' : 'Ningún archivo' }}</span>
+                                </div>
+
+                                <div v-if="newProduct.image" class="relative h-36 rounded-xl overflow-hidden border border-pink-500/50 bg-black shadow-[0_0_15px_rgba(236,72,153,0.3)] mt-2">
+                                    <img :src="newProduct.image" class="w-full h-full object-contain">
+                                </div>
+                            </div>
+
+                            <!-- BOTÓN 3D CON RELIEVE Y GLOW UP -->
+                            <button @click="addNewProduct" class="w-full mt-2 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-xs py-4 px-6 rounded-2xl shadow-[0_6px_0_#581c87,0_10px_25px_rgba(236,72,153,0.5)] active:translate-y-1.5 active:shadow-[0_2px_0_#581c87,0_5px_15px_rgba(236,72,153,0.4)] transition-all duration-150 flex items-center justify-center gap-2 border border-pink-400/40 tracking-wider uppercase">
+                                <span>Publicar Producto ✨</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-purple-500/20"></div>
+                        <span class="flex-shrink mx-4 text-purple-400 text-[10px] uppercase font-bold tracking-widest">Zona de gestión</span>
+                        <div class="flex-grow border-t border-purple-500/20"></div>
+                    </div>
+
+                    <!-- SECCIÓN: ELIMINAR PRODUCTOS -->
+                    <div class="space-y-3 relative z-10 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                            <h4 class="text-xs font-black tracking-wider text-rose-300 uppercase">Eliminar Productos Existentes</h4>
+                        </div>
+                        
+                        <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1">
+                            <div v-for="(p, idx) in products" :key="p.firebaseId" class="flex items-center justify-between bg-[#0d0310]/90 p-3 rounded-2xl border border-purple-500/30 hover:border-pink-500/50 transition-all shadow-md group">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <img :src="p.image" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-purple-500/40">
+                                    <div class="truncate">
+                                        <p class="text-xs font-bold text-white truncate">{{ p.title }}</p>
+                                        <p class="text-[10px] text-pink-400 font-semibold">{{ p.price }}</p>
+                                    </div>
+                                </div>
+                                <!-- BOTÓN 3D DE BORRAR -->
+                                <button @click="deleteProduct(p.firebaseId)" class="bg-gradient-to-r from-rose-900 to-rose-700 hover:from-rose-800 hover:to-rose-600 text-rose-100 font-bold text-[11px] px-3.5 py-2 rounded-xl shadow-[0_3px_0_#4c0519,0_5px_10px_rgba(244,63,94,0.3)] active:translate-y-0.5 active:shadow-[0_1px_0_#4c0519] transition-all flex items-center gap-1.5 flex-shrink-0 border border-rose-500/40">
+                                    <span>🗑️ Borrar</span>
+                                </button>
+                            </div>
+
+                            <div v-if="products.length === 0" class="text-center py-6 text-slate-500 text-xs">
+                                No hay productos registrados aún.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </transition>
+
+        <!-- VISOR DE IMAGEN (LIGHTBOX) -->
+        <div v-if="lightboxOpen" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-between p-4" @click="lightboxOpen = false">
+            <div class="w-full flex justify-between items-center z-10">
+                <span class="text-white font-medium text-sm">{{ lightboxTitle }}</span>
+                <button @click="lightboxOpen = false" class="text-white text-2xl bg-[#1b0c1b] hover:bg-purple-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors">✕</button>
+            </div>
+            <div class="relative flex-1 w-full flex items-center justify-center my-4">
+                <img :src="lightboxUrl" class="max-w-full max-h-full object-contain rounded-2xl">
+            </div>
+            <div></div>
+        </div>
+
+    </div>
+
+    <!-- CÓDIGO DE FIREBASE Y VUE INTEGRADO -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4f9rBB|qxzyZZPmgNIK_twefNYLQTW4",
+            authDomain: "nuestroespacio-3f541.firebaseapp.com",
+            projectId: "nuestroespacio-3f541",
+            storageBucket: "nuestroespacio-3f541.appspot.com",
+            messagingSenderId: "482638926414",
+            appId: "1:482638926414:web:2182581df2455d95b2a91f",
+            measurementId: "G-LPC6WBQTZ0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    categories: [
+                        { id: 'all', name: '✨ Todo' },
+                        { id: 'hogar', name: '🏠 Hogar' },
+                        { id: 'ninos', name: '🧸 Niños' },
+                        { id: 'ropa', name: '👗 Ropa / Cuerpo' },
+                        { id: 'tendidos', name: '🛏️ Tendidos' }
+                    ],
+                    selectedCategory: 'all',
+                    products: [],
+                    isAdmin: false,
+                    showAdminModal: false,
+                    newProduct: {
+                        title: '',
+                        price: '',
+                        category: 'hogar',
+                        description: '',
+                        image: null
+                    },
+                    lightboxOpen: false,
+                    lightboxUrl: '',
+                    lightboxTitle: ''
+                }
+            },
+            computed: {
+                filteredProducts() {
+                    if (this.selectedCategory === 'all') return this.products;
+                    return this.products.filter(p => p.category === this.selectedCategory);
+                }
+            },
+            mounted() {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('admin') === '1') {
+                    this.isAdmin = true;
+                }
+
+                onValue(ref(db, 'valen_products'), (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        this.products = Object.keys(data).map(key => ({
+                            firebaseId: key,
+                            ...data[key]
+                        })).reverse();
+                    } else {
+                        this.products = [];
+                    }
+                });
+            },
+            methods: {
+                getCategoryName(catId) {
+                    const found = this.categories.find(c => c.id === catId);
+                    return found ? found.name : catId;
+                },
+                getWhatsAppLink(product) {
+                    const phone = "573229247605";
+                    const text = `¡Hola Valen! 🤍 Me interesa este producto de tu catálogo: *${product.title}* (${product.price}). ¿Aún lo tienes disponible?`;
+                    return `https://wa.me/${phor-pink-500 focus:shadow-[0_0_20px_rgba(236,72,153,0.4)] outline-none transition-all cursor-pointer">
                                     <option v-for="cat in categories.filter(c => c.id !== 'all')" :value="cat.id">{{ cat.name }}</option>
                                 </select>
                             </div>
