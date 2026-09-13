@@ -27,6 +27,7 @@ createApp({
             ],
             selectedCategory: 'all',
             products: [],
+            isAdmin: false, // Controla si se muestra el panel de admin
             showAdminModal: false,
             newProduct: {
                 title: '',
@@ -47,6 +48,12 @@ createApp({
         }
     },
     mounted() {
+        // Detectar si se ingresó con el link secreto de administrador (ej: ?admin=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === '1') {
+            this.isAdmin = true;
+        }
+
         onValue(ref(db, 'valen_products'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -111,4 +118,3 @@ createApp({
         }
     }
 }).mount('#app');
-  
