@@ -64,7 +64,7 @@
 
         <!-- CATÁLOGO DE PRODUCTOS -->
         <main id="products-container" class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <div class="col-span-full py-16 text-center text-slate-400 space-y-2">
+            <div id="initial-loading-msg" class="col-span-full py-16 text-center text-slate-400 space-y-2">
                 <p class="text-3xl animate-pulse">⏳</p>
                 <p class="text-sm">Iniciando sistema y conectando...</p>
             </div>
@@ -287,6 +287,21 @@
         let base64Image = null;
         let profileBase64Image = null;
         let selectedRing = null;
+
+        // Watchdog: si tras 10s Firebase no respondió (ni éxito ni error), avisa en vez de dejar la rueda girando eternamente
+        let firebaseResponded = false;
+        setTimeout(() => {
+            if (!firebaseResponded) {
+                const el = document.getElementById('initial-loading-msg');
+                if (el) {
+                    el.innerHTML = `
+                        <p class="text-3xl">⚠️</p>
+                        <p class="text-sm text-rose-300">No se pudo conectar. Revisa tu internet.</p>
+                        <button onclick="location.reload()" class="mt-2 bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl">🔄 Reintentar</button>
+                    `;
+                }
+            }
+        }, 10000);
 
         const categories = [
             { id: 'all', name: '✨ Todo' },
@@ -617,6 +632,7 @@
 
         // Conexión a Firebase con visor de errores en pantalla
         onValue(ref(db, 'valen_products'), (snapshot) => {
+            firebaseResponded = true;
             const data = snapshot.val();
             if (data) {
                 allProducts = Object.keys(data).map(key => ({
@@ -630,6 +646,7 @@
             renderProducts();
             renderAdminList();
         }, (error) => {
+            firebaseResponded = true;
             console.error("Firebase Read Error:", error);
             document.getElementById('products-container').innerHTML = `
                 <div class="col-span-full py-12 px-6 bg-rose-950/80 border-2 border-rose-500 rounded-3xl text-center space-y-3">
@@ -776,6 +793,15 @@
             btn.disabled = true;
             btn.innerText = 'Publicando...';
 
+            let settled = false;
+            const safetyTimer = setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                btn.disabled = false;
+                btn.innerText = 'Publicar Producto ✨';
+                alert('⚠️ Está tardando demasiado (posible problema de conexión). Si el producto no aparece en la lista de abajo en unos segundos, revisa tu internet e inténtalo de nuevo.');
+            }, 15000);
+
             push(ref(db, 'valen_products'), {
                 title,
                 price,
@@ -784,6 +810,9 @@
                 image: base64Image,
                 createdAt: Date.now()
             }).then(() => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(safetyTimer);
                 document.getElementById('new-title').value = '';
                 document.getElementById('new-price').value = '';
                 document.getElementById('new-description').value = '';
@@ -794,6 +823,9 @@
                 btn.disabled = false;
                 btn.innerText = 'Publicar Producto ✨';
             }).catch((error) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(safetyTimer);
                 console.error('Error al publicar:', error);
                 alert('🚨 Error al publicar: ' + error.message);
                 btn.disabled = false;
