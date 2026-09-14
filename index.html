@@ -262,6 +262,8 @@
             measurementId: "G-LPC6WBQTZ0"
         };
 
+        const IMGBB_API_KEY = "a948b9f1bb4517d8835ac841a9b7508c";
+
         let db;
         let auth;
         let isLoggedIn = false;
@@ -426,7 +428,8 @@
         window.handleProfileImageInput = function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            document.getElementById('profile-image-status').innerText = "Cargando imagen...";
+            const statusEl = document.getElementById('profile-image-status');
+            statusEl.innerText = "Cargando imagen...";
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const img = new Image();
@@ -439,19 +442,35 @@
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    profileBase64Image = canvas.toDataURL('image/jpeg', 0.85);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    const base64Only = dataUrl.split(',')[1];
 
-                    document.getElementById('profile-image-preview').src = profileBase64Image;
-                    document.getElementById('profile-image-preview-container').classList.remove('hidden');
-                    document.getElementById('profile-image-status').innerText = "Imagen cargada ✨";
+                    statusEl.innerText = "Subiendo a ImgBB... ☁️";
+                    const formData = new FormData();
+                    formData.append('image', base64Only);
+
+                    fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    }).then(res => res.json()).then(data => {
+                        if (!data.success) throw new Error(data.error?.message || 'Error de ImgBB');
+                        profileBase64Image = data.data.url;
+                        document.getElementById('profile-image-preview').src = profileBase64Image;
+                        document.getElementById('profile-image-preview-container').classList.remove('hidden');
+                        statusEl.innerText = "Imagen subida ✨";
+                    }).catch((error) => {
+                        console.error('ImgBB upload error:', error);
+                        statusEl.innerText = "Error al subir imagen ⚠️ " + error.message;
+                        profileBase64Image = null;
+                    });
                 };
                 img.onerror = () => {
-                    document.getElementById('profile-image-status').innerText = "Error al leer la imagen ⚠️";
+                    statusEl.innerText = "Error al leer la imagen ⚠️";
                 };
                 img.src = ev.target.result;
             };
             reader.onerror = () => {
-                document.getElementById('profile-image-status').innerText = "Error al leer el archivo ⚠️";
+                statusEl.innerText = "Error al leer el archivo ⚠️";
             };
             reader.readAsDataURL(file);
         }
@@ -691,7 +710,8 @@
         window.handleImageInput = function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            document.getElementById('image-status').innerText = "Cargando imagen...";
+            const statusEl = document.getElementById('image-status');
+            statusEl.innerText = "Cargando imagen...";
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const img = new Image();
@@ -704,19 +724,35 @@
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    base64Image = canvas.toDataURL('image/jpeg', 0.8);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    const base64Only = dataUrl.split(',')[1];
 
-                    document.getElementById('image-preview').src = base64Image;
-                    document.getElementById('image-preview-container').classList.remove('hidden');
-                    document.getElementById('image-status').innerText = "Imagen cargada ✨";
+                    statusEl.innerText = "Subiendo a ImgBB... ☁️";
+                    const formData = new FormData();
+                    formData.append('image', base64Only);
+
+                    fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    }).then(res => res.json()).then(data => {
+                        if (!data.success) throw new Error(data.error?.message || 'Error de ImgBB');
+                        base64Image = data.data.url;
+                        document.getElementById('image-preview').src = base64Image;
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                        statusEl.innerText = "Imagen subida ✨";
+                    }).catch((error) => {
+                        console.error('ImgBB upload error:', error);
+                        statusEl.innerText = "Error al subir imagen ⚠️ " + error.message;
+                        base64Image = null;
+                    });
                 };
                 img.onerror = () => {
-                    document.getElementById('image-status').innerText = "Error al leer la imagen ⚠️";
+                    statusEl.innerText = "Error al leer la imagen ⚠️";
                 };
                 img.src = ev.target.result;
             };
             reader.onerror = () => {
-                document.getElementById('image-status').innerText = "Error al leer el archivo ⚠️";
+                statusEl.innerText = "Error al leer el archivo ⚠️";
             };
             reader.readAsDataURL(file);
         }
