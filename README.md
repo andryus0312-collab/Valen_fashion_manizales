@@ -1,28 +1,49 @@
-# 🛍️ Valen Fashion Manizales
+# 🛍️ Valen Fashion
 
-Una tienda en línea moderna diseñada para exhibir y promocionar prendas de vestir y accesorios de moda en Manizales.
+> **"MERECES LO QUE SUEÑAS"**
+
+Plataforma web de compras y ventas minoristas con productos exclusivos para todos los gustos, ubicada en Manizales, Caldas.
 
 🌐 **Demo en vivo:** [Visitar Valen Fashion](https://andryus0312-collab.github.io/Valen_fashion_manizales/)
 
 ---
 
-## 🚀 Características Principales
+## 📌 Información de la Tienda
 
-* 👗 **Catálogo Visual:** Exposición organizada de prendas de vestir.
-* 📱 **Diseño Responsivo:** Adaptado para una navegación fluida en dispositivos móviles y computadoras.
-* 💬 **Atención al Cliente:** Enlaces directos de contacto para pedidos.
+* **Ubicación:** Cra 38 #66-20, Manizales, Caldas
+* **Envíos:** Servicio de domicilio en Manizales
+* **Canales de contacto:** WhatsApp Directo e Instagram
+
+---
+
+## 🏷️ Categorías del Catálogo
+
+La plataforma permite filtrar productos en las siguientes secciones:
+* 🏡 **Hogar**
+* 🧸 **Niños**
+* 👗 **Ropa / Cuerpo**
+* 🛏️ **Tendidos**
+
+---
+
+## ✨ Características Principales
+
+* 🛒 **Catálogo Interactivo:** Muestrario de productos con precios en pesos colombianos y descripción detallada.
+* 📲 **Pedidos Directos:** Botón "Pedir por WhatsApp" integrado en cada tarjeta de producto.
+* ⚙️ **Panel de Administración:** Acceso directo (`Admin`) para gestión interna.
+* 📱 **Diseño Responsive:** Interfaz moderna en modo oscuro optimizada para dispositivos móviles.
 
 ---
 
 ## 🛠️ Tecnologías Utilizadas
 
-* **HTML5:** Estructuración del sitio web.
-* **CSS3:** Estilos visuales, paleta de colores y maquetación adaptable.
-* **JavaScript:** Interactividad del sitio.
+* **HTML5:** Estructura de la tienda y catálogo.
+* **CSS3:** Estilos visuales en tema oscuro, botones con degradados e interfaz adaptativa.
+* **JavaScript:** Filtrado por categorías y redirección de pedidos a WhatsApp.
 
 ---
 
-## ⚙️ Cómo ejecutar este proyecto localmente
+## ⚙️ Ejecución Local
 
 1. Clona el repositorio:
    ```bash
