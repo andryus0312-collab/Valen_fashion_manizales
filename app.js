@@ -4,13 +4,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 
         const firebaseConfig = {
             apiKey: "AIzaSyARk7mqSf7C24v4nu0aIx8zoizoewdFAyY",
-            authDomain: "nuestroespacio-3f541.firebaseapp.com",
-            databaseURL: "https://nuestroespacio-3f541-default-rtdb.firebaseio.com",
-            projectId: "nuestroespacio-3f541",
-            storageBucket: "nuestroespacio-3f541.appspot.com",
-            messagingSenderId: "482638926414",
-            appId: "1:482638926414:web:2182581df2455d95b2a91f",
-            measurementId: "G-LPC6WBQTZ0"
+            authDomain: "valen-fashion-manizales.firebaseapp.com",
+            databaseURL: "https://valen-fashion-manizales-default-rtdb.firebaseio.com",
+            projectId: "valen-fashion-manizales",
+            storageBucket: "valen-fashion-manizales.firebasestorage.app",
+            messagingSenderId: "644464075923",
+            appId: "1:644464075923:web:0e0aebd0882fc07a7cd966",
+            measurementId: "G-4QM38XDBXB"
         };
 
         let db;
