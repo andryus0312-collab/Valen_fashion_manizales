@@ -13,6 +13,10 @@
 
     <div class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 mx-auto max-w-7xl relative z-10">
 
+        <!-- BANNER PROMOCIONAL (carrusel) -->
+        <div id="banner-carousel" class="hidden w-full h-56 sm:h-72 rounded-3xl overflow-hidden relative mb-6 shadow-2xl border border-purple-500/30 bg-[#1b0c1b]">
+        </div>
+
         <!-- HEADER / PORTADA -->
         <header class="w-full bg-[#1b0c1b]/90 backdrop-blur-md border border-purple-500/30 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden mb-6">
             <div class="absolute -right-10 -top-10 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -111,6 +115,28 @@
                     </button>
                 </div>
 
+                <!-- ================= BANNER PROMOCIONAL ================= -->
+                <div class="space-y-4 relative z-10">
+                    <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">🖼️ Banner Promocional</h4>
+                    <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
+                        <label class="text-[11px] font-bold text-purple-300">Sube una o varias imágenes (promos, avisos, descuentos)</label>
+                        <div class="flex items-center gap-3">
+                            <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl">
+                                <span>Seleccionar imágenes</span>
+                                <input type="file" accept="image/*" multiple id="banner-image-file" onchange="handleBannerImagesInput(event)" class="hidden">
+                            </label>
+                            <span id="banner-image-status" class="text-[11px] text-slate-400 truncate flex-1">Ninguna imagen</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500">Se suben automáticamente al elegirlas. Con 2 o más, rotan solas cada pocos segundos en la página.</p>
+                        <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-1"></div>
+                    </div>
+                </div>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-purple-500/20"></div>
+                    <div class="flex-grow border-t border-purple-500/20"></div>
+                </div>
+
                 <!-- ================= EDITAR PERFIL ================= -->
                 <div class="space-y-4 relative z-10">
                     <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">✏️ Editar Perfil</h4>
@@ -177,7 +203,7 @@
 
                     <div class="space-y-3">
                         <input type="text" id="new-title" placeholder="Nombre del producto..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <input type="text" id="new-price" placeholder="Precio (Ej: $45.000)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
+                        <input type="text" id="new-price" inputmode="numeric" oninput="formatPriceInput(this)" placeholder="Precio (solo el número, ej: 45000)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
                         <select id="new-category" class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
                             <option value="hogar">🏠 Hogar</option>
                             <option value="ninos">🧸 Niños</option>

@@ -175,6 +175,144 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             }, 2200);
         }
 
+        // Formatea el precio en vivo mientras se escribe: 45000 -> $45.000 (pesos colombianos)
+        window.formatPriceInput = function(el) {
+            let digits = el.value.replace(/\D/g, '');
+            digits = digits.replace(/^0+(?=\d)/, '');
+            if (!digits) { el.value = ''; return; }
+            el.value = '$' + digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        // ============ BANNER PROMOCIONAL (carrusel) ============
+        let bannerImages = [];
+        let bannerIndex = 0;
+        let bannerInterval = null;
+
+        function renderBannerSlides() {
+            const container = document.getElementById('banner-carousel');
+            if (!container) return;
+            if (bannerInterval) { clearInterval(bannerInterval); bannerInterval = null; }
+
+            if (bannerImages.length === 0) {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+                return;
+            }
+            container.classList.remove('hidden');
+            bannerIndex = 0;
+            container.innerHTML = bannerImages.map((b, i) => `
+                <img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === 0 ? 'opacity-100' : 'opacity-0'}">
+            `).join('') + (bannerImages.length > 1 ? `
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">
+                    ${bannerImages.map((_, i) => `<span class="h-1.5 rounded-full transition-all ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></span>`).join('')}
+                </div>
+            ` : '');
+
+            if (bannerImages.length > 1) {
+                bannerInterval = setInterval(() => {
+                    bannerIndex = (bannerIndex + 1) % bannerImages.length;
+                    const slides = container.querySelectorAll('.banner-slide');
+                    slides.forEach((s, i) => {
+                        s.classList.toggle('opacity-100', i === bannerIndex);
+                        s.classList.toggle('opacity-0', i !== bannerIndex);
+                    });
+                    const dots = document.querySelectorAll('#banner-dots span');
+                    dots.forEach((d, i) => {
+                        d.classList.toggle('bg-white', i === bannerIndex);
+                        d.classList.toggle('w-4', i === bannerIndex);
+                        d.classList.toggle('bg-white/40', i !== bannerIndex);
+                        d.classList.toggle('w-1.5', i !== bannerIndex);
+                    });
+                }, 3500);
+            }
+        }
+
+        function renderAdminBannerList() {
+            const list = document.getElementById('admin-banner-list');
+            if (!list) return;
+            if (bannerImages.length === 0) {
+                list.innerHTML = '<p class="col-span-3 text-center text-slate-500 text-[11px] py-2">Sin imágenes de banner todavía.</p>';
+                return;
+            }
+            list.innerHTML = bannerImages.map(b => `
+                <div class="relative aspect-video rounded-xl overflow-hidden border border-purple-500/30 bg-black">
+                    <img src="${b.image}" class="w-full h-full object-cover">
+                    <button onclick="deleteBannerImage('${b.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-800/90 text-white text-[10px] flex items-center justify-center">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        onValue(ref(db, 'valen_banner'), (snapshot) => {
+            const data = snapshot.val();
+            bannerImages = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)) : [];
+            console.log('Imágenes de banner recibidas desde Firebase:', bannerImages.length);
+            renderBannerSlides();
+            renderAdminBannerList();
+        }, (error) => {
+            console.error('Firebase Banner Read Error:', error.code || '', error.message);
+        });
+
+        function resizeImageFile(file, maxSize, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        if (w > h && w > maxSize) { h *= maxSize / w; w = maxSize; }
+                        else if (h > maxSize) { w *= maxSize / h; h = maxSize; }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+                    img.src = ev.target.result;
+                };
+                reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.handleBannerImagesInput = function(e) {
+            const files = Array.from(e.target.files || []);
+            if (files.length === 0) return;
+            const statusEl = document.getElementById('banner-image-status');
+            let done = 0;
+            statusEl.innerText = `Subiendo 0/${files.length}...`;
+
+            files.forEach((file) => {
+                resizeImageFile(file, 1200, 0.8).then((base64) => {
+                    return withTimeout(
+                        push(ref(db, 'valen_banner'), { image: base64, createdAt: Date.now() }),
+                        12000,
+                        'La conexión con Firebase tardó demasiado al subir la imagen del banner.'
+                    );
+                }).then(() => {
+                    done++;
+                    statusEl.innerText = `Subiendo ${done}/${files.length}...`;
+                    if (done === files.length) {
+                        statusEl.innerText = 'Ninguna imagen';
+                        showToast('✅ Banner actualizado');
+                        document.getElementById('banner-image-file').value = '';
+                    }
+                }).catch((error) => {
+                    console.error('Error al subir imagen de banner:', error.code || '', error.message);
+                    alert('🚨 Error al subir una imagen del banner: ' + error.message);
+                    statusEl.innerText = 'Ninguna imagen';
+                });
+            });
+        }
+
+        window.deleteBannerImage = function(id) {
+            if (!confirm('¿Eliminar esta imagen del banner?')) return;
+            remove(ref(db, 'valen_banner/' + id)).catch((error) => {
+                console.error('Error al eliminar imagen de banner:', error.code || '', error.message);
+                alert('🚨 Error al eliminar: ' + error.message);
+            });
+        }
+        // ============ FIN BANNER PROMOCIONAL ============
+
         // Detección de admin por URL
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('admin') === '1') {
