@@ -37,6 +37,97 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
         let profileBase64Image = null;
         let selectedRing = null;
 
+        // ============ PANEL DE DIAGNÓSTICO (solo admin) ============
+        const debugLogs = [];
+        function pushDebugLog(type, args) {
+            const time = new Date().toLocaleTimeString();
+            const msg = args.map(a => {
+                try { return typeof a === 'object' ? JSON.stringify(a) : String(a); } catch (e) { return String(a); }
+            }).join(' ');
+            debugLogs.push({ time, type, msg });
+            if (debugLogs.length > 150) debugLogs.shift();
+            renderDebugLogs();
+        }
+        const _origLog = console.log.bind(console);
+        const _origWarn = console.warn.bind(console);
+        const _origError = console.error.bind(console);
+        console.log = function (...args) { pushDebugLog('log', args); _origLog(...args); };
+        console.warn = function (...args) { pushDebugLog('warn', args); _origWarn(...args); };
+        console.error = function (...args) { pushDebugLog('error', args); _origError(...args); };
+
+        window.addEventListener('error', (e) => {
+            pushDebugLog('error', ['Error no capturado: ' + e.message + ' (' + e.filename + ':' + e.lineno + ')']);
+        });
+        window.addEventListener('unhandledrejection', (e) => {
+            pushDebugLog('error', ['Promesa rechazada sin capturar: ' + (e.reason && e.reason.message ? e.reason.message : e.reason)]);
+        });
+
+        let dbConnected = null;
+        onValue(ref(db, '.info/connected'), (snap) => {
+            dbConnected = snap.val() === true;
+            console.log('Estado de conexión con Firebase:', dbConnected ? 'CONECTADO ✅' : 'DESCONECTADO ❌');
+            updateDebugStatus();
+        });
+
+        function updateDebugStatus() {
+            const connEl = document.getElementById('debug-connection');
+            const authEl = document.getElementById('debug-auth');
+            const countEl = document.getElementById('debug-count');
+            if (connEl) {
+                connEl.innerText = dbConnected === null ? '⏳ Verificando...' : (dbConnected ? '🟢 Conectado a Firebase' : '🔴 Sin conexión a Firebase');
+            }
+            if (authEl) {
+                const user = auth && auth.currentUser;
+                authEl.innerText = user ? ('👤 Sesión activa: ' + user.email) : '👤 Sin sesión';
+            }
+            if (countEl) {
+                countEl.innerText = '📦 Productos cargados: ' + allProducts.length;
+            }
+        }
+
+        function renderDebugLogs() {
+            const list = document.getElementById('debug-log-list');
+            if (!list) return;
+            const colors = { log: 'text-slate-300', warn: 'text-yellow-400', error: 'text-rose-400' };
+            list.innerHTML = debugLogs.slice().reverse().map(l => `
+                <div class="border-b border-purple-500/10 py-1.5">
+                    <span class="text-slate-500">[${l.time}]</span>
+                    <span class="${colors[l.type] || 'text-slate-300'}">${(l.msg || '').replace(/</g, '&lt;')}</span>
+                </div>
+            `).join('');
+        }
+
+        window.toggleDebugPanel = function (show) {
+            const panel = document.getElementById('debug-panel');
+            if (!panel) return;
+            if (show) {
+                panel.classList.remove('hidden');
+                panel.classList.add('flex');
+                updateDebugStatus();
+                renderDebugLogs();
+            } else {
+                panel.classList.remove('flex');
+                panel.classList.add('hidden');
+            }
+        }
+
+        window.clearDebugLogs = function () {
+            debugLogs.length = 0;
+            renderDebugLogs();
+        }
+
+        // Envuelve una promesa con un límite de tiempo, para que ningún botón quede trabado para siempre
+        function withTimeout(promise, ms, timeoutMsg) {
+            return new Promise((resolve, reject) => {
+                const timer = setTimeout(() => {
+                    reject(new Error(timeoutMsg || ('Tiempo de espera agotado (' + ms + 'ms)')));
+                }, ms);
+                promise.then((val) => { clearTimeout(timer); resolve(val); })
+                       .catch((err) => { clearTimeout(timer); reject(err); });
+            });
+        }
+        // ============ FIN PANEL DE DIAGNÓSTICO ============
+
         const categories = [
             { id: 'all', name: '✨ Todo' },
             { id: 'hogar', name: '🏠 Hogar' },
@@ -240,13 +331,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             btn.disabled = true;
             btn.innerText = 'Guardando...';
 
-            set(ref(db, 'valen_profile'), updatedProfile).then(() => {
+            console.log('Iniciando guardado de perfil...');
+            withTimeout(
+                set(ref(db, 'valen_profile'), updatedProfile),
+                12000,
+                'La conexión con Firebase tardó demasiado (más de 12s). Revisa tu internet o un posible bloqueador (Brave Shields, adblock).'
+            ).then(() => {
+                console.log('Perfil guardado con éxito ✅');
                 profileBase64Image = null;
                 document.getElementById('profile-image-status').innerText = 'Sin cambios';
                 document.getElementById('profile-image-preview-container').classList.add('hidden');
                 showToast('✅ Perfil actualizado con éxito');
             }).catch((error) => {
-                console.error('Error al guardar perfil:', error);
+                console.error('Error al guardar perfil:', error.code || '', error.message);
                 alert('🚨 Error al guardar el perfil: ' + error.message);
             }).finally(() => {
                 btn.disabled = false;
@@ -370,11 +467,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             } else {
                 allProducts = [];
             }
+            console.log('Productos recibidos desde Firebase:', allProducts.length);
             renderCategories();
             renderProducts();
             renderAdminList();
+            updateDebugStatus();
         }, (error) => {
-            console.error("Firebase Read Error:", error);
+            console.error("Firebase Read Error:", error.code || '', error.message);
             document.getElementById('products-container').innerHTML = `
                 <div class="col-span-full py-12 px-6 bg-rose-950/80 border-2 border-rose-500 rounded-3xl text-center space-y-3">
                     <p class="text-3xl">⚠️</p>
@@ -401,7 +500,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 
         onAuthStateChanged(auth, (user) => {
             isLoggedIn = !!user;
+            console.log('Estado de sesión:', isLoggedIn ? ('activa (' + user.email + ')') : 'sin sesión');
+            const debugBtn = document.getElementById('debug-btn');
+            if (debugBtn) debugBtn.classList.toggle('hidden', !isLoggedIn);
             updateAdminUI();
+            updateDebugStatus();
         });
 
         window.adminLogin = function() {
@@ -503,14 +606,20 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             btn.disabled = true;
             btn.innerText = 'Publicando...';
 
-            push(ref(db, 'valen_products'), {
-                title,
-                price,
-                category,
-                description,
-                image: base64Image,
-                createdAt: Date.now()
-            }).then(() => {
+            console.log('Iniciando publicación de producto:', title);
+            withTimeout(
+                push(ref(db, 'valen_products'), {
+                    title,
+                    price,
+                    category,
+                    description,
+                    image: base64Image,
+                    createdAt: Date.now()
+                }),
+                12000,
+                'La conexión con Firebase tardó demasiado (más de 12s). Revisa tu internet o un posible bloqueador (Brave Shields, adblock).'
+            ).then(() => {
+                console.log('Producto publicado con éxito ✅:', title);
                 document.getElementById('new-title').value = '';
                 document.getElementById('new-price').value = '';
                 document.getElementById('new-description').value = '';
@@ -520,7 +629,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
                 base64Image = null;
                 showToast('✅ Producto publicado con éxito');
             }).catch((error) => {
-                console.error('Error al publicar:', error);
+                console.error('Error al publicar:', error.code || '', error.message);
                 alert('🚨 Error al publicar: ' + error.message);
             }).finally(() => {
                 btn.disabled = false;
