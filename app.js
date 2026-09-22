@@ -71,6 +71,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 
         let currentProfile = defaultProfile;
 
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            if (!el) return;
+            el.innerText = msg;
+            el.classList.remove('hidden');
+            requestAnimationFrame(() => { el.style.opacity = '1'; });
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => {
+                el.style.opacity = '0';
+                setTimeout(() => el.classList.add('hidden'), 300);
+            }, 2200);
+        }
+
         // Detección de admin por URL
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('admin') === '1') {
@@ -231,12 +244,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
                 profileBase64Image = null;
                 document.getElementById('profile-image-status').innerText = 'Sin cambios';
                 document.getElementById('profile-image-preview-container').classList.add('hidden');
-                btn.disabled = false;
-                btn.innerText = 'Guardar Perfil 💾';
-                alert('✅ Perfil actualizado con éxito');
+                showToast('✅ Perfil actualizado con éxito');
             }).catch((error) => {
                 console.error('Error al guardar perfil:', error);
                 alert('🚨 Error al guardar el perfil: ' + error.message);
+            }).finally(() => {
                 btn.disabled = false;
                 btn.innerText = 'Guardar Perfil 💾';
             });
@@ -506,11 +518,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
                 document.getElementById('image-status').innerText = 'Ningún archivo';
                 document.getElementById('new-image-file').value = '';
                 base64Image = null;
-                btn.disabled = false;
-                btn.innerText = 'Publicar Producto ✨';
+                showToast('✅ Producto publicado con éxito');
             }).catch((error) => {
                 console.error('Error al publicar:', error);
                 alert('🚨 Error al publicar: ' + error.message);
+            }).finally(() => {
                 btn.disabled = false;
                 btn.innerText = 'Publicar Producto ✨';
             });
