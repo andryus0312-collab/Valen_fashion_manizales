@@ -223,7 +223,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
                         d.classList.toggle('bg-white/40', i !== bannerIndex);
                         d.classList.toggle('w-1.5', i !== bannerIndex);
                     });
-                }, 3500);
+                }, 5000);
             }
         }
 
@@ -519,6 +519,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             renderProducts();
         }
 
+        // Saludo cálido según la hora del día de quien está visitando
+        function getGreeting() {
+            const hour = new Date().getHours();
+            if (hour >= 5 && hour < 12) return 'buenos días';
+            if (hour >= 12 && hour < 19) return 'buenas tardes';
+            return 'buenas noches';
+        }
+
         function renderProducts() {
             const container = document.getElementById('products-container');
             const filtered = selectedCategory === 'all'
@@ -540,7 +548,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
                 const catObj = categories.find(c => c.id === p.category);
                 const catName = catObj ? catObj.name : p.category;
                 const phone = "573229247605";
-                const text = encodeURIComponent(`¡Hola Valen! 🤍 Me interesa este producto de tu catálogo: *${p.title}* (${p.price}). ¿Aún lo tienes disponible?`);
+                const text = encodeURIComponent(`¡Hola Valen, ${getGreeting()}! 🤍💜🖤 Me interesa saber más acerca de este producto de tu catálogo: *${p.title}* (${p.price}). ¿Aún lo tienes disponible? De antemano, ¡muchas gracias! 😊`);
                 const waLink = `https://wa.me/${phone}?text=${text}`;
 
                 return `
