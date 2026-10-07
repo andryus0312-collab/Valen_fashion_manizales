@@ -1,5 +1,108 @@
+/* ============ MODO CLARO / OSCURO Y FONDO BOUTIQUE ============ */
+
+/* Transición suave al cambiar de modo */
+body, .theme-transition, .theme-transition * {
+    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+}
+
+/* Estilos base (Modo Claro por defecto) */
+body {
+    background-color: #fdfbf7; /* Blanco hueso / crema muy suave */
+    color: #2d1b36; /* Texto morado oscuro casi negro para alta legibilidad */
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Imagen de fondo tipo Boutique (Solo visible en Modo Claro) */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Imagen elegante de boutique/tienda de ropa */
+    background-image: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.12; /* Transparencia del 88% (muy sutil para no interferir con textos) */
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+/* ============ MODO OSCURO (Tu paleta original) ============ */
+body.dark-mode {
+    background-color: #0a020a; /* Tu morado/negro original */
+    color: #f3f4f6; /* Texto claro */
+}
+
+/* Ocultar imagen de fondo en Modo Oscuro */
+body.dark-mode::before {
+    opacity: 0;
+}
+
+/* Clases utilitarias para adaptar componentes dinámicos (Tarjetas, Textos) */
+/* Estas clases serán usadas por JavaScript al renderizar productos */
+
+/* Tarjetas de productos */
+.card-bg {
+    background-color: rgba(255, 255, 255, 0.85); /* Blanco con transparencia en modo claro */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+}
+body.dark-mode .card-bg {
+    background-color: rgba(27, 12, 27, 0.85); /* Tu bg-[#1b0c1b]/85 original */
+    border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+/* Títulos de productos */
+.text-title {
+    color: #2d1b36;
+}
+body.dark-mode .text-title {
+    color: #ffffff;
+}
+
+/* Descripciones de productos */
+.text-desc {
+    color: #4b5563;
+}
+body.dark-mode .text-desc {
+    color: #cbd5e1; /* slate-300 */
+}
+
+/* Precios */
+.text-price {
+    color: #9333ea; /* purple-600 */
+}
+body.dark-mode .text-price {
+    color: #c084fc; /* purple-400 */
+}
+
+/* Botones de categorías (inactivos) */
+.btn-cat-inactive {
+    background-color: #ffffff;
+    color: #4b5563;
+    border-color: rgba(168, 85, 247, 0.3);
+    box-shadow: 0 4px 0 #e9d5ff;
+}
+body.dark-mode .btn-cat-inactive {
+    background-color: #1b0c1b;
+    color: #cbd5e1;
+    border-color: rgba(88, 28, 135, 0.5);
+    box-shadow: 0 4px 0 #2e1065;
+}
+body.dark-mode .btn-cat-inactive:hover {
+    background-color: rgba(88, 28, 135, 0.6);
+}
+
+/* ============ ESTILOS ORIGINALES (Scrollbars, inputs) ============ */
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
 input[type="color"] { -webkit-appearance: none; appearance: none; padding: 0; }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 9999px; }
 input[type="color"]::-webkit-color-swatch { border: none; border-radius: 9999px; }
