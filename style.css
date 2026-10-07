@@ -1,18 +1,17 @@
-/* ============ MODO CLARO / OSCURO Y FONDO BOUTIQUE ============ */
-
+/* ============ TRANSICIONES Y MODO CLARO (DEFAULT) ============ */
 body, .theme-transition, .theme-transition * {
     transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
 }
 
 body {
-    background-color: #fdfbf7; /* Blanco hueso / crema muy suave */
-    color: #2d1b36; /* Texto morado oscuro casi negro */
+    background-color: #fdfbf7; /* Blanco crema suave */
+    color: #2d1b36; /* Texto oscuro legible */
     position: relative;
     min-height: 100vh;
     overflow-x: hidden;
 }
 
-/* Imagen de fondo tipo Boutique (Solo visible en Modo Claro) */
+/* Imagen de fondo Boutique (Solo Modo Claro) */
 body::before {
     content: "";
     position: fixed;
@@ -20,7 +19,7 @@ body::before {
     background-image: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1920&q=80');
     background-size: cover;
     background-position: center;
-    opacity: 0.12; /* Muy sutil */
+    opacity: 0.10; /* Muy sutil (90% transparencia) */
     z-index: -1;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -33,9 +32,9 @@ body.dark-mode {
 }
 body.dark-mode::before { opacity: 0; }
 
-/* Clases utilitarias para componentes dinámicos */
+/* ============ CLASES ADAPTATIVAS (Usadas por el JS) ============ */
 .card-bg {
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(168, 85, 247, 0.2);
 }
