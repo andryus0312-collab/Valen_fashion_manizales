@@ -45,6 +45,9 @@ body.dark-mode .admin-panel-bg { background-color: #0d0310; }
 .admin-section-bg { background-color: #f9fafb; }
 body.dark-mode .admin-section-bg { background-color: rgba(27, 12, 27, 0.5); }
 
+.admin-item-bg { background-color: #ffffff; }
+body.dark-mode .admin-item-bg { background-color: #0d0310; }
+
 /* Scrollbar original */
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
