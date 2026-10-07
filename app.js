@@ -88,7 +88,7 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
     });
 })();
 
-// ============ FASE 3: CÓDIGO QR ============
+// ============ FASE 3: CÓDIGO QR (MEJORADO) ============
 (function initQR() {
     const btnOpen = document.getElementById('btn-qr-open');
     const modal = document.getElementById('qr-modal');
@@ -96,19 +96,27 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
     const btnShare = document.getElementById('btn-qr-share-action');
     const btnDownload = document.getElementById('btn-qr-download');
     
-    // URL ÚNICA Y ESTÁTICA (Sin parámetros de admin)
+    // URL ÚNICA Y ESTÁTICA
     const shareUrl = "https://andryus0312-collab.github.io/Valen_fashion_manizales/";
     let qrGenerated = false;
 
-    // Generar QR (Colores de marca: Morado oscuro #2e1065 sobre blanco)
+    // Función para obtener saludo según hora
+    function getGreeting() {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return '¡Buenos días';
+        if (hour >= 12 && hour < 19) return '¡Buenas tardes';
+        return '¡Buenas noches';
+    }
+
+    // Generar QR (Más grande: 256px)
     function generateQR() {
         if (qrGenerated) return;
-        container.innerHTML = ""; // Limpiar
+        container.innerHTML = "";
         new QRCode(container, {
             text: shareUrl,
-            width: 200,
-            height: 200,
-            colorDark : "#2e1065", // Morado oscuro marca
+            width: 256, // Más grande
+            height: 256,
+            colorDark : "#2e1065", // Morado oscuro
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
         });
@@ -121,7 +129,6 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         
-        // Detectar si es móvil para mostrar botón Compartir
         if (navigator.share) {
             btnShare.classList.remove('hidden');
         } else {
@@ -129,27 +136,29 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
         }
     };
 
-    // Cerrar Modal
     window.closeQRModal = () => {
         modal.classList.remove('flex');
         modal.classList.add('hidden');
     };
 
-    // Cerrar al hacer click fuera
     modal.onclick = (e) => { if (e.target === modal) closeQRModal(); };
 
-    // Acción Compartir (Móvil)
+    // Acción Compartir (Mensaje Personalizado y Bonito)
     btnShare.onclick = async () => {
+        const greeting = getGreeting();
+        // Mensaje con formato, emojis y espacios
+        const message = `${greeting}! 🤍✨\n\nTe invito a conocer *Valen Fashion Manizales* 🛍️, una tienda con artículos únicos y muy especiales para cualquier ocasión. \n\n🎁 Si no tenemos algo, ¡te lo conseguimos! Todo a precios muy razonables. 💸\n\n Visita nuestra página, sigue nuestro Instagram y contáctanos directamente si tienes dudas:\n${shareUrl}\n\n¡Gracias por compartir y ayudarnos a crecer! 💜🙏`;
+
         try {
             await navigator.share({
-                title: 'Valen Fashion Manizales',
-                text: '¡Hola! Te invito a ver Valen Fashion Manizales, una tienda única con artículos especiales. ¡Gracias por compartir! 🛍️✨',
-                url: shareUrl,
+                title: 'Valen Fashion Manizales 🤍',
+                text: message,
+                url: shareUrl, // Algunos navegadores ignoran url si está en text, pero es buena práctica
             });
         } catch (err) { console.log('Error sharing', err); }
     };
 
-    // Acción Descargar (PC o fallback)
+    // Acción Descargar
     btnDownload.onclick = () => {
         const img = container.querySelector('img');
         if (img) {
