@@ -13,787 +13,143 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from
          measurementId: "G-4QM38XDBXB"
      };
 
-     let db;
-     let auth;
-     let isLoggedIn = false;
-
+     let db, auth, isLoggedIn = false;
      try {
          const app = initializeApp(firebaseConfig);
-         db = getDatabase(app);
-         auth = getAuth(app);
-     } catch (initError) {
-         document.getElementById('products-container').innerHTML = `
-             <div class="col-span-full py-12 px-6 bg-rose-100 dark:bg-rose-950/80 border-2 border-rose-500 rounded-3xl text-center space-y-3">
-                 <p class="text-3xl">🚨</p>
-                 <p class="text-base font-bold text-rose-700 dark:text-rose-200">Error al inicializar Firebase</p>
-                 <p class="text-xs text-slate-600 dark:text-slate-300 font-mono bg-white/50 dark:bg-black/40 p-3 rounded-xl overflow-x-auto">${initError.message}</p>
-             </div>
-         `;
-         throw initError;
-     }
+         db = getDatabase(app); auth = getAuth(app);
+     } catch (initError) { throw initError; }
 
-     let allProducts = [];
-     let selectedCategory = 'all';
-     let base64Image = null;
-     let profileBase64Image = null;
-     let selectedRing = null;
+     let allProducts = [], selectedCategory = 'all', base64Image = null, profileBase64Image = null, selectedRing = null;
 
-     // ============ PANEL DE DIAGNÓSTICO (solo admin) ============
+     // ============ DIAGNÓSTICO ============
      const debugLogs = [];
      function pushDebugLog(type, args) {
-         const time = new Date().toLocaleTimeString();
-         const msg = args.map(a => {
-             try { return typeof a === 'object' ? JSON.stringify(a) : String(a); } catch (e) { return String(a); }
-         }).join(' ');
-         debugLogs.push({ time, type, msg });
+         const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+         debugLogs.push({ time: new Date().toLocaleTimeString(), type, msg });
          if (debugLogs.length > 150) debugLogs.shift();
          renderDebugLogs();
      }
-
-     const _origLog = console.log.bind(console);
-     const _origWarn = console.warn.bind(console);
-     const _origError = console.error.bind(console);
-
-     console.log = function (...args) { pushDebugLog('log', args); _origLog(...args); };
-     console.warn = function (...args) { pushDebugLog('warn', args); _origWarn(...args); };
-     console.error = function (...args) { pushDebugLog('error', args); _origError(...args); };
-
-     window.addEventListener('error', (e) => {
-         pushDebugLog('error', ['Error no capturado: ' + e.message + ' (' + e.filename + ':' + e.lineno + ')']);
-     });
-     window.addEventListener('unhandledrejection', (e) => {
-         pushDebugLog('error', ['Promesa rechazada sin capturar: ' + (e.reason && e.reason.message ? e.reason.message : e.reason)]);
-     });
+     console.log = (...a) => { pushDebugLog('log', a); };
+     console.warn = (...a) => { pushDebugLog('warn', a); };
+     console.error = (...a) => { pushDebugLog('error', a); };
+     window.addEventListener('error', (e) => pushDebugLog('error', [e.message]));
 
      let dbConnected = null;
-     onValue(ref(db, '.info/connected'), (snap) => {
-         dbConnected = snap.val() === true;
-         console.log('Estado de conexión con Firebase:', dbConnected ? 'CONECTADO ✅' : 'DESCONECTADO ❌');
-         updateDebugStatus();
-     });
+     onValue(ref(db, '.info/connected'), (snap) => { dbConnected = snap.val() === true; updateDebugStatus(); });
 
      function updateDebugStatus() {
-         const connEl = document.getElementById('debug-connection');
-         const authEl = document.getElementById('debug-auth');
-         const countEl = document.getElementById('debug-count');
-         if (connEl) {
-             connEl.innerText = dbConnected === null ? '⏳ Verificando...' : (dbConnected ? '🟢 Conectado a Firebase' : '🔴 Sin conexión a Firebase');
-         }
-         if (authEl) {
-             const user = auth && auth.currentUser;
-             authEl.innerText = user ? ('👤 Sesión activa: ' + user.email) : '👤 Sin sesión';
-         }
-         if (countEl) {
-             countEl.innerText = '📦 Productos cargados: ' + allProducts.length;
-         }
+         const c = document.getElementById('debug-connection'), a = document.getElementById('debug-auth'), p = document.getElementById('debug-count');
+         if(c) c.innerText = dbConnected ? '🟢 Conectado' : '🔴 Desconectado';
+         if(a) a.innerText = auth.currentUser ? '👤 ' + auth.currentUser.email : '👤 Sin sesión';
+         if(p) p.innerText = '📦 Productos: ' + allProducts.length;
      }
-
      function renderDebugLogs() {
-         const list = document.getElementById('debug-log-list');
-         if (!list) return;
+         const l = document.getElementById('debug-log-list');
+         if(!l) return;
          const colors = { log: 'text-slate-300', warn: 'text-yellow-400', error: 'text-rose-400' };
-         list.innerHTML = debugLogs.slice().reverse().map(l => `
-             <div class="border-b border-purple-500/10 py-1.5">
-                 <span class="text-slate-500">[${l.time}]</span>
-                 <span class="${colors[l.type] || 'text-slate-300'}">${(l.msg || '').replace(/</g, '&lt;')}</span>
-             </div>
-         `).join('');
+         l.innerHTML = debugLogs.slice().reverse().map(x => `<div class="border-b border-purple-500/10 py-1"><span class="text-slate-500">[${x.time}]</span> <span class="${colors[x.type]}">${x.msg.replace(/</g,'&lt;')}</span></div>`).join('');
      }
+     window.toggleDebugPanel = (s) => { const p = document.getElementById('debug-panel'); s ? (p.classList.remove('hidden'), p.classList.add('flex'), updateDebugStatus(), renderDebugLogs()) : (p.classList.remove('flex'), p.classList.add('hidden')); };
+     window.clearDebugLogs = () => { debugLogs.length = 0; renderDebugLogs(); };
 
-     window.toggleDebugPanel = function (show) {
-         const panel = document.getElementById('debug-panel');
-         if (!panel) return;
-         if (show) {
-             panel.classList.remove('hidden');
-             panel.classList.add('flex');
-             updateDebugStatus();
-             renderDebugLogs();
-         } else {
-             panel.classList.remove('flex');
-             panel.classList.add('hidden');
-         }
-     }
+     function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = setTimeout(() => rej(new Error(msg)), ms); p.then(v => {clearTimeout(t); res(v);}).catch(e => {clearTimeout(t); rej(e);}); }); }
 
-     window.clearDebugLogs = function () {
-         debugLogs.length = 0;
-         renderDebugLogs();
-     }
-
-     function withTimeout(promise, ms, timeoutMsg) {
-         return new Promise((resolve, reject) => {
-             const timer = setTimeout(() => {
-                 reject(new Error(timeoutMsg || ('Tiempo de espera agotado (' + ms + 'ms)')));
-             }, ms);
-             promise.then((val) => { clearTimeout(timer); resolve(val); })
-                    .catch((err) => { clearTimeout(timer); reject(err); });
-         });
-     }
-     // ============ FIN PANEL DE DIAGNÓSTICO ============
-
-     const categories = [
-         { id: 'all', name: '✨ Todo' },
-         { id: 'hogar', name: '🏠 Hogar' },
-         { id: 'ninos', name: '🧸 Niños' },
-         { id: 'ropa', name: '👗 Ropa / Cuerpo' },
-         { id: 'tendidos', name: '🛏️ Tendidos' }
-     ];
-
-     const ringPresets = [
-         { name: 'Morado', mode: 'solid', color: '#a855f7' },
-         { name: 'Negro', mode: 'solid', color: '#000000' },
-         { name: 'Blanco', mode: 'solid', color: '#ffffff' },
-         { name: 'Rosa', mode: 'solid', color: '#ec4899' },
-         { name: 'Morado → Negro', mode: 'gradient', from: '#a855f7', to: '#000000' },
-         { name: 'Morado → Rosa', mode: 'gradient', from: '#a855f7', to: '#ec4899' },
-         { name: 'Negro → Morado', mode: 'gradient', from: '#000000', to: '#7e22ce' },
-         { name: 'Blanco → Morado', mode: 'gradient', from: '#ffffff', to: '#a855f7' }
-     ];
-
-     const defaultProfile = {
-         photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-         name: 'Valen Fashion',
-         tagline: '✨ Mereces lo que sueñas 🤍',
-         category: '🛍️ Compras y ventas minoristas',
-         bio: 'Tenemos cosas hermosas y exclusivas para ti 💥\npara todos los gustos ♂️♀️',
-         service: '🚚 Contamos con servicio de domicilio en Manizales 💎',
-         address: '📍 Cra 38 #66-20, Manizales, Caldas',
-         ring: { mode: 'solid', color: '#a855f7' }
-     };
-
+     const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'🛏️ Tendidos'}];
+     const ringPresets = [{name:'Morado',mode:'solid',color:'#a855f7'},{name:'Negro',mode:'solid',color:'#000000'},{name:'Blanco',mode:'solid',color:'#ffffff'},{name:'Rosa',mode:'solid',color:'#ec4899'},{name:'M→N',mode:'gradient',from:'#a855f7',to:'#000000'},{name:'M→R',mode:'gradient',from:'#a855f7',to:'#ec4899'}];
+     const defaultProfile = { photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', name: 'Valen Fashion', tagline: '✨ Mereces lo que sueñas 🤍', category: '🛍️ Compras y ventas minoristas', bio: 'Tenemos cosas hermosas y exclusivas para ti 💥\npara todos los gustos ♂️♀️', service: '🚚 Domicilios en Manizales 💎', address: '📍 Cra 38 #66-20, Manizales', ring: {mode:'solid',color:'#a855f7'} };
      let currentProfile = defaultProfile;
 
-     function showToast(msg) {
-         const el = document.getElementById('toast');
-         if (!el) return;
-         el.innerText = msg;
-         el.classList.remove('hidden');
-         requestAnimationFrame(() => { el.style.opacity = '1'; });
-         clearTimeout(showToast._t);
-         showToast._t = setTimeout(() => {
-             el.style.opacity = '0';
-             setTimeout(() => el.classList.add('hidden'), 300);
-         }, 2200);
-     }
+     function showToast(m) { const e=document.getElementById('toast'); if(!e)return; e.innerText=m; e.classList.remove('hidden'); e.style.opacity='1'; setTimeout(()=>{e.style.opacity='0'; setTimeout(()=>e.classList.add('hidden'),300);},2200); }
+     window.formatPriceInput = (el) => { let d=el.value.replace(/\D/g,'').replace(/^0+(?=\d)/,''); el.value=d?'$'+d.replace(/\B(?=(\d{3})+(?!\d))/g,'.'):''; };
 
-     window.formatPriceInput = function(el) {
-         let digits = el.value.replace(/\D/g, '');
-         digits = digits.replace(/^0+(?=\d)/, '');
-         if (!digits) { el.value = ''; return; }
-         el.value = '$' + digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-     }
-
-     // ============ BANNER PROMOCIONAL (carrusel) ============
-     let bannerImages = [];
-     let bannerIndex = 0;
-     let bannerInterval = null;
-
+     // ============ BANNER ============
+     let bannerImages=[], bannerIndex=0, bannerInterval=null;
      function renderBannerSlides() {
-         const container = document.getElementById('banner-carousel');
-         if (!container) return;
-         if (bannerInterval) { clearInterval(bannerInterval); bannerInterval = null; }
-         if (bannerImages.length === 0) {
-             container.classList.add('hidden');
-             container.innerHTML = '';
-             return;
-         }
-         container.classList.remove('hidden');
-         bannerIndex = 0;
-         container.innerHTML = bannerImages.map((b, i) => `
-             <img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === 0 ? 'opacity-100' : 'opacity-0'}">
-         `).join('') + (bannerImages.length > 1 ? `
-             <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">
-                 ${bannerImages.map((_, i) => `<span class="h-1.5 rounded-full transition-all ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></span>`).join('')}
-             </div>
-         ` : '');
-
-         if (bannerImages.length > 1) {
-             bannerInterval = setInterval(() => {
-                 bannerIndex = (bannerIndex + 1) % bannerImages.length;
-                 const slides = container.querySelectorAll('.banner-slide');
-                 slides.forEach((s, i) => {
-                     s.classList.toggle('opacity-100', i === bannerIndex);
-                     s.classList.toggle('opacity-0', i !== bannerIndex);
-                 });
-                 const dots = document.querySelectorAll('#banner-dots span');
-                 dots.forEach((d, i) => {
-                     d.classList.toggle('bg-white', i === bannerIndex);
-                     d.classList.toggle('w-4', i === bannerIndex);
-                     d.classList.toggle('bg-white/40', i !== bannerIndex);
-                     d.classList.toggle('w-1.5', i !== bannerIndex);
-                 });
-             }, 5000);
-         }
+         const c=document.getElementById('banner-carousel'); if(!c)return;
+         if(bannerInterval) clearInterval(bannerInterval);
+         if(!bannerImages.length) { c.classList.add('hidden'); return; }
+         c.classList.remove('hidden'); bannerIndex=0;
+         c.innerHTML = bannerImages.map((b,i)=>`<img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i===0?'opacity-100':'opacity-0'}">`).join('') + (bannerImages.length>1?`<div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">${bannerImages.map((_,i)=>`<span class="h-1.5 rounded-full transition-all ${i===0?'bg-white w-4':'bg-white/40 w-1.5'}"></span>`).join('')}</div>`:'');
+         if(bannerImages.length>1) bannerInterval=setInterval(()=>{ bannerIndex=(bannerIndex+1)%bannerImages.length; c.querySelectorAll('.banner-slide').forEach((s,i)=>{s.classList.toggle('opacity-100',i===bannerIndex); s.classList.toggle('opacity-0',i!==bannerIndex);}); document.querySelectorAll('#banner-dots span').forEach((d,i)=>{d.classList.toggle('bg-white',i===bannerIndex); d.classList.toggle('w-4',i===bannerIndex); d.classList.toggle('bg-white/40',i!==bannerIndex); d.classList.toggle('w-1.5',i!==bannerIndex);}); }, 5000);
      }
-
      function renderAdminBannerList() {
-         const list = document.getElementById('admin-banner-list');
-         if (!list) return;
-         if (bannerImages.length === 0) {
-             list.innerHTML = '<p class="col-span-3 text-center text-slate-500 text-[11px] py-2">Sin imágenes de banner todavía.</p>';
-             return;
-         }
-         list.innerHTML = bannerImages.map(b => `
-             <div class="relative aspect-video rounded-xl overflow-hidden border border-purple-500/30 bg-black">
-                 <img src="${b.image}" class="w-full h-full object-cover">
-                 <button onclick="deleteBannerImage('${b.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-800/90 text-white text-[10px] flex items-center justify-center">🗑️</button>
-             </div>
-         `).join('');
+         const l=document.getElementById('admin-banner-list'); if(!l)return;
+         l.innerHTML = bannerImages.length ? bannerImages.map(b=>`<div class="relative aspect-video rounded-xl overflow-hidden border border-purple-500/30 bg-black"><img src="${b.image}" class="w-full h-full object-cover"><button onclick="deleteBannerImage('${b.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-800/90 text-white text-[10px] flex items-center justify-center">🗑️</button></div>`).join('') : '<p class="col-span-3 text-center text-slate-500 text-[11px] py-2">Sin imágenes.</p>';
      }
+     onValue(ref(db, 'valen_banner'), (s) => { const d=s.val(); bannerImages=d?Object.keys(d).map(k=>({id:k,...d[k]})):[]; renderBannerSlides(); renderAdminBannerList(); });
+     
+     function resizeImg(f, max, q) { return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>{ const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); let w=i.width,h=i.height; if(w>h&&w>max){h*=max/w;w=max;}else if(h>max){w*=max/h;h=max;} c.width=w;c.height=h; c.getContext('2d').drawImage(i,0,0,w,h); res(c.toDataURL('image/jpeg',q)); }; i.src=e.target.result; }; r.readAsDataURL(f); }); }
+     window.handleBannerImagesInput = (e) => { const f=Array.from(e.target.files||[]); if(!f.length)return; const st=document.getElementById('banner-image-status'); let d=0; st.innerText=`Subiendo 0/${f.length}...`; f.forEach(file=>{ resizeImg(file,1200,0.8).then(b64=>withTimeout(push(ref(db,'valen_banner'),{image:b64,createdAt:Date.now()}),12000,'Timeout')).then(()=>{ if(++d===f.length){st.innerText='Ninguna imagen'; showToast('✅ Banner actualizado'); document.getElementById('banner-image-file').value='';} else st.innerText=`Subiendo ${d}/${f.length}...`; }).catch(err=>alert('Error banner: '+err.message)); }); };
+     window.deleteBannerImage = (id) => { if(confirm('¿Eliminar?')) remove(ref(db,'valen_banner/'+id)); };
 
-     onValue(ref(db, 'valen_banner'), (snapshot) => {
-         const data = snapshot.val();
-         bannerImages = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)) : [];
-         console.log('Imágenes de banner recibidas desde Firebase:', bannerImages.length);
-         renderBannerSlides();
-         renderAdminBannerList();
-     }, (error) => {
-         console.error('Firebase Banner Read Error:', error.code || '', error.message);
-     });
+     if(new URLSearchParams(window.location.search).get('admin')==='1') document.getElementById('btn-admin').classList.remove('hidden');
 
-     function resizeImageFile(file, maxSize, quality) {
-         return new Promise((resolve, reject) => {
-             const reader = new FileReader();
-             reader.onload = (ev) => {
-                 const img = new Image();
-                 img.onload = () => {
-                     const canvas = document.createElement('canvas');
-                     let w = img.width, h = img.height;
-                     if (w > h && w > maxSize) { h *= maxSize / w; w = maxSize; }
-                     else if (h > maxSize) { w *= maxSize / h; h = maxSize; }
-                     canvas.width = w; canvas.height = h;
-                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                     resolve(canvas.toDataURL('image/jpeg', quality));
-                 };
-                 img.onerror = () => reject(new Error('No se pudo leer la imagen'));
-                 img.src = ev.target.result;
-             };
-             reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
-             reader.readAsDataURL(file);
-         });
-     }
+     function ringToCss(r) { return !r ? defaultProfile.ring.color : (r.mode==='gradient' ? `linear-gradient(135deg,${r.from},${r.to})` : r.color); }
+     function renderRingPresets() { document.getElementById('ring-presets').innerHTML = ringPresets.map((p,i)=>`<button type="button" onclick="selectRingPreset(${i})" class="ring-preset-btn w-8 h-8 rounded-full border border-purple-500/30" style="background:${p.mode==='solid'?p.color:`linear-gradient(135deg,${p.from},${p.to})`}"></button>`).join(''); }
+     function highlightRingPreset(i) { document.querySelectorAll('.ring-preset-btn').forEach((b,idx)=>b.classList.toggle('ring-2',idx===i)); }
+     window.selectRingPreset = (i) => { selectedRing=ringPresets[i].mode==='solid'?{mode:'solid',color:ringPresets[i].color}:{mode:'gradient',from:ringPresets[i].from,to:ringPresets[i].to}; highlightRingPreset(i); document.getElementById('ring-preview').style.background=ringToCss(selectedRing); };
+     window.selectCustomSolid = () => { selectedRing={mode:'solid',color:document.getElementById('ring-custom-solid').value}; highlightRingPreset(-1); document.getElementById('ring-preview').style.background=selectedRing.color; };
+     window.selectCustomGradient = () => { selectedRing={mode:'gradient',from:document.getElementById('ring-custom-from').value,to:document.getElementById('ring-custom-to').value}; highlightRingPreset(-1); document.getElementById('ring-preview').style.background=ringToCss(selectedRing); };
 
-     window.handleBannerImagesInput = function(e) {
-         const files = Array.from(e.target.files || []);
-         if (files.length === 0) return;
-         const statusEl = document.getElementById('banner-image-status');
-         let done = 0;
-         statusEl.innerText = `Subiendo 0/${files.length}...`;
-         files.forEach((file) => {
-             resizeImageFile(file, 1200, 0.8).then((base64) => {
-                 return withTimeout(
-                     push(ref(db, 'valen_banner'), { image: base64, createdAt: Date.now() }),
-                     12000,
-                     'La conexión con Firebase tardó demasiado al subir la imagen del banner.'
-                 );
-             }).then(() => {
-                 done++;
-                 statusEl.innerText = `Subiendo ${done}/${files.length}...`;
-                 if (done === files.length) {
-                     statusEl.innerText = 'Ninguna imagen';
-                     showToast('✅ Banner actualizado');
-                     document.getElementById('banner-image-file').value = '';
-                 }
-             }).catch((error) => {
-                 console.error('Error al subir imagen de banner:', error.code || '', error.message);
-                 alert('🚨 Error al subir una imagen del banner: ' + error.message);
-                 statusEl.innerText = 'Ninguna imagen';
-             });
-         });
-     }
-
-     window.deleteBannerImage = function(id) {
-         if (!confirm('¿Eliminar esta imagen del banner?')) return;
-         remove(ref(db, 'valen_banner/' + id)).catch((error) => {
-             console.error('Error al eliminar imagen de banner:', error.code || '', error.message);
-             alert('🚨 Error al eliminar: ' + error.message);
-         });
-     }
-     // ============ FIN BANNER PROMOCIONAL ============
-
-     const urlParams = new URLSearchParams(window.location.search);
-     if (urlParams.get('admin') === '1') {
-         document.getElementById('btn-admin').classList.remove('hidden');
-     }
-
-     function ringToCss(ring) {
-         if (!ring) return defaultProfile.ring.color;
-         if (ring.mode === 'gradient') return `linear-gradient(135deg, ${ring.from}, ${ring.to})`;
-         return ring.color;
-     }
-
-     function findPresetIndex(ring) {
-         if (!ring) return -1;
-         return ringPresets.findIndex(p => {
-             if (p.mode !== ring.mode) return false;
-             if (p.mode === 'solid') return p.color === ring.color;
-             return p.from === ring.from && p.to === ring.to;
-         });
-     }
-
-     function renderRingPresets() {
-         const container = document.getElementById('ring-presets');
-         container.innerHTML = ringPresets.map((p, i) => {
-             const bg = p.mode === 'solid' ? p.color : `linear-gradient(135deg, ${p.from}, ${p.to})`;
-             return `<button type="button" onclick="selectRingPreset(${i})" title="${p.name}" class="ring-preset-btn w-9 h-9 rounded-full border-2 border-purple-500/30 hover:scale-110 transition-all" style="background:${bg}"></button>`;
-         }).join('');
-     }
-
-     function highlightRingPreset(idx) {
-         document.querySelectorAll('.ring-preset-btn').forEach((btn, i) => {
-             if (i === idx) {
-                 btn.classList.add('ring-2', 'ring-white', 'scale-110');
-             } else {
-                 btn.classList.remove('ring-2', 'ring-white', 'scale-110');
-             }
-         });
-     }
-
-     function applyRingToPreview(ring) {
-         const el = document.getElementById('ring-preview');
-         if (el) el.style.background = ringToCss(ring);
-     }
-
-     window.selectRingPreset = function(idx) {
-         const p = ringPresets[idx];
-         selectedRing = p.mode === 'solid' ? { mode: 'solid', color: p.color } : { mode: 'gradient', from: p.from, to: p.to };
-         highlightRingPreset(idx);
-         applyRingToPreview(selectedRing);
-     }
-
-     window.selectCustomSolid = function() {
-         const color = document.getElementById('ring-custom-solid').value;
-         selectedRing = { mode: 'solid', color };
-         highlightRingPreset(-1);
-         applyRingToPreview(selectedRing);
-     }
-
-     window.selectCustomGradient = function() {
-         const from = document.getElementById('ring-custom-from').value;
-         const to = document.getElementById('ring-custom-to').value;
-         selectedRing = { mode: 'gradient', from, to };
-         highlightRingPreset(-1);
-         applyRingToPreview(selectedRing);
-     }
-
-     function renderProfile(profile) {
-         const p = profile || defaultProfile;
-         document.getElementById('profile-photo').src = p.photo || defaultProfile.photo;
-         document.getElementById('profile-name').innerText = p.name || defaultProfile.name;
-         document.getElementById('profile-tagline').innerText = p.tagline || defaultProfile.tagline;
-         document.getElementById('profile-category').innerText = p.category || '';
-         document.getElementById('profile-bio').innerText = p.bio || '';
-         document.getElementById('profile-service').innerText = p.service || '';
-         document.getElementById('profile-address').innerText = p.address || '';
-         document.getElementById('profile-ring').style.background = ringToCss(p.ring);
-     }
-
-     function prefillProfileForm() {
-         const p = currentProfile || defaultProfile;
-         document.getElementById('profile-category-input').value = p.category || '';
-         document.getElementById('profile-bio-input').value = p.bio || '';
-         document.getElementById('profile-service-input').value = p.service || '';
-         document.getElementById('profile-address-input').value = p.address || '';
-         document.getElementById('profile-image-preview-container').classList.add('hidden');
-         document.getElementById('profile-image-status').innerText = 'Sin cambios';
-         profileBase64Image = null;
-         selectedRing = p.ring || defaultProfile.ring;
-         renderRingPresets();
-         const idx = findPresetIndex(selectedRing);
-         highlightRingPreset(idx);
-         applyRingToPreview(selectedRing);
-         if (selectedRing.mode === 'solid') {
-             document.getElementById('ring-custom-solid').value = selectedRing.color;
-         } else {
-             document.getElementById('ring-custom-from').value = selectedRing.from;
-             document.getElementById('ring-custom-to').value = selectedRing.to;
-         }
-     }
-
-     window.handleProfileImageInput = function(e) {
-         const file = e.target.files[0];
-         if (!file) return;
-         document.getElementById('profile-image-status').innerText = "Cargando imagen...";
-         const reader = new FileReader();
-         reader.onload = (ev) => {
-             const img = new Image();
-             img.onload = () => {
-                 const canvas = document.createElement('canvas');
-                 let w = img.width, h = img.height;
-                 const max = 600;
-                 if (w > h && w > max) { h *= max / w; w = max; }
-                 else if (h > max) { w *= max / h; h = max; }
-                 canvas.width = w; canvas.height = h;
-                 const ctx = canvas.getContext('2d');
-                 ctx.drawImage(img, 0, 0, w, h);
-                 profileBase64Image = canvas.toDataURL('image/jpeg', 0.85);
-                 document.getElementById('profile-image-preview').src = profileBase64Image;
-                 document.getElementById('profile-image-preview-container').classList.remove('hidden');
-                 document.getElementById('profile-image-status').innerText = "Imagen cargada ✨";
-             };
-             img.onerror = () => {
-                 document.getElementById('profile-image-status').innerText = "Error al leer la imagen ⚠️";
-             };
-             img.src = ev.target.result;
-         };
-         reader.onerror = () => {
-             document.getElementById('profile-image-status').innerText = "Error al leer el archivo ⚠️";
-         };
-         reader.readAsDataURL(file);
-     }
-
-     window.saveProfile = function() {
-         const category = document.getElementById('profile-category-input').value.trim();
-         const bio = document.getElementById('profile-bio-input').value.trim();
-         const service = document.getElementById('profile-service-input').value.trim();
-         const address = document.getElementById('profile-address-input').value.trim();
-         const updatedProfile = {
-             ...(currentProfile || defaultProfile),
-             category,
-             bio,
-             service,
-             address,
-             ring: selectedRing || (currentProfile && currentProfile.ring) || defaultProfile.ring
-         };
-         if (profileBase64Image) updatedProfile.photo = profileBase64Image;
-
-         const btn = document.getElementById('save-profile-btn');
-         btn.disabled = true;
-         btn.innerText = 'Guardando...';
-         console.log('Iniciando guardado de perfil...');
-
-         withTimeout(
-             set(ref(db, 'valen_profile'), updatedProfile),
-             12000,
-             'La conexión con Firebase tardó demasiado (más de 12s). Revisa tu internet o un posible bloqueador (Brave Shields, adblock).'
-         ).then(() => {
-             console.log('Perfil guardado con éxito ✅');
-             profileBase64Image = null;
-             document.getElementById('profile-image-status').innerText = 'Sin cambios';
-             document.getElementById('profile-image-preview-container').classList.add('hidden');
-             showToast('✅ Perfil actualizado con éxito');
-         }).catch((error) => {
-             console.error('Error al guardar perfil:', error.code || '', error.message);
-             alert('🚨 Error al guardar el perfil: ' + error.message);
-         }).finally(() => {
-             btn.disabled = false;
-             btn.innerText = 'Guardar Perfil 💾';
-         });
-     }
-
-     onValue(ref(db, 'valen_profile'), (snapshot) => {
-         const data = snapshot.val();
-         currentProfile = data || defaultProfile;
-         renderProfile(currentProfile);
-     }, (error) => {
-         console.error('Firebase Profile Read Error:', error);
-         renderProfile(defaultProfile);
-     });
+     function renderProfile(p) { p=p||defaultProfile; document.getElementById('profile-photo').src=p.photo; document.getElementById('profile-name').innerText=p.name; document.getElementById('profile-tagline').innerText=p.tagline; document.getElementById('profile-category').innerText=p.category; document.getElementById('profile-bio').innerText=p.bio; document.getElementById('profile-service').innerText=p.service; document.getElementById('profile-address').innerText=p.address; document.getElementById('profile-ring').style.background=ringToCss(p.ring); }
+     function prefillProfileForm() { const p=currentProfile||defaultProfile; document.getElementById('profile-category-input').value=p.category; document.getElementById('profile-bio-input').value=p.bio; document.getElementById('profile-service-input').value=p.service; document.getElementById('profile-address-input').value=p.address; selectedRing=p.ring; renderRingPresets(); document.getElementById('ring-preview').style.background=ringToCss(selectedRing); }
+     
+     window.handleProfileImageInput = (e) => { const f=e.target.files[0]; if(!f)return; resizeImg(f,600,0.85).then(b64=>{ profileBase64Image=b64; document.getElementById('profile-image-preview').src=b64; document.getElementById('profile-image-preview-container').classList.remove('hidden'); document.getElementById('profile-image-status').innerText="Cargada ✨"; }); };
+     window.saveProfile = () => { const up={...(currentProfile||defaultProfile), category:document.getElementById('profile-category-input').value, bio:document.getElementById('profile-bio-input').value, service:document.getElementById('profile-service-input').value, address:document.getElementById('profile-address-input').value, ring:selectedRing}; if(profileBase64Image)up.photo=profileBase64Image; withTimeout(set(ref(db,'valen_profile'),up),12000,'Timeout').then(()=>showToast('✅ Perfil guardado')).catch(e=>alert('Error: '+e.message)); };
+     onValue(ref(db, 'valen_profile'), (s) => { currentProfile=s.val()||defaultProfile; renderProfile(currentProfile); });
 
      function renderCategories() {
-         const nav = document.getElementById('category-filters');
-         nav.innerHTML = categories.map(cat => {
-             const active = selectedCategory === cat.id;
-             const activeClasses = 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-pink-400 shadow-[0_4px_0_#581c87,0_8px_18px_rgba(236,72,153,0.45)] active:translate-y-1 active:shadow-[0_1px_0_#581c87]';
-             // Usamos la clase btn-cat-inactive definida en style.css para que se adapte al modo claro/oscuro
-             const inactiveClasses = 'btn-cat-inactive border hover:opacity-90 active:translate-y-1 active:shadow-[0_1px_0_#e9d5ff] dark:active:shadow-[0_1px_0_#2e1065]';
-             return `
-             <button onclick="setCategory('${cat.id}')" class="px-4 py-2.5 rounded-full text-xs font-bold border transition-all duration-150 whitespace-nowrap ${active ? activeClasses : inactiveClasses}">
-                 ${cat.name}
-             </button>
-         `;
+         document.getElementById('category-filters').innerHTML = categories.map(c => {
+             const act = selectedCategory===c.id;
+             return `<button onclick="setCategory('${c.id}')" class="px-4 py-2.5 rounded-full text-xs font-bold border transition-all whitespace-nowrap ${act ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'btn-cat-inactive'}">${c.name}</button>`;
          }).join('');
      }
-
-     window.setCategory = function(catId) {
-         selectedCategory = catId;
-         renderCategories();
-         renderProducts();
-     }
-
-     function getGreeting() {
-         const hour = new Date().getHours();
-         if (hour >= 5 && hour < 12) return 'buenos días';
-         if (hour >= 12 && hour < 19) return 'buenas tardes';
-         return 'buenas noches';
-     }
+     window.setCategory = (id) => { selectedCategory=id; renderCategories(); renderProducts(); };
 
      function renderProducts() {
-         const container = document.getElementById('products-container');
-         const filtered = selectedCategory === 'all'
-             ? allProducts
-             : allProducts.filter(p => p.category === selectedCategory);
-
-         if (filtered.length === 0) {
-             container.innerHTML = `
-                 <div class="col-span-full py-16 text-center text-desc space-y-2">
-                     <p class="text-3xl">🛍️</p>
-                     <p class="text-sm">No hay productos disponibles en esta categoría todavía.</p>
-                     <p class="text-[11px] text-purple-500">Si eres admin, entra con ?admin=1 para publicar.</p>
-                 </div>
-             `;
-             return;
-         }
-
-         container.innerHTML = filtered.map(p => {
-             const catObj = categories.find(c => c.id === p.category);
-             const catName = catObj ? catObj.name : p.category;
-             const phone = "573229247605";
-             const text = encodeURIComponent(`¡Hola Valen, ${getGreeting()}! 🤍🖤 Me interesa saber más acerca de este producto de tu catálogo: *${p.title}* (${p.price}). ¿Aún lo tienes disponible? De antemano, ¡muchas gracias! 😊`);
-             const waLink = `https://wa.me/${phone}?text=${text}`;
-
+         const c=document.getElementById('products-container');
+         const f=selectedCategory==='all'?allProducts:allProducts.filter(p=>p.category===selectedCategory);
+         if(!f.length) { c.innerHTML='<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">🛍️</p><p>Sin productos.</p></div>'; return; }
+         c.innerHTML = f.map(p => {
+             const cat = categories.find(x=>x.id===p.category)?.name || p.category;
+             const wa = `https://wa.me/573229247605?text=${encodeURIComponent(`¡Hola Valen! Me interesa: *${p.title}* (${p.price})`)}`;
              return `
-                 <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between group transition-all hover:shadow-2xl">
-                     <div>
-                         <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}', '${(p.title || '').replace(/'/g, "\\'")}')">
-                             <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                             <span class="absolute top-3 right-3 bg-white/80 dark:bg-black/70 backdrop-blur-md text-purple-700 dark:text-purple-300 text-[10px] font-bold px-3 py-1 rounded-full border border-purple-500/30">
-                                 ${catName}
-                             </span>
-                         </div>
-                         <div class="p-5 space-y-2">
-                             <div class="flex items-start justify-between gap-2">
-                                 <h3 class="text-lg font-bold text-title leading-snug">${p.title}</h3>
-                                 <span class="text-price font-extrabold text-base whitespace-nowrap">${p.price}</span>
-                             </div>
-                             <p class="text-xs text-desc leading-relaxed whitespace-pre-line">${p.description || ''}</p>
-                         </div>
-                     </div>
-                     <div class="p-5 pt-0">
-                         <a href="${waLink}" target="_blank" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs py-3 px-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
-                             <span>Pedir por WhatsApp 📱</span>
-                         </a>
-                     </div>
+             <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col group">
+                 <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${p.title}')">
+                     <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                     <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full">${cat}</span>
                  </div>
-             `;
+                 <div class="p-4 space-y-1 flex-1">
+                     <div class="flex justify-between"><h3 class="text-sm font-bold text-title">${p.title}</h3><span class="text-price font-extrabold text-sm">${p.price}</span></div>
+                     <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
+                 </div>
+                 <div class="p-4 pt-0"><a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a></div>
+             </div>`;
          }).join('');
      }
 
      function renderAdminList() {
-         const list = document.getElementById('admin-products-list');
-         if (!list) return;
-         if (allProducts.length === 0) {
-             list.innerHTML = '<div class="text-center py-6 text-slate-500 text-xs">No hay productos registrados aún.</div>';
-             return;
-         }
-         list.innerHTML = allProducts.map(p => `
-             <div class="flex items-center justify-between bg-gray-50 dark:bg-[#0d0310]/90 p-3 rounded-2xl border border-purple-500/30">
-                 <div class="flex items-center gap-3 overflow-hidden">
-                     <img src="${p.image}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-purple-500/40">
-                     <div class="truncate">
-                         <p class="text-xs font-bold text-title truncate">${p.title}</p>
-                         <p class="text-[10px] text-pink-500 dark:text-pink-400 font-semibold">${p.price}</p>
-                     </div>
-                 </div>
-                 <button onclick="deleteProduct('${p.firebaseId}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] px-3.5 py-2 rounded-xl transition-all">
-                     🗑️ Borrar
-                 </button>
-             </div>
-         `).join('');
+         const l=document.getElementById('admin-products-list'); if(!l)return;
+         l.innerHTML = allProducts.length ? allProducts.map(p=>`
+             <div class="flex items-center justify-between bg-gray-50 dark:bg-[#0d0310] p-2 rounded-xl border border-purple-500/20">
+                 <div class="flex items-center gap-2 overflow-hidden"><img src="${p.image}" class="w-8 h-8 rounded-lg object-cover"><p class="text-xs font-bold text-title truncate">${p.title}</p></div>
+                 <button onclick="deleteProduct('${p.firebaseId}')" class="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-lg">🗑️</button>
+             </div>`).join('') : '<p class="text-center text-slate-500 text-xs py-4">Sin productos.</p>';
      }
 
-     onValue(ref(db, 'valen_products'), (snapshot) => {
-         const data = snapshot.val();
-         if (data) {
-             allProducts = Object.keys(data).map(key => ({
-                 firebaseId: key,
-                 ...data[key]
-             })).reverse();
-         } else {
-             allProducts = [];
-         }
-         console.log('Productos recibidos desde Firebase:', allProducts.length);
-         renderCategories();
-         renderProducts();
-         renderAdminList();
-         updateDebugStatus();
-     }, (error) => {
-         console.error("Firebase Read Error:", error.code || '', error.message);
-         document.getElementById('products-container').innerHTML = `
-             <div class="col-span-full py-12 px-6 bg-rose-100 dark:bg-rose-950/80 border-2 border-rose-500 rounded-3xl text-center space-y-3">
-                 <p class="text-3xl">⚠️</p>
-                 <p class="text-base font-bold text-rose-700 dark:text-rose-200">Error de conexión o permisos en Firebase</p>
-                 <p class="text-xs text-slate-600 dark:text-slate-300 font-mono bg-white/50 dark:bg-black/40 p-3 rounded-xl overflow-x-auto">${error.message}</p>
-                 <p class="text-xs text-purple-600 dark:text-purple-300 pt-2">Asegúrate de que la <strong>Realtime Database</strong> esté creada en tu consola de Firebase y las reglas permitan lectura/escritura.</p>
-             </div>
-         `;
-     });
+     onValue(ref(db, 'valen_products'), (s) => { const d=s.val(); allProducts=d?Object.keys(d).map(k=>({firebaseId:k,...d[k]})).reverse():[]; renderCategories(); renderProducts(); renderAdminList(); updateDebugStatus(); });
 
-     function updateAdminUI() {
-         const loginSection = document.getElementById('admin-login-section');
-         const contentSection = document.getElementById('admin-content-section');
-         if (!loginSection || !contentSection) return;
-         if (isLoggedIn) {
-             loginSection.classList.add('hidden');
-             contentSection.classList.remove('hidden');
-             prefillProfileForm();
-         } else {
-             loginSection.classList.remove('hidden');
-             contentSection.classList.add('hidden');
-         }
-     }
+     onAuthStateChanged(auth, (u) => { isLoggedIn=!!u; document.getElementById('debug-btn').classList.toggle('hidden',!isLoggedIn); const ls=document.getElementById('admin-login-section'), cs=document.getElementById('admin-content-section'); if(isLoggedIn){ls.classList.add('hidden'); cs.classList.remove('hidden'); prefillProfileForm();}else{ls.classList.remove('hidden'); cs.classList.add('hidden');} updateDebugStatus(); });
+     
+     window.adminLogin = () => { const e=document.getElementById('admin-email').value, p=document.getElementById('admin-password').value; signInWithEmailAndPassword(auth,e,p).catch(()=>alert('Credenciales incorrectas')); };
+     window.adminLogout = () => signOut(auth);
+     window.toggleAdminModal = (s) => { const m=document.getElementById('admin-modal'); s?(m.classList.remove('hidden'),m.classList.add('flex')):(m.classList.remove('flex'),m.classList.add('hidden')); };
 
-     onAuthStateChanged(auth, (user) => {
-         isLoggedIn = !!user;
-         console.log('Estado de sesión:', isLoggedIn ? ('activa (' + user.email + ')') : 'sin sesión');
-         const debugBtn = document.getElementById('debug-btn');
-         if (debugBtn) debugBtn.classList.toggle('hidden', !isLoggedIn);
-         updateAdminUI();
-         updateDebugStatus();
-     });
+     window.handleImageInput = (e) => { const f=e.target.files[0]; if(!f)return; resizeImg(f,1000,0.8).then(b64=>{ base64Image=b64; document.getElementById('image-preview').src=b64; document.getElementById('image-preview-container').classList.remove('hidden'); document.getElementById('image-status').innerText="Cargada ✨"; }); };
+     window.publishProduct = () => { const t=document.getElementById('new-title').value, p=document.getElementById('new-price').value, c=document.getElementById('new-category').value, d=document.getElementById('new-description').value; if(!t||!p||!base64Image) return alert('Faltan datos'); withTimeout(push(ref(db,'valen_products'),{title:t,price:p,category:c,description:d,image:base64Image,createdAt:Date.now()}),12000,'Timeout').then(()=>{showToast('✅ Publicado'); document.getElementById('new-title').value=''; document.getElementById('new-price').value=''; base64Image=null; document.getElementById('image-preview-container').classList.add('hidden');}).catch(e=>alert('Error: '+e.message)); };
+     window.deleteProduct = (id) => { if(confirm('¿Borrar?')) remove(ref(db,'valen_products/'+id)); };
 
-     window.adminLogin = function() {
-         const email = document.getElementById('admin-email').value.trim();
-         const password = document.getElementById('admin-password').value;
-         const errorEl = document.getElementById('admin-login-error');
-         errorEl.classList.add('hidden');
-         if (!email || !password) {
-             errorEl.innerText = '⚠️ Escribe tu correo y contraseña.';
-             errorEl.classList.remove('hidden');
-             return;
-         }
-         const btn = document.getElementById('admin-login-btn');
-         btn.disabled = true;
-         btn.innerText = 'Ingresando...';
-         signInWithEmailAndPassword(auth, email, password).then(() => {
-             btn.disabled = false;
-             btn.innerText = 'Ingresar 🔑';
-             document.getElementById('admin-password').value = '';
-         }).catch((error) => {
-             console.error('Login error:', error);
-             errorEl.innerText = '🚨 Correo o contraseña incorrectos.';
-             errorEl.classList.remove('hidden');
-             btn.disabled = false;
-             btn.innerText = 'Ingresar 🔑';
-         });
-     }
+     window.openLightbox = (u,t) => { document.getElementById('lightbox-img').src=u; document.getElementById('lightbox-title').innerText=t; document.getElementById('lightbox').classList.replace('hidden','flex'); };
+     window.closeLightbox = () => document.getElementById('lightbox').classList.replace('flex','hidden');
 
-     window.adminLogout = function() {
-         signOut(auth).then(() => {
-             toggleAdminModal(false);
-         });
-     }
-
-     window.toggleAdminModal = function(show) {
-         const modal = document.getElementById('admin-modal');
-         if (show) {
-             modal.classList.remove('hidden');
-             modal.classList.add('flex');
-             updateAdminUI();
-         } else {
-             modal.classList.remove('flex');
-             modal.classList.add('hidden');
-         }
-     }
-
-     window.handleImageInput = function(e) {
-         const file = e.target.files[0];
-         if (!file) return;
-         document.getElementById('image-status').innerText = "Cargando imagen...";
-         const reader = new FileReader();
-         reader.onload = (ev) => {
-             const img = new Image();
-             img.onload = () => {
-                 const canvas = document.createElement('canvas');
-                 let w = img.width, h = img.height;
-                 const max = 1000;
-                 if (w > h && w > max) { h *= max / w; w = max; }
-                 else if (h > max) { w *= max / h; h = max; }
-                 canvas.width = w; canvas.height = h;
-                 const ctx = canvas.getContext('2d');
-                 ctx.drawImage(img, 0, 0, w, h);
-                 base64Image = canvas.toDataURL('image/jpeg', 0.8);
-                 document.getElementById('image-preview').src = base64Image;
-                 document.getElementById('image-preview-container').classList.remove('hidden');
-                 document.getElementById('image-status').innerText = "Imagen cargada ✨";
-             };
-             img.onerror = () => {
-                 document.getElementById('image-status').innerText = "Error al leer la imagen ⚠️";
-             };
-             img.src = ev.target.result;
-         };
-         reader.onerror = () => {
-             document.getElementById('image-status').innerText = "Error al leer el archivo ⚠️";
-         };
-         reader.readAsDataURL(file);
-     }
-
-     window.publishProduct = function() {
-         const title = document.getElementById('new-title').value.trim();
-         const price = document.getElementById('new-price').value.trim();
-         const category = document.getElementById('new-category').value;
-         const description = document.getElementById('new-description').value.trim();
-         if (!title || !price) {
-             alert('⚠️ El nombre y el precio son obligatorios.');
-             return;
-         }
-         if (!base64Image) {
-             alert('⚠️ Selecciona una fotografía del producto.');
-             return;
-         }
-         const btn = document.getElementById('publish-btn');
-         btn.disabled = true;
-         btn.innerText = 'Publicando...';
-         console.log('Iniciando publicación de producto:', title);
-
-         withTimeout(
-             push(ref(db, 'valen_products'), {
-                 title,
-                 price,
-                 category,
-                 description,
-                 image: base64Image,
-                 createdAt: Date.now()
-             }),
-             12000,
-             'La conexión con Firebase tardó demasiado (más de 12s). Revisa tu internet o un posible bloqueador (Brave Shields, adblock).'
-         ).then(() => {
-             console.log('Producto publicado con éxito ✅:', title);
-             document.getElementById('new-title').value = '';
-             document.getElementById('new-price').value = '';
-             document.getElementById('new-description').value = '';
-             document.getElementById('image-preview-container').classList.add('hidden');
-             document.getElementById('image-status').innerText = 'Ningún archivo';
-             document.getElementById('new-image-file').value = '';
-             base64Image = null;
-             showToast('✅ Producto publicado con éxito');
-         }).catch((error) => {
-             console.error('Error al publicar:', error.code || '', error.message);
-             alert('🚨 Error al publicar: ' + error.message);
-         }).finally(() => {
-             btn.disabled = false;
-             btn.innerText = 'Publicar Producto ✨';
-         });
-     }
-
-     window.deleteProduct = function(firebaseId) {
-         if (!confirm('¿Seguro que deseas eliminar este producto? Esta acción no se puede deshacer.')) return;
-         remove(ref(db, 'valen_products/' + firebaseId)).catch((error) => {
-             console.error('Error al eliminar:', error);
-             alert('🚨 Error al eliminar: ' + error.message);
-         });
-     }
-
-     window.openLightbox = function(imageUrl, title) {
-         document.getElementById('lightbox-img').src = imageUrl;
-         document.getElementById('lightbox-title').innerText = title || '';
-         const lightbox = document.getElementById('lightbox');
-         lightbox.classList.remove('hidden');
-         lightbox.classList.add('flex');
-     }
-
-     window.closeLightbox = function() {
-         const lightbox = document.getElementById('lightbox');
-         lightbox.classList.remove('flex');
-         lightbox.classList.add('hidden');
-     }
-
-     // ============ INICIALIZADOR DE TEMA (FASE 1) ============
-     (function initTheme() {
-         const savedTheme = localStorage.getItem('valen_theme');
-         if (savedTheme === 'dark') {
-             document.body.classList.add('dark-mode');
-         } else {
-             // Por defecto es claro, eliminamos la clase init del html
-             document.documentElement.classList.remove('dark-mode-init');
-         }
-     })();
+     (function(){ if(localStorage.getItem('valen_theme')==='dark') document.body.classList.add('dark-mode'); })();
