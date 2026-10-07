@@ -2,305 +2,241 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Valen Fashion | Catálogo Oficial 🤍</title>
-    <!-- Tailwind CSS -->
+    
+    <!-- Script anti-parpadeo: Carga el modo guardado o por defecto Claro -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('valen_theme');
+            // Por defecto es 'light' si no hay nada guardado
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark-mode-init');
+            }
+        })();
+    </script>
+    <style>
+        html.dark-mode-init body { background-color: #0a020a; color: #f3f4f6; }
+        html.dark-mode-init body::before { opacity: 0; }
+    </style>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80">
 </head>
-<body class="text-slate-100 min-h-screen relative font-sans selection:bg-purple-500 selection:text-white bg-[#0f0512]">
+<body class="font-sans antialiased theme-transition">
 
-    <div class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 mx-auto max-w-7xl relative z-10">
-
-        <!-- BANNER PROMOCIONAL (carrusel) -->
-        <div id="banner-carousel" class="hidden w-full h-56 sm:h-72 rounded-3xl overflow-hidden relative mb-6 shadow-2xl border border-purple-500/30 bg-[#1b0c1b]">
-        </div>
-
-        <!-- HEADER / PORTADA -->
-        <header class="w-full bg-[#1b0c1b]/90 backdrop-blur-md border border-purple-500/30 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden mb-6">
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-pink-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="flex flex-col items-center space-y-3 relative z-10">
-                <div id="profile-ring" class="w-24 h-24 rounded-full p-1 shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all" style="background:#a855f7">
-                    <div class="w-full h-full rounded-full overflow-hidden bg-black">
-                        <img id="profile-photo" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
-                    </div>
-                </div>
-                <div>
-                    <h1 id="profile-name" class="text-3xl sm:text-4xl font-extrabold tracking-wide text-white">Valen Fashion</h1>
-                    <p id="profile-tagline" class="text-xs sm:text-sm text-purple-300 font-medium tracking-widest uppercase mt-1">✨ Mereces lo que sueñas 🤍</p>
-                </div>
-
-                <!-- BIO ESTILO INSTAGRAM -->
-                <div class="max-w-md mx-auto text-center space-y-1.5 px-3">
-                    <p id="profile-category" class="text-xs font-bold text-pink-300 uppercase tracking-wide"></p>
-                    <p id="profile-bio" class="text-sm text-slate-200 whitespace-pre-line leading-relaxed"></p>
-                    <p id="profile-service" class="text-xs text-purple-300"></p>
-                    <p id="profile-address" class="text-xs text-slate-400"></p>
-                </div>
-
-                <div class="flex items-center gap-3 pt-2 flex-wrap justify-center">
-                    <a href="https://wa.me/573229247605" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all flex items-center gap-1.5">
-                        <span>💬 WhatsApp Directo</span>
-                    </a>
-                    <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all flex items-center gap-1.5">
-                        <span>📸 Instagram</span>
-                    </a>
-                    <button id="btn-admin" onclick="toggleAdminModal(true)" class="hidden bg-[#120814] hover:bg-purple-950 text-purple-300 border border-purple-500/40 text-xs px-3 py-2 rounded-full transition-all" title="Panel de Administración">
-                        ⚙️ Admin
-                    </button>
-                </div>
+    <!-- Contenedor principal -->
+    <div class="max-w-6xl mx-auto px-4 py-8 pb-24">
+        
+        <!-- Header / Perfil -->
+        <header class="flex flex-col items-center text-center space-y-4 mb-8">
+            <div class="relative">
+                <div id="profile-ring" class="absolute -inset-1 rounded-full blur-sm opacity-75" style="background: #a855f7;"></div>
+                <img id="profile-photo" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" alt="Perfil" class="relative w-28 h-28 rounded-full object-cover border-4 border-white dark:border-[#0a020a] shadow-xl">
             </div>
+            <div>
+                <h1 id="profile-name" class="text-2xl font-extrabold text-title tracking-tight">Valen Fashion</h1>
+                <p id="profile-tagline" class="text-sm text-desc font-medium mt-1">✨ Mereces lo que sueñas 🤍</p>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-3 mt-2">
+                <a href="https://wa.me/573229247605" target="_blank" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95">
+                    <span>💬 WhatsApp Directo</span>
+                </a>
+                <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95">
+                    <span>📸 Instagram</span>
+                </a>
+                <!-- Botón QR (Se activará en Fase 3) -->
+                <button id="btn-qr-share" class="hidden items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95">
+                    <span>🔳 Código QR</span>
+                </button>
+            </div>
+
+            <div class="w-full max-w-md space-y-2 text-xs text-desc bg-white/60 dark:bg-[#1b0c1b]/60 backdrop-blur-md p-4 rounded-2xl border border-purple-500/20 mt-2">
+                <p id="profile-category" class="font-bold text-title">🛍️ Compras y ventas minoristas</p>
+                <p id="profile-bio" class="whitespace-pre-line">Tenemos cosas hermosas y exclusivas para ti 💥<br>para todos los gustos ♂️♀️</p>
+                <p id="profile-service" class="font-semibold text-purple-600 dark:text-purple-400">🚚 Contamos con servicio de domicilio en Manizales 💎</p>
+            </div>
+
+            <!-- Botón Admin (Solo visible con ?admin=1) -->
+            <button id="btn-admin" onclick="toggleAdminModal(true)" class="hidden mt-4 bg-[#1b0c1b] hover:bg-purple-950 text-purple-300 text-xs font-bold py-2 px-6 rounded-full border border-purple-500/30 transition-all active:scale-95 shadow-lg">
+                ⚙️ Admin
+            </button>
         </header>
 
-        <!-- FILTROS DE CATEGORÍAS -->
-        <nav id="category-filters" class="w-full flex items-center justify-center gap-3 overflow-x-auto pb-4 mb-4 scrollbar-none">
-            <!-- Renderizado dinámico -->
+        <!-- Banner Promocional -->
+        <div id="banner-carousel" class="hidden relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 border border-purple-500/20 bg-black">
+            <!-- Slides inyectados por JS -->
+        </div>
+
+        <!-- Filtros de Categoría -->
+        <nav id="category-filters" class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+            <!-- Botones inyectados por JS -->
         </nav>
 
-        <!-- CATÁLOGO DE PRODUCTOS -->
-        <main id="products-container" class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <div class="col-span-full py-16 text-center text-slate-400 space-y-2">
-                <p class="text-3xl animate-pulse">⏳</p>
-                <p class="text-sm">Iniciando sistema y conectando...</p>
+        <!-- Grid de Productos -->
+        <main id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="col-span-full py-16 text-center text-desc space-y-3">
+                <p class="text-4xl animate-pulse">⏳</p>
+                <p class="text-sm font-medium">Iniciando sistema y conectando...</p>
             </div>
         </main>
 
-        <!-- FOOTER -->
-        <footer class="w-full text-center py-6 border-t border-purple-950 text-xs text-slate-500 space-y-1">
-            <p>Valen Fashion Manizales • Todos los derechos reservados 🤍</p>
-            <p>Cra 38 #66-20, Manizales, Caldas</p>
+        <!-- Footer -->
+        <footer class="mt-16 pt-8 border-t border-purple-500/20 text-center space-y-2">
+            <p class="text-xs font-bold text-title">Valen Fashion Manizales • Todos los derechos reservados 🤍</p>
+            <p id="profile-address" class="text-[11px] text-desc">📍 Cra 38 #66-20, Manizales, Caldas</p>
         </footer>
-
-        <!-- MODAL DE ADMINISTRACIÓN -->
-        <div id="admin-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
-            <div id="admin-modal-box" class="bg-gradient-to-b from-[#1f0a24] to-[#120516] border-2 border-purple-500/50 p-6 sm:p-8 rounded-[2.5rem] shadow-[0_0_50px_rgba(168,85,247,0.35)] w-full max-w-lg space-y-6 max-h-[90vh] overflow-y-auto relative">
-
-                <div class="flex justify-between items-center border-b border-purple-500/20 pb-4 relative z-10">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white text-lg">⚙️</div>
-                        <div>
-                            <h3 class="text-xl font-black text-white">Panel de Control</h3>
-                            <p class="text-[10px] text-pink-400 font-semibold uppercase">Gestión de Valen Fashion</p>
-                        </div>
-                    </div>
-                    <button onclick="toggleAdminModal(false)" class="w-9 h-9 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/30 flex items-center justify-center">✕</button>
-                </div>
-
-                <!-- ================= LOGIN ADMIN ================= -->
-                <div id="admin-login-section" class="space-y-4 relative z-10">
-                    <div class="text-center space-y-1 py-2">
-                        <p class="text-3xl">🔒</p>
-                        <p class="text-sm font-bold text-white">Acceso restringido</p>
-                        <p class="text-[11px] text-slate-400">Inicia sesión para gestionar Valen Fashion</p>
-                    </div>
-                    <div class="space-y-3">
-                        <input type="email" id="admin-email" placeholder="Correo..." autocomplete="username" class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <input type="password" id="admin-password" placeholder="Contraseña..." autocomplete="current-password" class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                    </div>
-                    <p id="admin-login-error" class="hidden text-[11px] text-rose-400 font-semibold text-center bg-rose-950/40 border border-rose-500/30 rounded-xl py-2 px-3"></p>
-                    <button id="admin-login-btn" onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white font-black text-xs py-4 px-6 rounded-2xl shadow-[0_6px_0_#581c87,0_10px_25px_rgba(236,72,153,0.4)] active:translate-y-1.5 active:shadow-[0_2px_0_#581c87] transition-all uppercase disabled:opacity-50">
-                        Ingresar 🔑
-                    </button>
-                </div>
-
-                <!-- ================= CONTENIDO ADMIN (solo autenticado) ================= -->
-                <div id="admin-content-section" class="hidden space-y-6">
-
-                <div class="flex justify-end relative z-10 -mt-2">
-                    <button onclick="adminLogout()" class="text-[11px] text-slate-400 hover:text-rose-400 flex items-center gap-1 transition-all">
-                        <span>🚪 Cerrar sesión</span>
-                    </button>
-                </div>
-
-                <!-- ================= BANNER PROMOCIONAL ================= -->
-                <div class="space-y-4 relative z-10">
-                    <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">🖼️ Banner Promocional</h4>
-                    <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
-                        <label class="text-[11px] font-bold text-purple-300">Sube una o varias imágenes (promos, avisos, descuentos)</label>
-                        <div class="flex items-center gap-3">
-                            <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl">
-                                <span>Seleccionar imágenes</span>
-                                <input type="file" accept="image/*" multiple id="banner-image-file" onchange="handleBannerImagesInput(event)" class="hidden">
-                            </label>
-                            <span id="banner-image-status" class="text-[11px] text-slate-400 truncate flex-1">Ninguna imagen</span>
-                        </div>
-                        <p class="text-[10px] text-slate-500">Se suben automáticamente al elegirlas. Con 2 o más, rotan solas cada pocos segundos en la página.</p>
-                        <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-1"></div>
-                    </div>
-                </div>
-
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                </div>
-
-                <!-- ================= EDITAR PERFIL ================= -->
-                <div class="space-y-4 relative z-10">
-                    <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">✏️ Editar Perfil</h4>
-
-                    <!-- Foto de perfil -->
-                    <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
-                        <label class="text-[11px] font-bold text-purple-300">🖼️ Foto de Perfil</label>
-                        <div class="flex items-center gap-3">
-                            <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl">
-                                <span>Cambiar foto</span>
-                                <input type="file" accept="image/*" id="profile-image-file" onchange="handleProfileImageInput(event)" class="hidden">
-                            </label>
-                            <span id="profile-image-status" class="text-[11px] text-slate-400 truncate flex-1">Sin cambios</span>
-                        </div>
-                        <div id="profile-image-preview-container" class="hidden relative h-24 w-24 mx-auto rounded-full overflow-hidden border border-pink-500/50 bg-black mt-2">
-                            <img id="profile-image-preview" class="w-full h-full object-cover">
-                        </div>
-                    </div>
-
-                    <!-- Color del anillo -->
-                    <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
-                        <label class="text-[11px] font-bold text-purple-300">🎨 Color del Anillo</label>
-                        <div id="ring-presets" class="grid grid-cols-6 gap-2"></div>
-                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-purple-500/10">
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] text-slate-400">Sólido</span>
-                                <input type="color" id="ring-custom-solid" oninput="selectCustomSolid()" value="#a855f7" class="w-8 h-8 rounded-full cursor-pointer">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] text-slate-400">Degradado</span>
-                                <input type="color" id="ring-custom-from" oninput="selectCustomGradient()" value="#a855f7" class="w-8 h-8 rounded-full cursor-pointer">
-                                <span class="text-slate-500 text-xs">→</span>
-                                <input type="color" id="ring-custom-to" oninput="selectCustomGradient()" value="#000000" class="w-8 h-8 rounded-full cursor-pointer">
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-[10px] text-slate-400">Vista:</span>
-                                <div id="ring-preview" class="w-9 h-9 rounded-full border border-purple-500/40"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Textos tipo Instagram -->
-                    <div class="space-y-3">
-                        <input type="text" id="profile-category-input" placeholder="Categoría (Ej: 🛍️ Compras y ventas minoristas)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <textarea id="profile-bio-input" rows="3" placeholder="Descripción / bio..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl p-4 text-xs text-white outline-none resize-none"></textarea>
-                        <input type="text" id="profile-service-input" placeholder="Info de servicio (Ej: 🚚 Domicilios en Manizales)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <input type="text" id="profile-address-input" placeholder="Dirección (Ej: 📍 Cra 38 #66-20)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                    </div>
-
-                    <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white font-black text-xs py-4 px-6 rounded-2xl shadow-[0_6px_0_#581c87,0_10px_25px_rgba(236,72,153,0.4)] active:translate-y-1.5 active:shadow-[0_2px_0_#581c87] transition-all uppercase disabled:opacity-50">
-                        Guardar Perfil 💾
-                    </button>
-                </div>
-
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                    <span class="flex-shrink mx-4 text-purple-400 text-[10px] uppercase font-bold">Productos</span>
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                </div>
-
-                <!-- ================= NUEVO PRODUCTO ================= -->
-                <div class="space-y-4 relative z-10">
-                    <h4 class="text-xs font-black tracking-wider text-pink-300 uppercase">Añadir Nuevo Producto</h4>
-
-                    <div class="space-y-3">
-                        <input type="text" id="new-title" placeholder="Nombre del producto..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <input type="text" id="new-price" inputmode="numeric" oninput="formatPriceInput(this)" placeholder="Precio (solo el número, ej: 45000)..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                        <select id="new-category" class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl px-4 py-3.5 text-xs text-white outline-none">
-                            <option value="hogar">🏠 Hogar</option>
-                            <option value="ninos">🧸 Niños</option>
-                            <option value="ropa">👗 Ropa / Cuerpo</option>
-                            <option value="tendidos">🛏️ Tendidos</option>
-                        </select>
-                        <textarea id="new-description" rows="3" placeholder="Descripción..." class="w-full bg-[#0d0310]/90 border border-purple-500/40 rounded-2xl p-4 text-xs text-white outline-none resize-none"></textarea>
-
-                        <div class="bg-[#0d0310]/80 border border-purple-500/30 rounded-2xl p-4 space-y-3">
-                            <label class="text-[11px] font-bold text-purple-300">📸 Fotografía del Producto</label>
-                            <div class="flex items-center gap-3">
-                                <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl">
-                                    <span>Seleccionar archivo</span>
-                                    <input type="file" accept="image/*" id="new-image-file" onchange="handleImageInput(event)" class="hidden">
-                                </label>
-                                <span id="image-status" class="text-[11px] text-slate-400 truncate flex-1">Ningún archivo</span>
-                            </div>
-                            <div id="image-preview-container" class="hidden relative h-36 rounded-xl overflow-hidden border border-pink-500/50 bg-black mt-2">
-                                <img id="image-preview" class="w-full h-full object-contain">
-                            </div>
-                        </div>
-
-                        <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-xs py-4 px-6 rounded-2xl shadow-lg uppercase disabled:opacity-50">
-                            Publicar Producto ✨
-                        </button>
-                    </div>
-                </div>
-
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                    <span class="flex-shrink mx-4 text-purple-400 text-[10px] uppercase font-bold">Eliminar</span>
-                    <div class="flex-grow border-t border-purple-500/20"></div>
-                </div>
-
-                <!-- ELIMINAR PRODUCTOS -->
-                <div class="space-y-3 relative z-10 pb-2">
-                    <div id="admin-products-list" class="max-h-48 overflow-y-auto space-y-2.5 pr-1">
-                        <!-- Renderizado dinámico -->
-                    </div>
-                </div>
-
-                </div>
-                <!-- fin admin-content-section -->
-
-            </div>
-        </div>
-
-        <!-- MENSAJE DE CONFIRMACIÓN (TOAST) -->
-        <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-2xl transition-opacity duration-300" style="opacity:0"></div>
-
-        <!-- BOTÓN FLOTANTE DE DIAGNÓSTICO (solo admin con sesión activa) -->
-        <button id="debug-btn" onclick="toggleDebugPanel(true)" class="hidden fixed bottom-5 right-5 z-[150] w-12 h-12 rounded-full bg-[#1b0c1b] border-2 border-purple-500/50 text-xl shadow-2xl flex items-center justify-center active:scale-90 transition-all" title="Panel de diagnóstico">
-            🐞
-        </button>
-
-        <!-- PANEL DE DIAGNÓSTICO -->
-        <div id="debug-panel" class="hidden fixed inset-0 z-[250] bg-black/90 backdrop-blur-md items-end justify-center p-0 sm:p-4">
-            <div class="bg-[#0d0310] border-t-2 sm:border-2 border-purple-500/50 w-full sm:max-w-lg h-[80vh] sm:rounded-[2rem] rounded-t-[2rem] flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center px-5 py-4 border-b border-purple-500/20">
-                    <div>
-                        <h3 class="text-sm font-black text-white">🐞 Diagnóstico</h3>
-                        <p class="text-[10px] text-purple-400">Solo visible para administrador</p>
-                    </div>
-                    <button onclick="toggleDebugPanel(false)" class="w-8 h-8 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/30 flex items-center justify-center">✕</button>
-                </div>
-
-                <div class="px-5 py-3 space-y-1.5 border-b border-purple-500/20 bg-[#120814]">
-                    <p id="debug-connection" class="text-xs font-bold">⏳ Verificando...</p>
-                    <p id="debug-auth" class="text-xs text-slate-300"></p>
-                    <p id="debug-count" class="text-xs text-slate-300"></p>
-                </div>
-
-                <div class="flex-1 overflow-y-auto px-5 py-3 font-mono text-[11px]" id="debug-log-list">
-                </div>
-
-                <div class="px-5 py-3 border-t border-purple-500/20">
-                    <button onclick="clearDebugLogs()" class="w-full bg-purple-950/60 text-purple-300 border border-purple-500/30 text-xs font-bold py-2.5 rounded-xl">
-                        🧹 Limpiar registro
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- VISOR DE IMAGEN (LIGHTBOX) -->
-        <div id="lightbox" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl hidden flex-col items-center justify-between p-4" onclick="closeLightbox()">
-            <div class="w-full flex justify-between items-center z-10">
-                <span id="lightbox-title" class="text-white font-medium text-sm"></span>
-                <button class="text-white text-2xl bg-[#1b0c1b] w-10 h-10 rounded-full flex items-center justify-center">✕</button>
-            </div>
-            <div class="relative flex-1 w-full flex items-center justify-center my-4">
-                <img id="lightbox-img" class="max-w-full max-h-full object-contain rounded-2xl">
-            </div>
-            <div></div>
-        </div>
-
     </div>
 
-    <script type="module" src="app.js"></script>
-</body>
-</html>
+    <!-- ============ BOTONES FLOTANTES (Fase 2) ============ -->
+    <div id="floating-controls" class="fixed right-4 top-20 z-40 flex flex-col gap-3">
+        <!-- Se llenarán en la Fase 2 -->
+    </div>
+
+    <!-- Botón Diagnóstico (Solo Admin logueado) -->
+    <button id="debug-btn" onclick="toggleDebugPanel(true)" class="hidden fixed bottom-6 left-6 w-12 h-12 bg-rose-600 hover:bg-rose-500 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 transition-all active:scale-90 border-2 border-white/20">
+        🐞
+    </button>
+
+    <!-- ============ MODAL ADMIN ============ -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white dark:bg-[#0d0310] w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-purple-500/30">
+            <div class="flex items-center justify-between p-4 border-b border-purple-500/20 bg-purple-50 dark:bg-[#1b0c1b]">
+                <div>
+                    <h2 class="text-lg font-bold text-title">⚙️ Panel de Control</h2>
+                    <p class="text-[11px] text-desc">Gestión de Valen Fashion</p>
+                </div>
+                <button onclick="toggleAdminModal(false)" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center hover:bg-rose-200 dark:hover:bg-rose-800 transition-all">✕</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-none">
+                <!-- Login Section -->
+                <div id="admin-login-section" class="flex flex-col items-center justify-center py-12 space-y-4">
+                    <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-3xl">🔒</div>
+                    <p class="text-sm font-bold text-title">Acceso restringido</p>
+                    <p class="text-xs text-desc">Inicia sesión para gestionar Valen Fashion</p>
+                    <div class="w-full max-w-xs space-y-3 mt-4">
+                        <input type="email" id="admin-email" placeholder="Correo electrónico" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-xl px-4 py-2.5 text-sm text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="password" id="admin-password" placeholder="Contraseña" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-xl px-4 py-2.5 text-sm text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <p id="admin-login-error" class="hidden text-xs text-rose-500 font-bold text-center"></p>
+                        <button id="admin-login-btn" onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm py-2.5 rounded-xl shadow-lg transition-all active:scale-95">Ingresar 🔑</button>
+                    </div>
+                </div>
+
+                <!-- Content Section (Logged in) -->
+                <div id="admin-content-section" class="hidden space-y-6">
+                    <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl border border-rose-500/30 transition-all active:scale-95">🚪 Cerrar sesión</button>
+
+                    <!-- Banner Admin -->
+                    <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-3">
+                        <h3 class="text-sm font-bold text-title flex items-center gap-2">🖼️ Banner Promocional</h3>
+                        <p class="text-[11px] text-desc">Sube una o varias imágenes (promos, avisos, descuentos)</p>
+                        <div class="flex items-center gap-2">
+                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                Seleccionar imágenes
+                                <input type="file" id="banner-image-file" accept="image/*" multiple class="hidden" onchange="handleBannerImagesInput(event)">
+                            </label>
+                            <span id="banner-image-status" class="text-[10px] text-desc font-mono">Ninguna imagen</span>
+                        </div>
+                        <p class="text-[10px] text-purple-500 italic">Se suben automáticamente al elegirlas. Con 2 o más, rotan solas cada pocos segundos en la página.</p>
+                        <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-2"></div>
+                    </section>
+
+                    <!-- Profile Admin -->
+                    <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-4">
+                        <h3 class="text-sm font-bold text-title flex items-center gap-2">✏️ Editar Perfil</h3>
+                        
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-desc">🖼️ Foto de Perfil</label>
+                            <div class="flex items-center gap-2">
+                                <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                    Cambiar foto
+                                    <input type="file" id="profile-image-file" accept="image/*" class="hidden" onchange="handleProfileImageInput(event)">
+                                </label>
+                                <span id="profile-image-status" class="text-[10px] text-desc font-mono">Sin cambios</span>
+                            </div>
+                            <div id="profile-image-preview-container" class="hidden mt-2">
+                                <img id="profile-image-preview" class="w-16 h-16 rounded-full object-cover border-2 border-purple-500">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-desc">🎨 Color del Anillo</label>
+                            <div class="flex gap-2 mb-2">
+                                <button type="button" onclick="document.getElementById('ring-mode-solid').click()" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-500/30">Sólido</button>
+                                <button type="button" onclick="document.getElementById('ring-mode-gradient').click()" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg bg-gray-100 dark:bg-[#0d0310] text-desc border border-purple-500/30">Degradado</button>
+                            </div>
+                            <input type="radio" name="ring-mode" id="ring-mode-solid" class="hidden" checked onchange="document.getElementById('ring-options-solid').classList.remove('hidden'); document.getElementById('ring-options-gradient').classList.add('hidden');">
+                            <input type="radio" name="ring-mode" id="ring-mode-gradient" class="hidden" onchange="document.getElementById('ring-options-solid').classList.add('hidden'); document.getElementById('ring-options-gradient').classList.remove('hidden');">
+                            
+                            <div id="ring-options-solid" class="space-y-2">
+                                <div id="ring-presets" class="flex flex-wrap gap-2"></div>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="ring-custom-solid" value="#a855f7" onchange="selectCustomSolid()" class="w-8 h-8 rounded-full cursor-pointer border-0">
+                                    <span class="text-[10px] text-desc">Color personalizado</span>
+                                </div>
+                            </div>
+                            <div id="ring-options-gradient" class="hidden space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="ring-custom-from" value="#a855f7" onchange="selectCustomGradient()" class="w-8 h-8 rounded-full cursor-pointer border-0">
+                                    <span class="text-[10px] text-desc">→</span>
+                                    <input type="color" id="ring-custom-to" value="#000000" onchange="selectCustomGradient()" class="w-8 h-8 rounded-full cursor-pointer border-0">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mt-2 p-2 bg-white dark:bg-[#0d0310] rounded-xl border border-purple-500/20">
+                                <span class="text-[10px] text-desc">Vista:</span>
+                                <div id="ring-preview" class="w-8 h-8 rounded-full" style="background: #a855f7;"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-desc">Categoría / Título</label>
+                            <input type="text" id="profile-category-input" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-desc">Biografía</label>
+                            <textarea id="profile-bio-input" rows="2" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-desc">Servicio / Envíos</label>
+                            <input type="text" id="profile-service-input" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-desc">Dirección</label>
+                            <input type="text" id="profile-address-input" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Guardar Perfil 💾</button>
+                    </section>
+
+                    <!-- Products Admin -->
+                    <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-4">
+                        <h3 class="text-sm font-bold text-title">Productos</h3>
+                        
+                        <div class="space-y-3 p-3 bg-white dark:bg-[#0d0310] rounded-xl border border-purple-500/20">
+                            <p class="text-[11px] font-bold text-desc">Añadir Nuevo Producto</p>
+                            <input type="text" id="new-title" placeholder="Nombre del producto" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <input type="text" id="new-price" placeholder="Precio (ej: 45000)" oninput="formatPriceInput(this)" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <select id="new-category" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="hogar">🏠 Hogar</option>
+                                <option value="ninos">🧸 Niños</option>
+                                <option value="ropa">👗 Ropa / Cuerpo</option>
+                                <option value="tendidos">🛏️ Tendidos</option>
+                            </select>
+                            <textarea id="new-description" placeholder="Descripción (opcional)" rows="2" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                            
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-desc">📸 Fotografía del Producto</label>
+                                <div class="flex items-center gap-2">
+                                    <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                        Seleccionar archivo
+                                        <input type="file" id="new-image-file" accept="image/*" class="hidden" onchange="handleImageInput(event)">
+                                    </label>
+                                    <span id="image-status" class="text-[10px] text-desc font-mono">Ningún archivo</span>
+                                </div>
+                                <div id="image-preview-container" class="hidden mt-2">
+                                    <img id="image-preview" class="w-full h-32 object-cover rounded-lg border border-purple-500/30">
+                                </div>
+                            </div>
+                            <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Publicar Produ
