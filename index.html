@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Valen Fashion | Catálogo Oficial 🤍</title>
     <script>
-        if (localStorage.getItem('valen_theme') === 'dark') document.documentElement.classList.add('dark-mode-init');
+        // Anti-parpadeo: Cargar tema guardado antes de renderizar
+        (function() {
+            const theme = localStorage.getItem('valen_theme');
+            const size = localStorage.getItem('valen_text_size') || 'md';
+            if (theme === 'dark') document.documentElement.classList.add('dark-mode-init');
+            document.documentElement.classList.add('text-size-' + size);
+        })();
     </script>
     <style>
         html.dark-mode-init body { background-color: #0a020a; color: #f3f4f6; }
@@ -15,9 +21,18 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80">
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased theme-transition">
+
+    <!-- BOTONES FLOTANTES (FASE 2) -->
+    <div id="floating-controls">
+        <button id="btn-theme" class="float-btn" title="Cambiar Tema">🌙</button>
+        <button id="btn-text-size" class="float-btn" title="Tamaño Texto">🔤</button>
+        <button id="btn-music" class="float-btn" title="Música" style="display:none;">🔇</button>
+    </div>
 
     <div class="max-w-6xl mx-auto px-4 py-8 pb-24">
+        
+        <!-- BANNER ARRIBA -->
         <div id="banner-carousel" class="hidden relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 border border-purple-500/20 bg-black mt-2"></div>
 
         <header class="flex flex-col items-center text-center space-y-4 mb-8">
@@ -26,44 +41,51 @@
                 <img id="profile-photo" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="relative w-28 h-28 rounded-full object-cover border-4 border-white dark:border-[#0a020a] shadow-xl">
             </div>
             <div>
-                <h1 id="profile-name" class="text-2xl font-extrabold text-title">Valen Fashion</h1>
+                <h1 id="profile-name" class="text-2xl font-extrabold text-title tracking-tight">Valen Fashion</h1>
                 <p id="profile-tagline" class="text-sm text-desc font-medium mt-1">✨ Mereces lo que sueñas 🤍</p>
             </div>
             
             <div class="flex flex-wrap justify-center gap-3 mt-2">
-                <a href="https://wa.me/573229247605" target="_blank" class="flex items-center gap-2 bg-emerald-500 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg active:scale-95"><span>💬 WhatsApp</span></a>
-                <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg active:scale-95"><span>📸 Instagram</span></a>
-                <button id="btn-qr-share" class="hidden items-center gap-2 bg-blue-500 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg active:scale-95"><span>🔳 QR</span></button>
+                <a href="https://wa.me/573229247605" target="_blank" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95"><span>💬 WhatsApp Directo</span></a>
+                <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95"><span>📸 Instagram</span></a>
+                <button id="btn-qr-share" class="hidden items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95"><span>🔳 Código QR</span></button>
             </div>
 
             <div class="w-full max-w-md space-y-2 text-xs card-bg p-4 rounded-2xl mt-2 shadow-sm">
                 <p id="profile-category" class="font-bold text-title">🛍️ Compras y ventas minoristas</p>
                 <p id="profile-bio" class="whitespace-pre-line text-desc">Tenemos cosas hermosas y exclusivas para ti 💥<br>para todos los gustos ♂️♀️</p>
-                <p id="profile-service" class="font-semibold text-purple-600 dark:text-purple-400">🚚 Domicilios en Manizales 💎</p>
+                <p id="profile-service" class="font-semibold text-purple-600 dark:text-purple-400">🚚 Contamos con servicio de domicilio en Manizales 💎</p>
             </div>
 
-            <button id="btn-admin" onclick="toggleAdminModal(true)" class="hidden mt-4 bg-white dark:bg-[#1b0c1b] text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-6 rounded-full border border-purple-500/30 shadow-lg">⚙️ Admin</button>
+            <button id="btn-admin" onclick="toggleAdminModal(true)" class="hidden mt-4 bg-white dark:bg-[#1b0c1b] text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-6 rounded-full border border-purple-500/30 transition-all active:scale-95 shadow-lg">⚙️ Admin</button>
         </header>
 
         <nav id="category-filters" class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none"></nav>
+
         <main id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            <div class="col-span-full py-16 text-center text-desc"><p class="text-4xl animate-pulse">⏳</p><p>Cargando...</p></div>
+            <div class="col-span-full py-16 text-center text-desc space-y-3">
+                <p class="text-4xl animate-pulse">⏳</p>
+                <p class="text-sm font-medium">Iniciando sistema y conectando...</p>
+            </div>
         </main>
-        <footer class="mt-16 pt-8 border-t border-purple-500/20 text-center">
+
+        <footer class="mt-16 pt-8 border-t border-purple-500/20 text-center space-y-2">
             <p class="text-xs font-bold text-title">Valen Fashion Manizales • Todos los derechos reservados 🤍</p>
-            <p id="profile-address" class="text-[11px] text-desc">📍 Cra 38 #66-20, Manizales</p>
+            <p id="profile-address" class="text-[11px] text-desc">📍 Cra 38 #66-20, Manizales, Caldas</p>
         </footer>
     </div>
 
-    <div id="floating-controls" class="fixed right-4 top-20 z-40 flex flex-col gap-3"></div>
-    <button id="debug-btn" onclick="toggleDebugPanel(true)" class="hidden fixed bottom-6 left-6 w-12 h-12 bg-rose-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40">🐞</button>
+    <button id="debug-btn" onclick="toggleDebugPanel(true)" class="hidden fixed bottom-6 left-6 w-12 h-12 bg-rose-600 hover:bg-rose-500 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 transition-all active:scale-90 border-2 border-white/20">🐞</button>
 
-    <!-- MODAL ADMIN CORREGIDO -->
+    <!-- MODAL ADMIN -->
     <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="admin-panel-bg w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-purple-500/30">
             <div class="flex items-center justify-between p-4 border-b border-purple-500/20 admin-section-bg">
-                <h2 class="text-lg font-bold text-title">⚙️ Panel de Control</h2>
-                <button onclick="toggleAdminModal(false)" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center">✕</button>
+                <div>
+                    <h2 class="text-lg font-bold text-title">⚙️ Panel de Control</h2>
+                    <p class="text-[11px] text-desc">Gestión de Valen Fashion</p>
+                </div>
+                <button onclick="toggleAdminModal(false)" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center hover:bg-rose-200 dark:hover:bg-rose-800 transition-all">✕</button>
             </div>
             
             <div class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-none">
@@ -71,41 +93,41 @@
                     <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-3xl">🔒</div>
                     <p class="text-sm font-bold text-title">Acceso restringido</p>
                     <div class="w-full max-w-xs space-y-3 mt-4">
-                        <input type="email" id="admin-email" placeholder="Correo" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                        <input type="password" id="admin-password" placeholder="Contraseña" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                        <input type="email" id="admin-email" placeholder="Correo electrónico" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="password" id="admin-password" placeholder="Contraseña" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <p id="admin-login-error" class="hidden text-xs text-rose-500 font-bold text-center"></p>
-                        <button id="admin-login-btn" onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm py-2.5 rounded-xl shadow-lg">Ingresar 🔑</button>
+                        <button id="admin-login-btn" onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm py-2.5 rounded-xl shadow-lg transition-all active:scale-95">Ingresar 🔑</button>
                     </div>
                 </div>
 
                 <div id="admin-content-section" class="hidden space-y-6">
-                    <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl border border-rose-500/30">🚪 Cerrar sesión</button>
+                    <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl border border-rose-500/30 transition-all active:scale-95">🚪 Cerrar sesión</button>
 
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-3">
-                        <h3 class="text-sm font-bold text-title">🖼️ Banner</h3>
+                        <h3 class="text-sm font-bold text-title flex items-center gap-2">🖼️ Banner Promocional</h3>
                         <div class="flex items-center gap-2">
-                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30">
-                                Seleccionar<input type="file" id="banner-image-file" accept="image/*" multiple class="hidden" onchange="handleBannerImagesInput(event)">
+                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                Seleccionar imágenes<input type="file" id="banner-image-file" accept="image/*" multiple class="hidden" onchange="handleBannerImagesInput(event)">
                             </label>
-                            <span id="banner-image-status" class="text-[10px] text-desc font-mono">Ninguna</span>
+                            <span id="banner-image-status" class="text-[10px] text-desc font-mono">Ninguna imagen</span>
                         </div>
                         <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-2"></div>
                     </section>
 
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-4">
-                        <h3 class="text-sm font-bold text-title">✏️ Perfil</h3>
+                        <h3 class="text-sm font-bold text-title flex items-center gap-2">✏️ Editar Perfil</h3>
                         <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-desc">Foto</label>
+                            <label class="text-[11px] font-bold text-desc">🖼️ Foto de Perfil</label>
                             <div class="flex items-center gap-2">
-                                <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30">
-                                    Cambiar<input type="file" id="profile-image-file" accept="image/*" class="hidden" onchange="handleProfileImageInput(event)">
+                                <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                    Cambiar foto<input type="file" id="profile-image-file" accept="image/*" class="hidden" onchange="handleProfileImageInput(event)">
                                 </label>
                                 <span id="profile-image-status" class="text-[10px] text-desc font-mono">Sin cambios</span>
                             </div>
                             <div id="profile-image-preview-container" class="hidden mt-2"><img id="profile-image-preview" class="w-16 h-16 rounded-full object-cover border-2 border-purple-500"></div>
                         </div>
                         <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-desc">Color Anillo</label>
+                            <label class="text-[11px] font-bold text-desc">🎨 Color del Anillo</label>
                             <div class="flex gap-2 mb-2">
                                 <button type="button" onclick="document.getElementById('ring-mode-solid').click()" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-500/30">Sólido</button>
                                 <button type="button" onclick="document.getElementById('ring-mode-gradient').click()" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg bg-gray-100 dark:bg-[#0d0310] text-desc border border-purple-500/30">Degradado</button>
@@ -116,7 +138,7 @@
                                 <div id="ring-presets" class="flex flex-wrap gap-2"></div>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="ring-custom-solid" value="#a855f7" onchange="selectCustomSolid()" class="w-8 h-8 rounded-full cursor-pointer border-0">
-                                    <span class="text-[10px] text-desc">Personalizado</span>
+                                    <span class="text-[10px] text-desc">Color personalizado</span>
                                 </div>
                             </div>
                             <div id="ring-options-gradient" class="hidden space-y-2">
@@ -131,32 +153,32 @@
                                 <div id="ring-preview" class="w-8 h-8 rounded-full" style="background: #a855f7;"></div>
                             </div>
                         </div>
-                        <div class="space-y-2"><input type="text" id="profile-category-input" placeholder="Categoría" class="w-full admin-input rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"></div>
-                        <div class="space-y-2"><textarea id="profile-bio-input" rows="2" placeholder="Bio" class="w-full admin-input rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea></div>
-                        <div class="space-y-2"><input type="text" id="profile-service-input" placeholder="Servicio" class="w-full admin-input rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"></div>
-                        <div class="space-y-2"><input type="text" id="profile-address-input" placeholder="Dirección" class="w-full admin-input rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"></div>
-                        <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg mt-2">Guardar 💾</button>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Categoría / Título</label><input type="text" id="profile-category-input" class="w-full admin-input rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Biografía</label><textarea id="profile-bio-input" rows="2" class="w-full admin-input rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea></div>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Servicio / Envíos</label><input type="text" id="profile-service-input" class="w-full admin-input rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Dirección</label><input type="text" id="profile-address-input" class="w-full admin-input rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
+                        <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Guardar Perfil 💾</button>
                     </section>
 
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-4">
                         <h3 class="text-sm font-bold text-title">Productos</h3>
                         <div class="space-y-3 p-3 bg-white dark:bg-[#0d0310] rounded-xl border border-purple-500/20">
-                            <input type="text" id="new-title" placeholder="Nombre" class="w-full admin-input rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
-                            <input type="text" id="new-price" placeholder="Precio" oninput="formatPriceInput(this)" class="w-full admin-input rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
-                            <select id="new-category" class="w-full admin-input rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
-                                <option value="hogar">🏠 Hogar</option><option value="ninos">🧸 Niños</option><option value="ropa">👗 Ropa</option><option value="tendidos">🛏️ Tendidos</option>
+                            <input type="text" id="new-title" placeholder="Nombre del producto" class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <input type="text" id="new-price" placeholder="Precio (ej: 45000)" oninput="formatPriceInput(this)" class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <select id="new-category" class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="hogar">🏠 Hogar</option><option value="ninos">🧸 Niños</option><option value="ropa">👗 Ropa / Cuerpo</option><option value="tendidos">🛏️ Tendidos</option>
                             </select>
-                            <textarea id="new-description" placeholder="Descripción" rows="2" class="w-full admin-input rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                            <textarea id="new-description" placeholder="Descripción (opcional)" rows="2" class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2">
-                                    <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer border border-purple-500/30">
-                                        Foto<input type="file" id="new-image-file" accept="image/*" class="hidden" onchange="handleImageInput(event)">
+                                    <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                        Seleccionar archivo<input type="file" id="new-image-file" accept="image/*" class="hidden" onchange="handleImageInput(event)">
                                     </label>
-                                    <span id="image-status" class="text-[10px] text-desc font-mono">Ninguno</span>
+                                    <span id="image-status" class="text-[10px] text-desc font-mono">Ningún archivo</span>
                                 </div>
                                 <div id="image-preview-container" class="hidden mt-2"><img id="image-preview" class="w-full h-32 object-cover rounded-lg border border-purple-500/30"></div>
                             </div>
-                            <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg mt-2">Publicar ✨</button>
+                            <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Publicar Producto ✨</button>
                         </div>
                         <div id="admin-products-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-none pr-1"></div>
                     </section>
@@ -165,10 +187,11 @@
         </div>
     </div>
 
+    <!-- PANEL DIAGNÓSTICO -->
     <div id="debug-panel" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex-col p-4">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-white">🐞 Diagnóstico</h2>
-            <button onclick="toggleDebugPanel(false)" class="w-8 h-8 rounded-full bg-rose-900/50 text-rose-300 flex items-center justify-center">✕</button>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">🐞 Diagnóstico</h2>
+            <button onclick="toggleDebugPanel(false)" class="w-8 h-8 rounded-full bg-rose-900/50 text-rose-300 flex items-center justify-center hover:bg-rose-800 transition-all">✕</button>
         </div>
         <div class="flex-1 overflow-y-auto space-y-4 scrollbar-none">
             <div class="grid grid-cols-1 gap-2 text-xs font-mono">
@@ -176,17 +199,24 @@
                 <div id="debug-auth" class="bg-[#1b0c1b] p-2 rounded-lg border border-purple-500/30 text-slate-300">👤 Sin sesión</div>
                 <div id="debug-count" class="bg-[#1b0c1b] p-2 rounded-lg border border-purple-500/30 text-slate-300">📦 Productos: 0</div>
             </div>
-            <div id="debug-log-list" class="bg-[#0d0310] p-3 rounded-xl border border-purple-500/30 text-[11px] font-mono space-y-1 min-h-[200px]"></div>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-bold text-purple-300">Registro de Consola</p>
+                    <button onclick="clearDebugLogs()" class="text-[10px] bg-rose-900/50 text-rose-300 px-2 py-1 rounded-lg border border-rose-500/30 active:scale-95 transition-all">🧹 Limpiar registro</button>
+                </div>
+                <div id="debug-log-list" class="bg-[#0d0310] p-3 rounded-xl border border-purple-500/30 text-[11px] font-mono space-y-1 min-h-[200px]"></div>
+            </div>
         </div>
     </div>
 
-    <div id="lightbox" class="hidden fixed inset-0 z-50 bg-black/95 items-center justify-center p-4" onclick="closeLightbox()">
+    <div id="lightbox" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm items-center justify-center p-4" onclick="closeLightbox()">
         <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
-            <button onclick="closeLightbox()" class="absolute -top-10 right-0 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center text-xl">✕</button>
+            <button onclick="closeLightbox()" class="absolute -top-10 right-0 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all text-xl">✕</button>
             <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
             <p id="lightbox-title" class="mt-4 text-white font-bold text-lg text-center"></p>
         </div>
     </div>
+
     <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#1b0c1b] text-white text-xs font-bold py-2 px-6 rounded-full shadow-2xl border border-purple-500/50 z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
     <script type="module" src="app.js"></script>
