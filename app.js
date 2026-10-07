@@ -57,11 +57,13 @@ window.clearDebugLogs = () => { debugLogs.length = 0; renderDebugLogs(); };
 
 function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = setTimeout(() => rej(new Error(msg)), ms); p.then(v => {clearTimeout(t); res(v);}).catch(e => {clearTimeout(t); rej(e);}); }); }
 
-// ============ FASE 2: BOTONES FLOTANTES ============
+// ============ FASE 2: BOTONES FLOTANTES FUNCIONALES ============
 (function initFloatingControls() {
-    // 1. Tema
+    // 1. TEMA
     const btnTheme = document.getElementById('btn-theme');
     const savedTheme = localStorage.getItem('valen_theme') || 'light';
+    
+    // Aplicar tema inicial
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         btnTheme.innerText = '☀️';
@@ -75,26 +77,41 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
         btnTheme.innerText = isDark ? '☀️' : '🌙';
     };
 
-    // 2. Tamaño Texto
+    // 2. TAMAÑO TEXTO (SLIDER)
     const btnSize = document.getElementById('btn-text-size');
-    const sizes = ['sm', 'md', 'lg', 'xl'];
-    let currentSizeIdx = sizes.indexOf(localStorage.getItem('valen_text_size') || 'md');
-    if (currentSizeIdx === -1) currentSizeIdx = 1;
+    const sliderContainer = document.getElementById('text-slider-container');
+    const slider = document.getElementById('text-slider');
+    const sizeVal = document.getElementById('text-size-val');
     
-    // Aplicar tamaño inicial
-    document.documentElement.className = document.documentElement.className.replace(/text-size-\w+/, '') + ` text-size-${sizes[currentSizeIdx]}`;
+    // Cargar tamaño guardado
+    const savedSize = localStorage.getItem('valen_text_size') || '100';
+    document.documentElement.style.fontSize = savedSize + '%';
+    slider.value = savedSize;
+    sizeVal.innerText = savedSize + '%';
 
+    // Toggle Slider
     btnSize.onclick = () => {
-        currentSizeIdx = (currentSizeIdx + 1) % sizes.length;
-        const newSize = sizes[currentSizeIdx];
-        localStorage.setItem('valen_text_size', newSize);
-        document.documentElement.className = document.documentElement.className.replace(/text-size-\w+/, '') + ` text-size-${newSize}`;
-        showToast(`Tamaño: ${newSize.toUpperCase()}`);
+        const isVisible = sliderContainer.style.display === 'flex';
+        sliderContainer.style.display = isVisible ? 'none' : 'flex';
     };
 
-    // 3. Música (Preparado para Fase 4)
+    // Slider Change
+    slider.oninput = (e) => {
+        const val = e.target.value;
+        document.documentElement.style.fontSize = val + '%';
+        sizeVal.innerText = val + '%';
+        localStorage.setItem('valen_text_size', val);
+    };
+
+    // Cerrar slider al hacer click fuera
+    document.addEventListener('click', (e) => {
+        if (!sliderContainer.contains(e.target) && e.target !== btnSize) {
+            sliderContainer.style.display = 'none';
+        }
+    });
+
+    // 3. MÚSICA (Preparado)
     const btnMusic = document.getElementById('btn-music');
-    // Se mostrará cuando haya audio en Fase 4
 })();
 
 // ============ DATOS ============
@@ -145,7 +162,6 @@ onValue(ref(db, 'valen_profile'), (s) => { currentProfile=s.val()||defaultProfil
 function renderCategories() {
     document.getElementById('category-filters').innerHTML = categories.map(c => {
         const act = selectedCategory===c.id;
-        // CORREGIDO: Usa btn-cat-inactive (blanco en claro)
         return `<button onclick="setCategory('${c.id}')" class="px-4 py-2.5 rounded-full text-xs font-bold border transition-all whitespace-nowrap ${act ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'btn-cat-inactive'}">${c.name}</button>`;
     }).join('');
 }
@@ -158,7 +174,6 @@ function renderProducts() {
     c.innerHTML = f.map(p => {
         const cat = categories.find(x=>x.id===p.category)?.name || p.category;
         const wa = `https://wa.me/573229247605?text=${encodeURIComponent(`¡Hola! Me interesa: *${p.title}* (${p.price})`)}`;
-        // CORREGIDO: Usa card-bg, text-title, text-desc, text-price
         return `
         <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col group">
             <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${p.title}')">
@@ -176,7 +191,6 @@ function renderProducts() {
 
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
-    // CORREGIDO: Usa admin-item-bg (blanco en claro)
     l.innerHTML = allProducts.length ? allProducts.map(p=>`
         <div class="flex items-center justify-between admin-item-bg p-2 rounded-xl">
             <div class="flex items-center gap-2 overflow-hidden"><img src="${p.image}" class="w-8 h-8 rounded-lg object-cover"><p class="text-xs font-bold text-title truncate">${p.title}</p></div>
