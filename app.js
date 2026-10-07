@@ -140,6 +140,7 @@ function renderProducts() {
 
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
+    // CORRECCIÓN CRÍTICA: Usamos admin-product-item en lugar de bg-[#0d0310]
     l.innerHTML = allProducts.length ? allProducts.map(p=>`
         <div class="flex items-center justify-between admin-product-item p-2 rounded-xl">
             <div class="flex items-center gap-2 overflow-hidden"><img src="${p.image}" class="w-8 h-8 rounded-lg object-cover"><p class="text-xs font-bold text-title truncate">${p.title}</p></div>
