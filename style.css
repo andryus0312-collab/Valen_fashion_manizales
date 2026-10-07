@@ -95,21 +95,26 @@ body.dark-mode .qr-btn-fixed {
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); 
 }
 
-/* ============ MODAL QR (ADAPTATIVO) ============ */
+/* ============ MODAL QR (MARCO ADAPTATIVO REAL) ============ */
 .qr-modal-content {
+    background-color: #ffffff; /* Blanco en modo claro */
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+body.dark-mode .qr-modal-content {
+    background-color: #0d0310; /* Oscuro en modo oscuro */
 }
 @keyframes popIn {
     from { opacity: 0; transform: scale(0.8); }
     to { opacity: 1; transform: scale(1); }
 }
 
-/* El contenedor del QR debe ser siempre blanco para que se lea bien, pero el borde cambia */
+/* El QR siempre sobre blanco (para escanear bien), borde adaptativo */
 #qrcode-container {
     background-color: #ffffff !important;
+    border: 2px solid #e9d5ff;
 }
 body.dark-mode #qrcode-container {
-    border-color: #581c87 !important; /* Borde morado en oscuro */
+    border-color: #581c87;
 }
 
 /* ============ ESTILOS ORIGINALES ============ */
