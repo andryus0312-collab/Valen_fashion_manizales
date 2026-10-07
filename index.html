@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Valen Fashion | Catálogo Oficial 🤍</title>
-    
-    <!-- Meta Tags para que WhatsApp muestre el LOGO correcto -->
+
+    <!-- Meta Tags: WhatsApp y redes mostrarán el LOGO real -->
     <meta property="og:title" content="Valen Fashion Manizales 🤍">
     <meta property="og:description" content="Artículos únicos y especiales para ti. ¡Visítanos! ✨">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80">
+    <meta property="og:image" content="https://andryus0312-collab.github.io/Valen_fashion_manizales/logo.jpg">
     <meta property="og:url" content="https://andryus0312-collab.github.io/Valen_fashion_manizales/">
     <meta property="og:type" content="website">
 
@@ -16,7 +16,10 @@
         (function() {
             const theme = localStorage.getItem('valen_theme');
             const size = localStorage.getItem('valen_text_size') || '100';
-            if (theme === 'dark') document.documentElement.classList.add('dark-mode-init');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.add('dark-mode-init');
+            }
             document.documentElement.style.fontSize = size + '%';
         })();
     </script>
@@ -25,9 +28,11 @@
         html.dark-mode-init body::before { opacity: 0; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CLAVE: ahora el modo oscuro lo controla NUESTRO botón, no el sistema del celular -->
+    <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80">
+    <link rel="icon" href="logo.jpg">
 </head>
 <body class="font-sans antialiased theme-transition">
 
@@ -52,7 +57,7 @@
         <header class="flex flex-col items-center text-center space-y-4 mb-8">
             <div class="relative">
                 <div id="profile-ring" class="absolute -inset-1 rounded-full blur-sm opacity-75" style="background: #a855f7;"></div>
-                <img id="profile-photo" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="relative w-28 h-28 rounded-full object-cover border-4 border-white dark:border-[#0a020a] shadow-xl">
+                <img id="profile-photo" src="logo.jpg" class="relative w-28 h-28 rounded-full object-cover border-4 border-white dark:border-[#0a020a] shadow-xl">
             </div>
             <div>
                 <h1 id="profile-name" class="text-2xl font-extrabold text-title tracking-tight">Valen Fashion</h1>
@@ -95,32 +100,28 @@
 
     <button id="debug-btn" onclick="toggleDebugPanel(true)" class="hidden fixed bottom-6 left-6 w-12 h-12 bg-rose-600 hover:bg-rose-500 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 transition-all active:scale-90 border-2 border-white/20">🐞</button>
 
-    <!-- MODAL QR (CORREGIDO: Logo Real, Tamaño Grande, Marco Adaptativo) -->
+    <!-- MODAL QR (Marco 100% adaptativo + logo.jpg) -->
     <div id="qr-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm items-center justify-center p-4">
-        <div class="qr-modal-content w-full max-w-md bg-white dark:bg-[#0d0310] rounded-3xl shadow-2xl flex flex-col items-center p-6 relative border-2 border-purple-500/30">
+        <div class="qr-modal-content w-full max-w-md rounded-3xl shadow-2xl flex flex-col items-center p-6 relative border-2 border-purple-500/30">
             <button onclick="closeQRModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center hover:bg-rose-200 transition-all">✕</button>
             
-            <!-- Logo Real de la Página -->
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" class="w-20 h-20 rounded-full object-cover border-4 border-purple-500 mb-3 shadow-lg">
+            <!-- LOGO REAL -->
+            <img src="logo.jpg" class="w-20 h-20 rounded-full object-cover border-4 border-purple-500 mb-3 shadow-lg">
             
-            <!-- Título -->
             <h3 class="text-xl font-bold text-title mb-1 text-center">¡Compártelo! ✨</h3>
             <p class="text-sm text-desc text-center mb-4">Ayúdanos a crecer compartiendo nuestra página 🤍</p>
 
-            <!-- Contenedor QR (Más grande) -->
-            <div id="qrcode-container" class="bg-white p-4 rounded-2xl shadow-inner mb-4 border-2 border-purple-100 dark:border-purple-900">
+            <div id="qrcode-container" class="p-4 rounded-2xl shadow-inner mb-4">
                 <!-- El QR se genera aquí -->
             </div>
 
-            <!-- Texto Amable y Grande -->
             <div class="text-sm text-desc text-center leading-relaxed mb-4 px-2 space-y-2">
                 <p>📱 <strong>Escanea este código</strong> con tu cámara para entrar rápido.</p>
-                <p> <strong>Desde celular:</strong> Usa el botón "Compartir".</p>
-                <p>💻 <strong>Desde PC:</strong> Descarga la imagen y envíala.</p>
+                <p>📲 <strong>Desde celular:</strong> Usa el botón "Compartir".</p>
+                <p>💻 <strong>Desde PC:</strong> Descarga la imagen con el logo y envíala.</p>
                 <p class="pt-2 font-semibold text-purple-600 dark:text-purple-400">¡Gracias por apoyar a Valen Fashion! 💜🛍️</p>
             </div>
 
-            <!-- Botones Acción -->
             <div class="flex gap-3 w-full">
                 <button id="btn-qr-share-action" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold py-3 rounded-xl shadow transition-all active:scale-95 hidden">
                     Compartir 📲
@@ -231,7 +232,7 @@
                                     </label>
                                     <span id="image-status" class="text-[10px] text-desc font-mono">Ningún archivo</span>
                                 </div>
-                                <div id="image-preview-container" class="hidden mt-2"><img id="image-preview" class="w-full h-32 object-cover rounded-lg border border-purple-500/30"></div>
+                              <div id="image-preview-container" class="hidden mt-2"><img id="image-preview" class="w-full h-32 object-cover rounded-lg border border-purple-500/30"></div>
                             </div>
                             <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Publicar Producto ✨</button>
                         </div>
