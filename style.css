@@ -1,8 +1,15 @@
-/* ============ MODO CLARO / OSCURO ============ */
+/* ============ TRANSICIONES ============ */
+body, .theme-transition, .theme-transition * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ============ MODO CLARO (DEFAULT) ============ */
 body {
-    background-color: #fdfbf7; /* Blanco crema */
-    color: #2d1b36; /* Texto oscuro */
-    transition: background-color 0.3s, color 0.3s;
+    background-color: #fdfbf7; /* Crema suave */
+    color: #2d1b36; /* Texto oscuro legible */
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* Fondo Boutique (Solo visible en claro) */
@@ -10,18 +17,19 @@ body::before {
     content: "";
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1920&q=80');
-    background-size: cover; opacity: 0.1; z-index: -1; pointer-events: none;
+    background-size: cover; background-position: center;
+    opacity: 0.08; z-index: -1; pointer-events: none;
 }
 
-/* MODO OSCURO (Tu diseño original) */
+/* ============ MODO OSCURO ============ */
 body.dark-mode {
     background-color: #0a020a;
     color: #f3f4f6;
 }
 body.dark-mode::before { opacity: 0; }
 
-/* CLASES MÁGICAS (Para que el JS cambie de color) */
-.card-bg { background-color: rgba(255, 255, 255, 0.9); border: 1px solid rgba(168, 85, 247, 0.2); }
+/* ============ CLASES ADAPTATIVAS (Para JS) ============ */
+.card-bg { background-color: rgba(255, 255, 255, 0.9); border: 1px solid rgba(168, 85, 247, 0.2); backdrop-filter: blur(8px); }
 body.dark-mode .card-bg { background-color: rgba(27, 12, 27, 0.85); border: 1px solid rgba(168, 85, 247, 0.2); }
 
 .text-title { color: #2d1b36; }
@@ -45,12 +53,37 @@ body.dark-mode .admin-panel-bg { background-color: #0d0310; }
 .admin-section-bg { background-color: #f9fafb; }
 body.dark-mode .admin-section-bg { background-color: rgba(27, 12, 27, 0.5); }
 
-.admin-item-bg { background-color: #ffffff; }
-body.dark-mode .admin-item-bg { background-color: #0d0310; }
+.admin-item-bg { background-color: #ffffff; border: 1px solid #e9d5ff; }
+body.dark-mode .admin-item-bg { background-color: #0d0310; border: 1px solid #581c87; }
 
-/* Scrollbar original */
+/* ============ BOTONES FLOTANTES (FASE 2) ============ */
+#floating-controls {
+    position: fixed; right: 1rem; top: 5rem; z-index: 40;
+    display: flex; flex-direction: column; gap: 0.75rem;
+}
+.float-btn {
+    width: 3rem; height: 3rem; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s; border: 2px solid transparent;
+    background-color: #ffffff; color: #2d1b36; border-color: #e9d5ff;
+}
+body.dark-mode .float-btn {
+    background-color: #1b0c1b; color: #ffffff; border-color: #581c87;
+}
+.float-btn:active { transform: scale(0.9); }
+.float-btn:hover { transform: scale(1.05); }
+
+/* Control de tamaño de texto */
+.text-size-sm { font-size: 0.875rem; }
+.text-size-md { font-size: 1rem; }
+.text-size-lg { font-size: 1.125rem; }
+.text-size-xl { font-size: 1.25rem; }
+
+/* ============ ESTILOS ORIGINALES ============ */
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-input[type="color"] { -webkit-appearance: none; padding: 0; border: none; }
-input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"] { -webkit-appearance: none; appearance: none; padding: 0; }
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 9999px; }
 input[type="color"]::-webkit-color-swatch { border: none; border-radius: 9999px; }
