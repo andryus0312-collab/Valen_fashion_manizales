@@ -57,61 +57,109 @@ window.clearDebugLogs = () => { debugLogs.length = 0; renderDebugLogs(); };
 
 function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = setTimeout(() => rej(new Error(msg)), ms); p.then(v => {clearTimeout(t); res(v);}).catch(e => {clearTimeout(t); rej(e);}); }); }
 
-// ============ FASE 2: BOTONES FLOTANTES FUNCIONALES ============
+// ============ FASE 2: BOTONES FLOTANTES ============
 (function initFloatingControls() {
-    // 1. TEMA
     const btnTheme = document.getElementById('btn-theme');
     const savedTheme = localStorage.getItem('valen_theme') || 'light';
-    
-    // Aplicar tema inicial
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        btnTheme.innerText = '☀️';
-    } else {
-        btnTheme.innerText = '🌙';
-    }
-    
+    if (savedTheme === 'dark') { document.body.classList.add('dark-mode'); btnTheme.innerText = '☀️'; } else { btnTheme.innerText = '🌙'; }
     btnTheme.onclick = () => {
         const isDark = document.body.classList.toggle('dark-mode');
         localStorage.setItem('valen_theme', isDark ? 'dark' : 'light');
         btnTheme.innerText = isDark ? '☀️' : '🌙';
     };
 
-    // 2. TAMAÑO TEXTO (SLIDER)
     const btnSize = document.getElementById('btn-text-size');
     const sliderContainer = document.getElementById('text-slider-container');
     const slider = document.getElementById('text-slider');
     const sizeVal = document.getElementById('text-size-val');
-    
-    // Cargar tamaño guardado
     const savedSize = localStorage.getItem('valen_text_size') || '100';
     document.documentElement.style.fontSize = savedSize + '%';
-    slider.value = savedSize;
-    sizeVal.innerText = savedSize + '%';
+    slider.value = savedSize; sizeVal.innerText = savedSize + '%';
 
-    // Toggle Slider
-    btnSize.onclick = () => {
-        const isVisible = sliderContainer.style.display === 'flex';
-        sliderContainer.style.display = isVisible ? 'none' : 'flex';
-    };
-
-    // Slider Change
+    btnSize.onclick = () => { sliderContainer.style.display = sliderContainer.style.display === 'flex' ? 'none' : 'flex'; };
     slider.oninput = (e) => {
         const val = e.target.value;
         document.documentElement.style.fontSize = val + '%';
         sizeVal.innerText = val + '%';
         localStorage.setItem('valen_text_size', val);
     };
-
-    // Cerrar slider al hacer click fuera
     document.addEventListener('click', (e) => {
-        if (!sliderContainer.contains(e.target) && e.target !== btnSize) {
-            sliderContainer.style.display = 'none';
-        }
+        if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none';
     });
+})();
 
-    // 3. MÚSICA (Preparado)
-    const btnMusic = document.getElementById('btn-music');
+// ============ FASE 3: CÓDIGO QR ============
+(function initQR() {
+    const btnOpen = document.getElementById('btn-qr-open');
+    const modal = document.getElementById('qr-modal');
+    const container = document.getElementById('qrcode-container');
+    const btnShare = document.getElementById('btn-qr-share-action');
+    const btnDownload = document.getElementById('btn-qr-download');
+    
+    // URL ÚNICA Y ESTÁTICA (Sin parámetros de admin)
+    const shareUrl = "https://andryus0312-collab.github.io/Valen_fashion_manizales/";
+    let qrGenerated = false;
+
+    // Generar QR (Colores de marca: Morado oscuro #2e1065 sobre blanco)
+    function generateQR() {
+        if (qrGenerated) return;
+        container.innerHTML = ""; // Limpiar
+        new QRCode(container, {
+            text: shareUrl,
+            width: 200,
+            height: 200,
+            colorDark : "#2e1065", // Morado oscuro marca
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        qrGenerated = true;
+    }
+
+    // Abrir Modal
+    btnOpen.onclick = () => {
+        generateQR();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Detectar si es móvil para mostrar botón Compartir
+        if (navigator.share) {
+            btnShare.classList.remove('hidden');
+        } else {
+            btnShare.classList.add('hidden');
+        }
+    };
+
+    // Cerrar Modal
+    window.closeQRModal = () => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    };
+
+    // Cerrar al hacer click fuera
+    modal.onclick = (e) => { if (e.target === modal) closeQRModal(); };
+
+    // Acción Compartir (Móvil)
+    btnShare.onclick = async () => {
+        try {
+            await navigator.share({
+                title: 'Valen Fashion Manizales',
+                text: '¡Hola! Te invito a ver Valen Fashion Manizales, una tienda única con artículos especiales. ¡Gracias por compartir! 🛍️✨',
+                url: shareUrl,
+            });
+        } catch (err) { console.log('Error sharing', err); }
+    };
+
+    // Acción Descargar (PC o fallback)
+    btnDownload.onclick = () => {
+        const img = container.querySelector('img');
+        if (img) {
+            const link = document.createElement('a');
+            link.download = 'valen-fashion-qr.png';
+            link.href = img.src;
+            link.click();
+            showToast('✅ QR Descargado');
+        }
+    };
 })();
 
 // ============ DATOS ============
