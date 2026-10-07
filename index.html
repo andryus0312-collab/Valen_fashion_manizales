@@ -27,6 +27,9 @@
 
     <div class="max-w-6xl mx-auto px-4 py-8 pb-24">
         
+        <!-- 1. BANNER PROMOCIONAL MOVIDO ARRIBA (Portada) -->
+        <div id="banner-carousel" class="hidden relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 border border-purple-500/20 bg-black mt-2"></div>
+
         <!-- Header / Perfil -->
         <header class="flex flex-col items-center text-center space-y-4 mb-8">
             <div class="relative">
@@ -50,7 +53,7 @@
                 </button>
             </div>
 
-            <!-- CUADRO DE INFORMACIÓN CORREGIDO (Se adapta a Claro/Oscuro) -->
+            <!-- CUADRO DE INFORMACIÓN (Adaptativo) -->
             <div class="w-full max-w-md space-y-2 text-xs card-bg p-4 rounded-2xl mt-2 shadow-sm">
                 <p id="profile-category" class="font-bold text-title">🛍️ Compras y ventas minoristas</p>
                 <p id="profile-bio" class="whitespace-pre-line text-desc">Tenemos cosas hermosas y exclusivas para ti 💥<br>para todos los gustos ♂️♀️</p>
@@ -61,8 +64,6 @@
                 ⚙️ Admin
             </button>
         </header>
-
-        <div id="banner-carousel" class="hidden relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 border border-purple-500/20 bg-black"></div>
 
         <nav id="category-filters" class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none"></nav>
 
@@ -83,9 +84,11 @@
 
     <button id="debug-btn" onclick="toggleDebugPanel(true)" class="hidden fixed bottom-6 left-6 w-12 h-12 bg-rose-600 hover:bg-rose-500 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 transition-all active:scale-90 border-2 border-white/20">🐞</button>
 
-    <!-- MODAL ADMIN (Corregido para Modo Claro) -->
-    <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+    <!-- 2. MODAL ADMIN TOTALMENTE ADAPTADO A MODO CLARO / OSCURO -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="bg-white dark:bg-[#0d0310] w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-purple-500/30">
+            
+            <!-- Cabecera Admin -->
             <div class="flex items-center justify-between p-4 border-b border-purple-500/20 bg-gray-50 dark:bg-[#1b0c1b]">
                 <div>
                     <h2 class="text-lg font-bold text-title">⚙️ Panel de Control</h2>
@@ -95,6 +98,8 @@
             </div>
             
             <div class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-none">
+                
+                <!-- Login Section -->
                 <div id="admin-login-section" class="flex flex-col items-center justify-center py-12 space-y-4">
                     <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-3xl">🔒</div>
                     <p class="text-sm font-bold text-title">Acceso restringido</p>
@@ -107,9 +112,11 @@
                     </div>
                 </div>
 
+                <!-- Content Section (Logged in) -->
                 <div id="admin-content-section" class="hidden space-y-6">
                     <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl border border-rose-500/30 transition-all active:scale-95">🚪 Cerrar sesión</button>
 
+                    <!-- Banner Admin -->
                     <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-3">
                         <h3 class="text-sm font-bold text-title flex items-center gap-2">🖼️ Banner Promocional</h3>
                         <p class="text-[11px] text-desc">Sube una o varias imágenes (promos, avisos, descuentos)</p>
@@ -124,8 +131,10 @@
                         <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-2"></div>
                     </section>
 
+                    <!-- Profile Admin -->
                     <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-4">
                         <h3 class="text-sm font-bold text-title flex items-center gap-2">✏️ Editar Perfil</h3>
+                        
                         <div class="space-y-2">
                             <label class="text-[11px] font-bold text-desc">🖼️ Foto de Perfil</label>
                             <div class="flex items-center gap-2">
@@ -139,6 +148,7 @@
                                 <img id="profile-image-preview" class="w-16 h-16 rounded-full object-cover border-2 border-purple-500">
                             </div>
                         </div>
+
                         <div class="space-y-2">
                             <label class="text-[11px] font-bold text-desc">🎨 Color del Anillo</label>
                             <div class="flex gap-2 mb-2">
@@ -147,6 +157,7 @@
                             </div>
                             <input type="radio" name="ring-mode" id="ring-mode-solid" class="hidden" checked onchange="document.getElementById('ring-options-solid').classList.remove('hidden'); document.getElementById('ring-options-gradient').classList.add('hidden');">
                             <input type="radio" name="ring-mode" id="ring-mode-gradient" class="hidden" onchange="document.getElementById('ring-options-solid').classList.add('hidden'); document.getElementById('ring-options-gradient').classList.remove('hidden');">
+                            
                             <div id="ring-options-solid" class="space-y-2">
                                 <div id="ring-presets" class="flex flex-wrap gap-2"></div>
                                 <div class="flex items-center gap-2">
@@ -166,6 +177,7 @@
                                 <div id="ring-preview" class="w-8 h-8 rounded-full" style="background: #a855f7;"></div>
                             </div>
                         </div>
+
                         <div class="space-y-2">
                             <label class="text-[11px] font-bold text-desc">Categoría / Título</label>
                             <input type="text" id="profile-category-input" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
@@ -185,8 +197,10 @@
                         <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Guardar Perfil 💾</button>
                     </section>
 
+                    <!-- Products Admin -->
                     <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-4">
                         <h3 class="text-sm font-bold text-title">Productos</h3>
+                        
                         <div class="space-y-3 p-3 bg-white dark:bg-[#0d0310] rounded-xl border border-purple-500/20">
                             <p class="text-[11px] font-bold text-desc">Añadir Nuevo Producto</p>
                             <input type="text" id="new-title" placeholder="Nombre del producto" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
@@ -198,6 +212,7 @@
                                 <option value="tendidos">🛏️ Tendidos</option>
                             </select>
                             <textarea id="new-description" placeholder="Descripción (opcional)" rows="2" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                            
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold text-desc">📸 Fotografía del Producto</label>
                                 <div class="flex items-center gap-2">
@@ -213,6 +228,7 @@
                             </div>
                             <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Publicar Producto ✨</button>
                         </div>
+
                         <div class="space-y-2">
                             <p class="text-[11px] font-bold text-desc">Gestionar Existentes</p>
                             <div id="admin-products-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-none pr-1"></div>
@@ -223,12 +239,12 @@
         </div>
     </div>
 
-    <!-- PANEL DIAGNÓSTICO -->
-    <div id="debug-panel" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex-col p-4">
+        <!-- PANEL DIAGNÓSTICO (Mantiene su estilo oscuro técnico para contraste de logs) -->
+    <div id="debug-panel" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex-col p-4">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-bold text-white flex items-center gap-2">🐞 Diagnóstico</h2>
             <button onclick="toggleDebugPanel(false)" class="w-8 h-8 rounded-full bg-rose-900/50 text-rose-300 flex items-center justify-center hover:bg-rose-800 transition-all">✕</button>
-             </div>
+        </div>
         <div class="flex-1 overflow-y-auto space-y-4 scrollbar-none">
             <div class="grid grid-cols-1 gap-2 text-xs font-mono">
                 <div id="debug-connection" class="bg-[#1b0c1b] p-2 rounded-lg border border-purple-500/30 text-slate-300">⏳ Verificando...</div>
@@ -245,6 +261,7 @@
         </div>
     </div>
 
+    <!-- Lightbox -->
     <div id="lightbox" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm items-center justify-center p-4" onclick="closeLightbox()">
         <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
             <button onclick="closeLightbox()" class="absolute -top-10 right-0 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all text-xl">✕</button>
@@ -253,6 +270,7 @@
         </div>
     </div>
 
+    <!-- Toast -->
     <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#1b0c1b] text-white text-xs font-bold py-2 px-6 rounded-full shadow-2xl border border-purple-500/50 z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
     <script type="module" src="app.js"></script>
