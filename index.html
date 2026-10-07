@@ -21,7 +21,6 @@
 
     <div class="max-w-6xl mx-auto px-4 py-8 pb-24">
         
-        <!-- BANNER ARRIBA -->
         <div id="banner-carousel" class="hidden relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 border border-purple-500/20 bg-black mt-2"></div>
 
         <header class="flex flex-col items-center text-center space-y-4 mb-8">
@@ -70,7 +69,7 @@
     <!-- MODAL ADMIN 100% ADAPTATIVO -->
     <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="bg-white dark:bg-[#0d0310] w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-purple-500/30">
-            <div class="flex items-center justify-between p-4 border-b border-purple-500/20 bg-gray-50 dark:bg-[#1b0c1b]">
+            <div class="flex items-center justify-between p-4 border-b border-purple-500/20 admin-section">
                 <div>
                     <h2 class="text-lg font-bold text-title">⚙️ Panel de Control</h2>
                     <p class="text-[11px] text-desc">Gestión de Valen Fashion</p>
@@ -83,8 +82,8 @@
                     <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-3xl">🔒</div>
                     <p class="text-sm font-bold text-title">Acceso restringido</p>
                     <div class="w-full max-w-xs space-y-3 mt-4">
-                        <input type="email" id="admin-email" placeholder="Correo electrónico" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-xl px-4 py-2.5 text-sm text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <input type="password" id="admin-password" placeholder="Contraseña" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-xl px-4 py-2.5 text-sm text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="email" id="admin-email" placeholder="Correo electrónico" class="w-full input-light rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="password" id="admin-password" placeholder="Contraseña" class="w-full input-light rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <p id="admin-login-error" class="hidden text-xs text-rose-500 font-bold text-center"></p>
                         <button id="admin-login-btn" onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm py-2.5 rounded-xl shadow-lg active:scale-95">Ingresar 🔑</button>
                     </div>
@@ -93,7 +92,7 @@
                 <div id="admin-content-section" class="hidden space-y-6">
                     <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl border border-rose-500/30 active:scale-95">🚪 Cerrar sesión</button>
 
-                    <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-3">
+                    <section class="admin-section p-4 rounded-2xl border border-purple-500/20 space-y-3">
                         <h3 class="text-sm font-bold text-title">🖼️ Banner Promocional</h3>
                         <div class="flex items-center gap-2">
                             <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95">
@@ -104,7 +103,7 @@
                         <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-2"></div>
                     </section>
 
-                    <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-4">
+                    <section class="admin-section p-4 rounded-2xl border border-purple-500/20 space-y-4">
                         <h3 class="text-sm font-bold text-title">✏️ Editar Perfil</h3>
                         <div class="space-y-2">
                             <label class="text-[11px] font-bold text-desc">🖼️ Foto de Perfil</label>
@@ -143,22 +142,22 @@
                                 <div id="ring-preview" class="w-8 h-8 rounded-full" style="background: #a855f7;"></div>
                             </div>
                         </div>
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Categoría</label><input type="text" id="profile-category-input" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Biografía</label><textarea id="profile-bio-input" rows="2" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea></div>
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Servicio</label><input type="text" id="profile-service-input" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Dirección</label><input type="text" id="profile-address-input" class="w-full bg-white dark:bg-[#0d0310] border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Categoría</label><input type="text" id="profile-category-input" class="w-full input-light rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Biografía</label><textarea id="profile-bio-input" rows="2" class="w-full input-light rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea></div>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Servicio</label><input type="text" id="profile-service-input" class="w-full input-light rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
+                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Dirección</label><input type="text" id="profile-address-input" class="w-full input-light rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></div>
                         <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg active:scale-95 mt-2">Guardar Perfil 💾</button>
                     </section>
 
-                    <section class="bg-gray-50 dark:bg-[#1b0c1b]/50 p-4 rounded-2xl border border-purple-500/20 space-y-4">
+                    <section class="admin-section p-4 rounded-2xl border border-purple-500/20 space-y-4">
                         <h3 class="text-sm font-bold text-title">Productos</h3>
                         <div class="space-y-3 p-3 bg-white dark:bg-[#0d0310] rounded-xl border border-purple-500/20">
-                            <input type="text" id="new-title" placeholder="Nombre del producto" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <input type="text" id="new-price" placeholder="Precio (ej: 45000)" oninput="formatPriceInput(this)" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <select id="new-category" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <input type="text" id="new-title" placeholder="Nombre del producto" class="w-full input-light rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <input type="text" id="new-price" placeholder="Precio (ej: 45000)" oninput="formatPriceInput(this)" class="w-full input-light rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <select id="new-category" class="w-full input-light rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
                                 <option value="hogar">🏠 Hogar</option><option value="ninos">🧸 Niños</option><option value="ropa">👗 Ropa</option><option value="tendidos">🛏️ Tendidos</option>
                             </select>
-                            <textarea id="new-description" placeholder="Descripción" rows="2" class="w-full bg-gray-50 dark:bg-[#1b0c1b] border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-title focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                            <textarea id="new-description" placeholder="Descripción" rows="2" class="w-full input-light rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2">
                                     <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer border border-purple-500/30 active:scale-95">
@@ -204,4 +203,4 @@
 
     <script type="module" src="app.js"></script>
 </body>
-</html>
+                                </html>
