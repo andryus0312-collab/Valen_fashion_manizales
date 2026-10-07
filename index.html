@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Valen Fashion | Catálogo Oficial 🤍</title>
     <script>
-        // Anti-parpadeo: Cargar tema guardado antes de renderizar
         (function() {
             const theme = localStorage.getItem('valen_theme');
-            const size = localStorage.getItem('valen_text_size') || 'md';
+            const size = localStorage.getItem('valen_text_size') || '100';
             if (theme === 'dark') document.documentElement.classList.add('dark-mode-init');
-            document.documentElement.classList.add('text-size-' + size);
+            document.documentElement.style.fontSize = size + '%';
         })();
     </script>
     <style>
@@ -23,16 +22,22 @@
 </head>
 <body class="font-sans antialiased theme-transition">
 
-    <!-- BOTONES FLOTANTES (FASE 2) -->
+    <!-- BOTONES FLOTANTES (CENTRADOS DERECHA) -->
     <div id="floating-controls">
         <button id="btn-theme" class="float-btn" title="Cambiar Tema">🌙</button>
         <button id="btn-text-size" class="float-btn" title="Tamaño Texto">🔤</button>
         <button id="btn-music" class="float-btn" title="Música" style="display:none;">🔇</button>
     </div>
 
+    <!-- SLIDER DE TEXTO (Aparece al presionar 🔤) -->
+    <div id="text-slider-container">
+        <label>Tamaño Texto</label>
+        <input type="range" id="text-slider" min="80" max="150" value="100" step="5">
+        <span id="text-size-val" style="font-size: 0.8rem; font-weight: bold;">100%</span>
+    </div>
+
     <div class="max-w-6xl mx-auto px-4 py-8 pb-24">
         
-        <!-- BANNER ARRIBA -->
         <div id="banner-carousel" class="hidden relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 border border-purple-500/20 bg-black mt-2"></div>
 
         <header class="flex flex-col items-center text-center space-y-4 mb-8">
@@ -187,7 +192,6 @@
         </div>
     </div>
 
-    <!-- PANEL DIAGNÓSTICO -->
     <div id="debug-panel" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex-col p-4">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-bold text-white flex items-center gap-2">🐞 Diagnóstico</h2>
@@ -212,7 +216,7 @@
     <div id="lightbox" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm items-center justify-center p-4" onclick="closeLightbox()">
         <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
             <button onclick="closeLightbox()" class="absolute -top-10 right-0 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all text-xl">✕</button>
-            <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
+                        <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
             <p id="lightbox-title" class="mt-4 text-white font-bold text-lg text-center"></p>
         </div>
     </div>
