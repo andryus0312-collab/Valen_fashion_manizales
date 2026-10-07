@@ -90,6 +90,7 @@ onValue(ref(db, 'valen_profile'), s => { currentProfile=s.val()||defaultProfile;
 function renderCategories() {
     document.getElementById('category-filters').innerHTML = categories.map(c => {
         const act = selectedCategory===c.id;
+        // USAMOS btn-cat-inactive QUE ES BLANCO EN CSS
         return `<button onclick="setCategory('${c.id}')" class="px-4 py-2.5 rounded-full text-xs font-bold border transition-all whitespace-nowrap ${act ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'btn-cat-inactive'}">${c.name}</button>`;
     }).join('');
 }
@@ -102,6 +103,7 @@ function renderProducts() {
     c.innerHTML = f.map(p => {
         const cat = categories.find(x=>x.id===p.category)?.name || p.category;
         const wa = `https://wa.me/573229247605?text=${encodeURIComponent(`¡Hola! Me interesa: *${p.title}* (${p.price})`)}`;
+        // USAMOS card-bg, text-title, text-desc, text-price QUE SON BLANCOS/ADAPTATIVOS EN CSS
         return `
         <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col group">
             <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${p.title}')">
@@ -119,9 +121,9 @@ function renderProducts() {
 
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
-    // CORRECCIÓN CRÍTICA: bg-white dark:bg-[#0d0310] para que sea blanco en modo claro
+    // USAMOS admin-item-bg (que es blanco) o bg-white dark:bg...
     l.innerHTML = allProducts.length ? allProducts.map(p=>`
-        <div class="flex items-center justify-between bg-white dark:bg-[#0d0310] p-2 rounded-xl border border-purple-500/20">
+        <div class="flex items-center justify-between admin-item-bg p-2 rounded-xl border border-purple-500/20">
             <div class="flex items-center gap-2 overflow-hidden"><img src="${p.image}" class="w-8 h-8 rounded-lg object-cover"><p class="text-xs font-bold text-title truncate">${p.title}</p></div>
             <button onclick="deleteProduct('${p.firebaseId}')" class="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-lg">🗑️</button>
         </div>`).join('') : '<p class="text-center text-desc text-xs py-4">Sin productos.</p>';
