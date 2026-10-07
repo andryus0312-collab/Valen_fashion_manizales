@@ -17,19 +17,21 @@
         html.dark-mode-init body::before { opacity: 0; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librería QR Ligera -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80">
 </head>
 <body class="font-sans antialiased theme-transition">
 
-    <!-- BOTONES FLOTANTES (CENTRADOS DERECHA) -->
+    <!-- BOTONES FLOTANTES -->
     <div id="floating-controls">
         <button id="btn-theme" class="float-btn" title="Cambiar Tema">🌙</button>
         <button id="btn-text-size" class="float-btn" title="Tamaño Texto">🔤</button>
         <button id="btn-music" class="float-btn" title="Música" style="display:none;">🔇</button>
     </div>
 
-    <!-- SLIDER DE TEXTO (Aparece al presionar 🔤) -->
+    <!-- SLIDER DE TEXTO -->
     <div id="text-slider-container">
         <label>Tamaño Texto</label>
         <input type="range" id="text-slider" min="80" max="150" value="100" step="5">
@@ -53,7 +55,11 @@
             <div class="flex flex-wrap justify-center gap-3 mt-2">
                 <a href="https://wa.me/573229247605" target="_blank" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95"><span>💬 WhatsApp Directo</span></a>
                 <a href="https://instagram.com/valen_fashion_manizales" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95"><span>📸 Instagram</span></a>
-                <button id="btn-qr-share" class="hidden items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-full shadow-lg transition-all active:scale-95"><span>🔳 Código QR</span></button>
+                
+                <!-- BOTÓN QR (SIEMPRE BLANCO) -->
+                <button id="btn-qr-open" class="qr-btn-fixed flex items-center gap-2 text-xs font-bold py-2 px-4 rounded-full transition-all active:scale-95">
+                    <span>🔳 Código QR</span>
+                </button>
             </div>
 
             <div class="w-full max-w-md space-y-2 text-xs card-bg p-4 rounded-2xl mt-2 shadow-sm">
@@ -81,6 +87,42 @@
     </div>
 
     <button id="debug-btn" onclick="toggleDebugPanel(true)" class="hidden fixed bottom-6 left-6 w-12 h-12 bg-rose-600 hover:bg-rose-500 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 transition-all active:scale-90 border-2 border-white/20">🐞</button>
+
+    <!-- MODAL QR (CENTRADO, ADAPTATIVO) -->
+    <div id="qr-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm items-center justify-center p-4">
+        <div class="qr-modal-content w-full max-w-sm bg-white dark:bg-[#0d0310] rounded-3xl shadow-2xl flex flex-col items-center p-6 relative border-2 border-purple-500/30">
+            <button onclick="closeQRModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center hover:bg-rose-200 transition-all">✕</button>
+            
+            <!-- Logo -->
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" class="w-16 h-16 rounded-full object-cover border-2 border-purple-500 mb-2 shadow-md">
+            
+            <!-- Título -->
+            <h3 class="text-lg font-bold text-title mb-1 text-center">¡Compártelo! ✨</h3>
+            <p class="text-xs text-desc text-center mb-4">Ayúdanos a crecer compartiendo nuestra página 🤍</p>
+
+            <!-- Contenedor QR -->
+            <div id="qrcode-container" class="bg-white p-3 rounded-xl shadow-inner mb-4 border border-purple-100">
+                <!-- El QR se genera aquí -->
+            </div>
+
+            <!-- Texto Amable -->
+            <p class="text-[11px] text-desc text-center leading-relaxed mb-4 px-2">
+                📱 <strong>Desde tu celular:</strong> Usa el botón compartir abajo.<br>
+                💻 <strong>Desde PC:</strong> Descarga la imagen y envíala.<br><br>
+                ¡Gracias por apoyar a <span class="font-bold text-purple-600 dark:text-purple-400">Valen Fashion</span>! 💜🛍️
+            </p>
+
+            <!-- Botones Acción -->
+            <div class="flex gap-2 w-full">
+                <button id="btn-qr-share-action" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl shadow transition-all active:scale-95 hidden">
+                    Compartir 📲
+                </button>
+                <button id="btn-qr-download" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold py-2 rounded-xl shadow transition-all active:scale-95">
+                    Descargar 📥
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL ADMIN -->
     <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
@@ -184,7 +226,7 @@
                                 <div id="image-preview-container" class="hidden mt-2"><img id="image-preview" class="w-full h-32 object-cover rounded-lg border border-purple-500/30"></div>
                             </div>
                             <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Publicar Producto ✨</button>
-                        </div>
+                                                </div>
                         <div id="admin-products-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-none pr-1"></div>
                     </section>
                 </div>
@@ -216,7 +258,7 @@
     <div id="lightbox" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm items-center justify-center p-4" onclick="closeLightbox()">
         <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
             <button onclick="closeLightbox()" class="absolute -top-10 right-0 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all text-xl">✕</button>
-                        <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
+            <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
             <p id="lightbox-title" class="mt-4 text-white font-bold text-lg text-center"></p>
         </div>
     </div>
