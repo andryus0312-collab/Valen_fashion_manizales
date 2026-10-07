@@ -57,13 +57,21 @@ window.clearDebugLogs = () => { debugLogs.length = 0; renderDebugLogs(); };
 
 function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = setTimeout(() => rej(new Error(msg)), ms); p.then(v => {clearTimeout(t); res(v);}).catch(e => {clearTimeout(t); rej(e);}); }); }
 
-// ============ FASE 2: BOTONES FLOTANTES ============
+// ============ FASE 2: BOTONES FLOTANTES (SINCRONIZADOS CON TAILWIND) ============
 (function initFloatingControls() {
     const btnTheme = document.getElementById('btn-theme');
     const savedTheme = localStorage.getItem('valen_theme') || 'light';
-    if (savedTheme === 'dark') { document.body.classList.add('dark-mode'); btnTheme.innerText = '☀️'; } else { btnTheme.innerText = '🌙'; }
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark');
+        btnTheme.innerText = '☀️';
+    } else {
+        document.documentElement.classList.remove('dark');
+        btnTheme.innerText = '🌙';
+    }
     btnTheme.onclick = () => {
         const isDark = document.body.classList.toggle('dark-mode');
+        document.documentElement.classList.toggle('dark', isDark);
         localStorage.setItem('valen_theme', isDark ? 'dark' : 'light');
         btnTheme.innerText = isDark ? '☀️' : '🌙';
     };
@@ -88,7 +96,7 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
     });
 })();
 
-// ============ FASE 3: CÓDIGO QR (MEJORADO) ============
+// ============ FASE 3: CÓDIGO QR (LOGO + 1 SOLO LINK) ============
 (function initQR() {
     const btnOpen = document.getElementById('btn-qr-open');
     const modal = document.getElementById('qr-modal');
@@ -96,11 +104,9 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
     const btnShare = document.getElementById('btn-qr-share-action');
     const btnDownload = document.getElementById('btn-qr-download');
     
-    // URL ÚNICA Y ESTÁTICA
     const shareUrl = "https://andryus0312-collab.github.io/Valen_fashion_manizales/";
     let qrGenerated = false;
 
-    // Función para obtener saludo según hora
     function getGreeting() {
         const hour = new Date().getHours();
         if (hour >= 5 && hour < 12) return '¡Buenos días';
@@ -108,73 +114,107 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t = 
         return '¡Buenas noches';
     }
 
-    // Generar QR (Más grande: 256px)
     function generateQR() {
         if (qrGenerated) return;
         container.innerHTML = "";
         new QRCode(container, {
             text: shareUrl,
-            width: 256, // Más grande
+            width: 256,
             height: 256,
-            colorDark : "#2e1065", // Morado oscuro
+            colorDark : "#2e1065",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
         });
         qrGenerated = true;
     }
 
-    // Abrir Modal
     btnOpen.onclick = () => {
         generateQR();
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        
-        if (navigator.share) {
-            btnShare.classList.remove('hidden');
-        } else {
-            btnShare.classList.add('hidden');
-        }
+        btnShare.classList.toggle('hidden', !navigator.share);
     };
 
     window.closeQRModal = () => {
         modal.classList.remove('flex');
         modal.classList.add('hidden');
     };
-
     modal.onclick = (e) => { if (e.target === modal) closeQRModal(); };
 
-    // Acción Compartir (Mensaje Personalizado y Bonito)
+    // COMPARTIR: mensaje bonito con UN SOLO link (sin duplicado)
     btnShare.onclick = async () => {
         const greeting = getGreeting();
-        // Mensaje con formato, emojis y espacios
-        const message = `${greeting}! 🤍✨\n\nTe invito a conocer *Valen Fashion Manizales* 🛍️, una tienda con artículos únicos y muy especiales para cualquier ocasión. \n\n🎁 Si no tenemos algo, ¡te lo conseguimos! Todo a precios muy razonables. 💸\n\n Visita nuestra página, sigue nuestro Instagram y contáctanos directamente si tienes dudas:\n${shareUrl}\n\n¡Gracias por compartir y ayudarnos a crecer! 💜🙏`;
-
+        const message = `${greeting}! 🤍✨\n\nTe invito a conocer *Valen Fashion Manizales* 🛍️, una tienda con artículos únicos y muy especiales para cualquier ocasión.\n\n🎁 Y si no tenemos algo... ¡te lo conseguimos! Todo a precios muy razonables. 💸\n\n👉 Visita nuestra página:\n${shareUrl}\n\n📸 Allí mismo encuentras nuestro Instagram para seguirnos y el WhatsApp para consultarnos cualquier duda. 💬\n\n¡Gracias por compartir y ayudarnos a seguir creciendo! 💜🙏`;
         try {
-            await navigator.share({
-                title: 'Valen Fashion Manizales 🤍',
-                text: message,
-                url: shareUrl, // Algunos navegadores ignoran url si está en text, pero es buena práctica
-            });
-        } catch (err) { console.log('Error sharing', err); }
+            await navigator.share({ title: 'Valen Fashion Manizales 🤍', text: message });
+        } catch (err) { console.log('Share cancelado', err); }
     };
 
-    // Acción Descargar
+    // DESCARGAR: imagen compuesta con LOGO + QR + nombre
     btnDownload.onclick = () => {
-        const img = container.querySelector('img');
-        if (img) {
+        const qrSource = container.querySelector('canvas') || container.querySelector('img');
+        if (!qrSource) return;
+        const logo = new Image();
+        logo.onload = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                const W = 512, H = 720;
+                canvas.width = W; canvas.height = H;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, W, H);
+                // Logo circular
+                const logoSize = 140;
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(W/2, 100, logoSize/2, 0, Math.PI*2);
+                ctx.clip();
+                ctx.drawImage(logo, W/2 - logoSize/2, 100 - logoSize/2, logoSize, logoSize);
+                ctx.restore();
+                ctx.beginPath();
+                ctx.arc(W/2, 100, logoSize/2, 0, Math.PI*2);
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = '#a855f7';
+                ctx.stroke();
+                // Textos
+                ctx.fillStyle = '#2e1065';
+                ctx.font = 'bold 30px Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Valen Fashion Manizales', W/2, 210);
+                ctx.font = '20px Arial, sans-serif';
+                ctx.fillStyle = '#6b7280';
+                ctx.fillText('✨ Mereces lo que sueñas 🤍', W/2, 240);
+                // QR
+                ctx.drawImage(qrSource, 56, 265, 400, 400);
+                // Pie
+                ctx.fillStyle = '#2e1065';
+                ctx.font = 'bold 22px Arial, sans-serif';
+                ctx.fillText('¡Escanéame! 📱💜', W/2, 700);
+                const link = document.createElement('a');
+                link.download = 'valen-fashion-qr.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('✅ QR con logo descargado');
+            } catch (err) {
+                console.error('Error al componer imagen', err);
+                showToast('⚠️ No se pudo componer la imagen');
+            }
+        };
+        logo.onerror = () => {
             const link = document.createElement('a');
             link.download = 'valen-fashion-qr.png';
-            link.href = img.src;
+            link.href = qrSource.src || qrSource.toDataURL();
             link.click();
             showToast('✅ QR Descargado');
-        }
+        };
+        logo.src = 'logo.jpg';
     };
 })();
 
 // ============ DATOS ============
 const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'🛏️ Tendidos'}];
 const ringPresets = [{name:'Morado',mode:'solid',color:'#a855f7'},{name:'Negro',mode:'solid',color:'#000000'},{name:'Blanco',mode:'solid',color:'#ffffff'},{name:'Rosa',mode:'solid',color:'#ec4899'},{name:'M→N',mode:'gradient',from:'#a855f7',to:'#000000'},{name:'M→R',mode:'gradient',from:'#a855f7',to:'#ec4899'}];
-const defaultProfile = { photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', name: 'Valen Fashion', tagline: '✨ Mereces lo que sueñas 🤍', category: '🛍️ Compras y ventas minoristas', bio: 'Tenemos cosas hermosas y exclusivas para ti 💥\npara todos los gustos ♂️♀️', service: '🚚 Domicilios en Manizales 💎', address: '📍 Cra 38 #66-20, Manizales', ring: {mode:'solid',color:'#a855f7'} };
+const defaultProfile = { photo: 'https://andryus0312-collab.github.io/Valen_fashion_manizales/logo.jpg', name: 'Valen Fashion', tagline: '✨ Mereces lo que sueñas 🤍', category: '🛍️ Compras y ventas minoristas', bio: 'Tenemos cosas hermosas y exclusivas para ti 💥\npara todos los gustos ♂️♀️', service: '🚚 Domicilios en Manizales 💎', address: '📍 Cra 38 #66-20, Manizales', ring: {mode:'solid',color:'#a855f7'} };
 let currentProfile = defaultProfile;
 
 function showToast(m) { const e=document.getElementById('toast'); if(!e)return; e.innerText=m; e.classList.remove('hidden'); e.style.opacity='1'; setTimeout(()=>{e.style.opacity='0'; setTimeout(()=>e.classList.add('hidden'),300);},2200); }
@@ -234,7 +274,7 @@ function renderProducts() {
         return `
         <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col group">
             <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${p.title}')">
-                <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                 <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full">${cat}</span>
             </div>
             <div class="p-4 space-y-1 flex-1">
