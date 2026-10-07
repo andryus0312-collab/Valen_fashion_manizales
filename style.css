@@ -86,24 +86,30 @@ input[type=range] { width: 100%; accent-color: #ec4899; }
 
 /* ============ BOTÓN QR (SIEMPRE BLANCO) ============ */
 .qr-btn-fixed {
-    background-color: #ffffff !important; /* Siempre blanco */
-    color: #2d1b36 !important; /* Texto oscuro */
+    background-color: #ffffff !important;
+    color: #2d1b36 !important;
     border: 1px solid #e9d5ff;
-    /* Sombra oscura en modo claro */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
-/* En modo oscuro, solo cambia la sombra a clara para resaltar */
 body.dark-mode .qr-btn-fixed {
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); 
 }
 
-/* ============ MODAL QR ============ */
+/* ============ MODAL QR (ADAPTATIVO) ============ */
 .qr-modal-content {
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 @keyframes popIn {
     from { opacity: 0; transform: scale(0.8); }
     to { opacity: 1; transform: scale(1); }
+}
+
+/* El contenedor del QR debe ser siempre blanco para que se lea bien, pero el borde cambia */
+#qrcode-container {
+    background-color: #ffffff !important;
+}
+body.dark-mode #qrcode-container {
+    border-color: #581c87 !important; /* Borde morado en oscuro */
 }
 
 /* ============ ESTILOS ORIGINALES ============ */
