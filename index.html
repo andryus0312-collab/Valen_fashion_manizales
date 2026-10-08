@@ -120,20 +120,7 @@
                 <div id="admin-content-section" class="hidden space-y-6">
                     <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl border border-rose-500/30 transition-all active:scale-95">🚪 Cerrar sesión</button>
 
-                    <!-- SECCIÓN MÚSICA (NUEVA) -->
-                    <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-3">
-                        <h3 class="text-sm font-bold text-title flex items-center gap-2">🎵 Melodía de Fondo</h3>
-                        <p class="text-[11px] text-desc">Sube una canción suave para ambientar la tienda (MP3, WAV, OGG). Solo se permite una.</p>
-                        <div class="flex items-center gap-2">
-                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
-                                Seleccionar Audio
-                                <input type="file" id="music-file" accept="audio/*" class="hidden" onchange="handleMusicInput(event)">
-                            </label>
-                            <button id="btn-delete-music" onclick="deleteMusic()" class="hidden bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 px-3 rounded-xl border border-rose-500/30 active:scale-95 transition-all">🗑️ Quitar</button>
-                        </div>
-                        <div id="music-status" class="text-[10px] text-desc font-mono text-center">Sin melodía asignada</div>
-                        <audio id="admin-music-preview" controls class="w-full hidden mt-2 rounded-lg"></audio>
-                    </section>
+                
 
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-3">
                         <h3 class="text-sm font-bold text-title flex items-center gap-2">🖼️ Banner Promocional</h3>
