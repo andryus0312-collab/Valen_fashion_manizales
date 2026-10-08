@@ -492,25 +492,27 @@ window.orderProduct = async function(product) {
     const text = `${greeting}! 🤍✨\n\nHola Valen, me encantó este producto de tu catálogo:\n\n🛍️ *${product.title}*\n💰 ${product.price}\n\n¿Podrías confirmarme si aún está disponible? 😊\n\n¡Muchas gracias de antemano! 💜`;
     
     try {
-        // Intentar descargar y compartir la imagen
+        // Descargar la imagen
         const response = await fetch(product.image);
         const blob = await response.blob();
         const file = new File([blob], "valen-product.jpg", { type: "image/jpeg" });
         
+        // Verificar si podemos compartir archivos DIRECTAMENTE a WhatsApp
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            // Si soporta archivos, abre el menú nativo para elegir WhatsApp
+            // Usar share con target específico para WhatsApp (solo funciona en algunos Android/iOS)
             await navigator.share({ 
                 files: [file], 
                 title: `Valen Fashion: ${product.title}`, 
-                text: text 
+                text: text,
+                url: 'https://wa.me/573229247605' // Intenta forzar WhatsApp
             });
         } else {
-            // Fallback: Redirige directo a WhatsApp solo con texto
+            // Fallback: Abrir WhatsApp solo con texto (la imagen tendrá que adjuntarla manualmente)
             window.open(`https://wa.me/573229247605?text=${encodeURIComponent(text)}`, '_blank');
         }
     } catch (error) {
-        console.error("Error al preparar imagen:", error);
-        // Si falla todo, redirige directo a WhatsApp
+        console.error("Error al preparar pedido:", error);
+        // Si falla todo, abrir WhatsApp con texto
         window.open(`https://wa.me/573229247605?text=${encodeURIComponent(text)}`, '_blank');
     }
 };
