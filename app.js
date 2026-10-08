@@ -48,8 +48,9 @@ window.toggleDebugPanel = (s) => { const p=document.getElementById('debug-panel'
 window.clearDebugLogs = () => { debugLogs.length=0; renderDebugLogs(); };
 function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=setTimeout(()=>rej(new Error(msg)), ms); p.then(v=>{clearTimeout(t);res(v);}).catch(e=>{clearTimeout(t);rej(e);}); }); }
 
-// ============ FASE 2: BOTONES FLOTANTES ============
+// ============ FASE 2 & 4: BOTONES FLOTANTES + MÚSICA ============
 (function initFloatingControls() {
+    // 1. TEMA
     const btnTheme = document.getElementById('btn-theme');
     const savedTheme = localStorage.getItem('valen_theme') || 'light';
     if (savedTheme === 'dark') { document.body.classList.add('dark-mode'); document.documentElement.classList.add('dark'); btnTheme.innerText = '☀️'; } else { document.documentElement.classList.remove('dark'); btnTheme.innerText = '🌙'; }
@@ -59,6 +60,8 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
         localStorage.setItem('valen_theme', isDark ? 'dark' : 'light');
         btnTheme.innerText = isDark ? '☀️' : '🌙';
     };
+
+    // 2. TEXTO
     const btnSize = document.getElementById('btn-text-size');
     const sliderContainer = document.getElementById('text-slider-container');
     const slider = document.getElementById('text-slider');
@@ -68,6 +71,58 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
     btnSize.onclick = () => { sliderContainer.style.display = sliderContainer.style.display === 'flex' ? 'none' : 'flex'; };
     slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
     document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
+
+    // 3. MÚSICA (FASE 4)
+    const btnMusic = document.getElementById('btn-music');
+    const audioEl = document.getElementById('bg-music');
+    let isMuted = localStorage.getItem('valen_music_muted') === 'true';
+    let hasAudio = false;
+
+    // Actualizar icono
+    function updateMusicIcon() {
+        if (!hasAudio) { btnMusic.style.display = 'none'; return; }
+        btnMusic.style.display = 'flex';
+        btnMusic.innerText = isMuted ? '🔇' : '🔊';
+    }
+
+    // Intentar reproducir (requiere interacción previa del usuario)
+    function tryPlay() {
+        if (!hasAudio || isMuted) return;
+        const playPromise = audioEl.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => { console.log("Autoplay bloqueado, esperando interacción."); });
+        }
+    }
+
+    // Escuchar cambios en Firebase para la música
+    onValue(ref(db, 'valen_music'), (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.url) {
+            hasAudio = true;
+            audioEl.src = data.url;
+            updateMusicIcon();
+            // Si no está muteado, intentar reproducir al primer toque del usuario en la página
+            if (!isMuted) {
+                const startAudio = () => { tryPlay(); document.removeEventListener('click', startAudio); document.removeEventListener('touchstart', startAudio); };
+                document.addEventListener('click', startAudio);
+                document.addEventListener('touchstart', startAudio);
+            }
+        } else {
+            hasAudio = false;
+            audioEl.pause();
+            audioEl.src = "";
+            updateMusicIcon();
+        }
+    });
+
+    // Toggle Mute/Unmute
+    btnMusic.onclick = () => {
+        if (!hasAudio) return;
+        isMuted = !isMuted;
+        localStorage.setItem('valen_music_muted', isMuted);
+        if (isMuted) { audioEl.pause(); } else { audioEl.play().catch(e => console.log(e)); }
+        updateMusicIcon();
+    };
 })();
 
 // ============ FASE 3: QR GLOBAL ============
@@ -85,7 +140,7 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
     window.closeQRModal = () => { modal.classList.remove('flex'); modal.classList.add('hidden'); };
     modal.onclick = (e) => { if (e.target === modal) closeQRModal(); };
     btnShare.onclick = async () => {
-        const msg = `${getGreeting()}! 🤍✨\n\nTe invito a conocer *Valen Fashion Manizales* 🛍️, una tienda con artículos únicos y muy especiales.\n\n🎁 Y si no tenemos algo... ¡te lo conseguimos! Todo a precios muy razonables. 💸\n\n👉 Visita nuestra página:\n${shareUrl}\n\n📸 Allí mismo encuentras nuestro Instagram y WhatsApp. 💬\n\n¡Gracias por compartir! 💜🙏`;
+        const msg = `${getGreeting()}! 🤍✨\n\nTe invito a conocer *Valen Fashion Manizales* 🛍️.\n\n🎁 Y si no tenemos algo... ¡te lo conseguimos!\n\n👉 ${shareUrl}\n\n¡Gracias por compartir! 💜`;
         try { await navigator.share({ title: 'Valen Fashion Manizales 🤍', text: msg }); } catch (err) {}
     };
     btnDownload.onclick = () => {
@@ -101,7 +156,7 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
             ctx.font = '20px Arial'; ctx.fillStyle = '#6b7280'; ctx.fillText('✨ Mereces lo que sueñas 🤍', W/2, 240);
             ctx.drawImage(qrSource, 56, 265, 400, 400);
             ctx.fillStyle = '#2e1065'; ctx.font = 'bold 22px Arial'; ctx.fillText('¡Escanéame! 📱💜', W/2, 700);
-            const link = document.createElement('a'); link.download = 'valen-fashion-qr.png'; link.href = canvas.toDataURL('image/png'); link.click(); showToast('✅ QR con logo descargado');
+            const link = document.createElement('a'); link.download = 'valen-fashion-qr.png'; link.href = canvas.toDataURL('image/png'); link.click(); showToast('✅ QR descargado');
         };
         logo.src = 'logo.jpg';
     };
@@ -131,6 +186,64 @@ function resizeImg(f, max, q) { return new Promise((res,rej)=>{ const r=new File
 window.handleBannerImagesInput = (e) => { const f=Array.from(e.target.files||[]); if(!f.length)return; const st=document.getElementById('banner-image-status'); let d=0; st.innerText=`Subiendo 0/${f.length}...`; f.forEach(file=>{ resizeImg(file,1200,0.8).then(b64=>withTimeout(push(ref(db,'valen_banner'),{image:b64,createdAt:Date.now()}),12000,'Timeout')).then(()=>{ if(++d===f.length){st.innerText='Ninguna'; showToast('✅ Banner OK'); document.getElementById('banner-image-file').value='';} else st.innerText=`Subiendo ${d}/${f.length}...`; }).catch(err=>alert('Error: '+err.message)); }); };
 window.deleteBannerImage = (id) => { if(confirm('¿Eliminar?')) remove(ref(db,'valen_banner/'+id)); };
 
+// ============ FASE 4: MÚSICA ADMIN ============
+window.handleMusicInput = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('music-status');
+    statusEl.innerText = "Subiendo melodía... (puede tardar)";
+    
+    // Convertir a Base64 (Firebase Realtime DB tiene límite de 10MB, así que comprimimos o advertimos)
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const base64 = ev.target.result;
+        // Guardar en Firebase
+        withTimeout(set(ref(db, 'valen_music'), { url: base64, name: file.name, createdAt: Date.now() }), 30000, 'La canción es muy pesada o la conexión es lenta.')
+        .then(() => {
+            statusEl.innerText = "✅ Melodía activa: " + file.name;
+            document.getElementById('btn-delete-music').classList.remove('hidden');
+            const preview = document.getElementById('admin-music-preview');
+            preview.src = base64;
+            preview.classList.remove('hidden');
+            showToast('✅ Música actualizada');
+        })
+        .catch((err) => {
+            statusEl.innerText = "❌ Error: " + err.message;
+            alert("Error al subir música. Intenta con un archivo MP3 más pequeño (< 5MB).");
+        });
+    };
+    reader.readAsDataURL(file);
+};
+
+window.deleteMusic = function() {
+    if (!confirm('¿Eliminar la melodía de fondo?')) return;
+    remove(ref(db, 'valen_music')).then(() => {
+        document.getElementById('music-status').innerText = "Sin melodía asignada";
+        document.getElementById('btn-delete-music').classList.add('hidden');
+        document.getElementById('admin-music-preview').classList.add('hidden');
+        document.getElementById('music-file').value = '';
+        showToast('🗑️ Música eliminada');
+    });
+};
+
+// Cargar estado inicial de música en admin
+onValue(ref(db, 'valen_music'), (snapshot) => {
+    const data = snapshot.val();
+    const statusEl = document.getElementById('music-status');
+    const btnDel = document.getElementById('btn-delete-music');
+    const preview = document.getElementById('admin-music-preview');
+    if (data && data.url) {
+        statusEl.innerText = "✅ Activa: " + (data.name || 'Melodía');
+        btnDel.classList.remove('hidden');
+        preview.src = data.url;
+        preview.classList.remove('hidden');
+    } else {
+        statusEl.innerText = "Sin melodía asignada";
+        btnDel.classList.add('hidden');
+        preview.classList.add('hidden');
+    }
+});
+
 if(new URLSearchParams(window.location.search).get('admin')==='1') document.getElementById('btn-admin').classList.remove('hidden');
 
 function ringToCss(r) { return !r ? defaultProfile.ring.color : (r.mode==='gradient' ? `linear-gradient(135deg,${r.from},${r.to})` : r.color); }
@@ -142,10 +255,18 @@ window.selectCustomGradient = () => { selectedRing={mode:'gradient',from:documen
 
 function renderProfile(p) { p=p||defaultProfile; document.getElementById('profile-photo').src=p.photo; document.getElementById('profile-name').innerText=p.name; document.getElementById('profile-tagline').innerText=p.tagline; document.getElementById('profile-category').innerText=p.category; document.getElementById('profile-bio').innerText=p.bio; document.getElementById('profile-service').innerText=p.service; document.getElementById('profile-address').innerText=p.address; document.getElementById('profile-ring').style.background=ringToCss(p.ring); }
 function prefillProfileForm() { const p=currentProfile||defaultProfile; document.getElementById('profile-category-input').value=p.category; document.getElementById('profile-bio-input').value=p.bio; document.getElementById('profile-service-input').value=p.service; document.getElementById('profile-address-input').value=p.address; selectedRing=p.ring; renderRingPresets(); document.getElementById('ring-preview').style.background=ringToCss(selectedRing); }
+function renderProfile(p) { p=p||defaultProfile; document.getElementById('profile-photo').src=p.photo; document.getElementById('profile-name').innerText=p.name; document.getElementById('profile-tagline').innerText=p.tagline; document.getElementById('profile-category').innerText=p.category; document.getElementById('profile-bio').innerText=p.bio; document.getElementById('profile-service').innerText=p.service; document.getElementById('profile-address').innerText=p.address; document.getElementById('profile-ring').style.background=ringToCss(p.ring); }
+            updateMusicIcon();
+function prefillProfileForm() { const p=currentProfile||defaultProfile; document.getElementById('profile-category-input').value=p.category; document.getElementById('profile-bio-input').value=p.bio; document.getElementById('profile-service-input').value=p.service; document.getElementById('profile-address-input').value=p.address; selectedRing=p.ring; renderRingPresets(); document.getElementById('ring-preview').style.background=ringToCss(selectedRing); }
+            // Si no está muteado, intentar reproducir al primer toque del usuario en la página
 window.handleProfileImageInput = (e) => { const f=e.target.files[0]; if(!f)return; resizeImg(f,600,0.85).then(b64=>{ profileBase64Image=b64; document.getElementById('profile-image-preview').src=b64; document.getElementById('profile-image-preview-container').classList.remove('hidden'); document.getElementById('profile-image-status').innerText="OK"; }); };
+            if (!isMuted) {
 window.saveProfile = () => { const up={...(currentProfile||defaultProfile), category:document.getElementById('profile-category-input').value, bio:document.getElementById('profile-bio-input').value, service:document.getElementById('profile-service-input').value, address:document.getElementById('profile-address-input').value, ring:selectedRing}; if(profileBase64Image)up.photo=profileBase64Image; withTimeout(set(ref(db,'valen_profile'),up),12000,'Timeout').then(()=>showToast('✅ Guardado')).catch(e=>alert('Error: '+e.message)); };
+                const startAudio = () => { tryPlay(); document.removeEventListener('click', startAudio); document.removeEventListener('touchstart', startAudio); };
 onValue(ref(db, 'valen_profile'), (s) => { currentProfile=s.val()||defaultProfile; renderProfile(currentProfile); });
+                document.addEventListener('click', startAudio);
 
+                document.addEventListener('touchstart', startAudio);
 function renderCategories() {
     document.getElementById('category-filters').innerHTML = categories.map(c => {
         const act = selectedCategory===c.id;
@@ -154,106 +275,36 @@ function renderCategories() {
 }
 window.setCategory = (id) => { selectedCategory=id; renderCategories(); renderProducts(); };
 
-// ============ FUNCIONES COMPARTIR PRODUCTO ============
+// ============ COMPARTIR PRODUCTO ============
 function getGreeting() { const h = new Date().getHours(); return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches'; }
-
-// ============ FUNCIÓN COMPARTIR PRODUCTO (CON IMAGEN) ============
 window.shareProduct = async function(product) {
     const greeting = getGreeting();
-    const text = `${greeting}! 🤍✨\n\nMira qué encontré en *Valen Fashion Manizales* y pensé en ti: \n\n🛍️ *${product.title}*\n💰 ${product.price}\n\n${product.description ? '📝 ' + product.description + '\n\n' : ''}Me pareció súper interesante y quería compartirlo contigo. 😍\n\n👉 Recuerda seguirnos en Instagram y visitar nuestra página para ver más cositas lindas:\nhttps://andryus0312-collab.github.io/Valen_fashion_manizales/\n\n¡Un abrazo! 💜`;
-
+    const text = `${greeting}! 🤍✨\n\nMira qué encontré en *Valen Fashion Manizales*: \n\n🛍️ *${product.title}*\n💰 ${product.price}\n\n${product.description ? '📝 ' + product.description + '\n\n' : ''}Me pareció súper interesante. 😍\n\n👉 Recuerda seguirnos en Instagram:\nhttps://andryus0312-collab.github.io/Valen_fashion_manizales/\n\n¡Un abrazo! 💜`;
     try {
-        // 1. Intentar descargar la imagen del producto para compartirla como archivo
         const response = await fetch(product.image);
         const blob = await response.blob();
         const file = new File([blob], "valen-product.jpg", { type: "image/jpeg" });
-
-        // 2. Verificar si el navegador soporta compartir archivos
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: `Valen Fashion: ${product.title}`,
-                text: text,
-            });
-            console.log('✅ Producto compartido con imagen');
+            await navigator.share({ files: [file], title: `Valen Fashion: ${product.title}`, text: text });
         } else {
-            // 3. Fallback: Si no soporta archivos (PC o celulares viejos), compartir solo texto
-            console.log('⚠️ El dispositivo no soporta compartir archivos, enviando solo texto.');
-            await navigator.share({
-                title: `Valen Fashion: ${product.title}`,
-                text: text,
-            });
+            await navigator.share({ title: `Valen Fashion: ${product.title}`, text: text });
         }
     } catch (error) {
-        console.error('Error al compartir:', error);
-        // Si el usuario cancela o hay error, intentamos descargar la imagen como último recurso
-        if (error.name !== 'AbortError') {
-            showToast('⚠️ No se pudo compartir la imagen, descargando...');
-            downloadProductImage(product);
-        }
+        if (error.name !== 'AbortError') { showToast('⚠️ Descargando imagen...'); downloadProductImage(product); }
     }
 };
-
 window.downloadProductImage = function(product) {
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
+    const img = new Image(); img.crossOrigin = "Anonymous";
     img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const W = 600, H = 800;
-        canvas.width = W; canvas.height = H;
-        const ctx = canvas.getContext('2d');
-        
-        // Fondo
-        ctx.fillStyle = '#fdfbf7'; ctx.fillRect(0, 0, W, H);
-        
-        // Imagen Producto (centrada arriba)
-        const imgSize = 400;
-        const startX = (W - imgSize) / 2;
-        ctx.drawImage(img, startX, 40, imgSize, imgSize);
-        
-        // Logo pequeño esquina
-        const logo = new Image();
-        logo.src = 'logo.jpg';
-        // No esperamos a que cargue el logo para no complicar, dibujamos texto
-        
-        // Textos
-        ctx.fillStyle = '#2e1065';
-        ctx.font = 'bold 32px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(product.title, W/2, 480);
-        
-        ctx.fillStyle = '#9333ea';
-        ctx.font = 'bold 28px Arial';
-        ctx.fillText(product.price, W/2, 520);
-        
-        if (product.description) {
-            ctx.fillStyle = '#4b5563';
-            ctx.font = '18px Arial';
-            // Simple wrap
-            const words = product.description.split(' ');
-            let line = '';
-            let y = 560;
-            for(let n = 0; n < words.length; n++) {
-                let testLine = line + words[n] + ' ';
-                if (ctx.measureText(testLine).width > W - 40 && n > 0) {
-                    ctx.fillText(line, W/2, y);
-                    line = words[n] + ' ';
-                    y += 25;
-                } else { line = testLine; }
-            }
-            ctx.fillText(line, W/2, y);
-        }
-        
-        // Footer
-        ctx.fillStyle = '#2e1065';
-        ctx.font = 'bold 20px Arial';
-        ctx.fillText('Valen Fashion Manizales 🤍', W/2, H - 40);
-        
-        const link = document.createElement('a');
-        link.download = `valen-${product.title.replace(/\s+/g, '-')}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showToast('✅ Imagen del producto descargada');
+        const canvas = document.createElement('canvas'); const W = 600, H = 800; canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fdfbf7'; ctx.fillRect(0, 0, W, H);
+        const imgSize = 400; ctx.drawImage(img, (W-imgSize)/2, 40, imgSize, imgSize);
+        ctx.fillStyle = '#2e1065'; ctx.font = 'bold 32px Arial'; ctx.textAlign = 'center'; ctx.fillText(product.title, W/2, 480);
+        ctx.fillStyle = '#9333ea'; ctx.font = 'bold 28px Arial'; ctx.fillText(product.price, W/2, 520);
+        if (product.description) { ctx.fillStyle = '#4b5563'; ctx.font = '18px Arial'; ctx.fillText(product.description.substring(0, 100) + '...', W/2, 560); }
+        ctx.fillStyle = '#2e1065'; ctx.font = 'bold 20px Arial'; ctx.fillText('Valen Fashion Manizales 🤍', W/2, H - 40);
+        const link = document.createElement('a'); link.download = `valen-${product.title.replace(/\s+/g, '-')}.png`; link.href = canvas.toDataURL('image/png'); link.click();
+        showToast('✅ Imagen descargada');
     };
     img.src = product.image;
 };
@@ -265,10 +316,7 @@ function renderProducts() {
     c.innerHTML = f.map(p => {
         const cat = categories.find(x=>x.id===p.category)?.name || p.category;
         const wa = `https://wa.me/573229247605?text=${encodeURIComponent(`¡Hola! Me interesa: *${p.title}* (${p.price})`)}`;
-        // Escape comillas para el onclick
-        const safeTitle = p.title.replace(/'/g, "\\'");
-        const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
-        
+        const safeTitle = p.title.replace(/'/g, "\\'"); const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
         return `
         <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col group">
             <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${safeTitle}')">
@@ -281,9 +329,7 @@ function renderProducts() {
             </div>
             <div class="p-4 pt-0 space-y-2">
                 <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
-                <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">
-                    Compartir 🔗
-                </button>
+                <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button>
             </div>
         </div>`;
     }).join('');
