@@ -427,17 +427,26 @@ function renderProducts() {
     c.innerHTML = f.map(p => {
         const cat = categories.find(x => x.id === p.category)?.name || p.category;
         
-        // Mensaje personalizado para WhatsApp
+        // --- MENSAJE BONITO Y COMPLETO PARA WHATSAPP ---
         const greeting = getGreeting();
-        const waText = `${greeting}! 🤍✨\n\nHola Valen, me encantó este producto de tu catálogo:\n\n️ *${p.title}*\n💰 ${p.price}\n\n¿Podrías confirmarme si aún está disponible? 😊\n\n¡Muchas gracias de antemano! 💜`;
+        const descripcion = p.description ? p.description : 'Sin descripción';
         
-        // Enlace base de WhatsApp (se usará como fallback)
-        const waBaseLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
+        const waText = `${greeting}! 🌸✨\n\n` +
+                       `Hola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n` +
+                       `️ *Producto:* ${p.title}\n` +
+                       `💰 *Precio:* ${p.price}\n` +
+                       `📂 *Categoría:* ${cat}\n\n` +
+                       `📝 *Descripción:*\n${descripcion}\n\n` +
+                       `¿Podrías confirmarme si aún está disponible? 😊\n` +
+                       `¡Muchas gracias de antemano! ✨`;
+        
+        const waLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
+        // -----------------------------------------------
         
         const safeTitle = p.title.replace(/'/g, "\\'"); 
         const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
-        // --- LÓGICA DE ETIQUETAS (Ya corregida y funcionando) ---
+        // --- LÓGICA DE ETIQUETAS ---
         let tagsHtml = '';
         const now = Date.now();
         const sevenDays = 7 * 24 * 60 * 60 * 1000;
@@ -456,7 +465,6 @@ function renderProducts() {
             const topPos = p.tagType ? '48px' : '14px';
             tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">Nuevo</div>`;
         }
-        // ---------------------------
 
         const topPadding = tagCount === 2 ? '60px' : (tagCount === 1 ? '36px' : '12px');
 
@@ -473,10 +481,10 @@ function renderProducts() {
                     <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
                 </div>
                 <div class="p-4 pt-0 space-y-2">
-                    <!-- NUEVO BOTÓN PEDIR CON LÓGICA DE COMPARTIR IMAGEN -->
-                    <button onclick="orderProduct({title: '${safeTitle}', price: '${p.price}', image: '${p.image}'})" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">
-                        Pedir 
-                    </button>
+                    <!-- BOTÓN PEDIR: DIRECTO A WHATSAPP (sin menú de compartir) -->
+                    <a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">
+                        Pedir por WhatsApp 💬
+                    </a>
                     <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">
                         Compartir 🔗
                     </button>
@@ -485,37 +493,6 @@ function renderProducts() {
         </div>`;
     }).join('');
 }
-
-// Nueva función para manejar el pedido con imagen
-window.orderProduct = async function(product) {
-    const greeting = getGreeting();
-    const text = `${greeting}! 🤍✨\n\nHola Valen, me encantó este producto de tu catálogo:\n\n🛍️ *${product.title}*\n💰 ${product.price}\n\n¿Podrías confirmarme si aún está disponible? 😊\n\n¡Muchas gracias de antemano! 💜`;
-    
-    try {
-        // Descargar la imagen
-        const response = await fetch(product.image);
-        const blob = await response.blob();
-        const file = new File([blob], "valen-product.jpg", { type: "image/jpeg" });
-        
-        // Verificar si podemos compartir archivos DIRECTAMENTE a WhatsApp
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            // Usar share con target específico para WhatsApp (solo funciona en algunos Android/iOS)
-            await navigator.share({ 
-                files: [file], 
-                title: `Valen Fashion: ${product.title}`, 
-                text: text,
-                url: 'https://wa.me/573229247605' // Intenta forzar WhatsApp
-            });
-        } else {
-            // Fallback: Abrir WhatsApp solo con texto (la imagen tendrá que adjuntarla manualmente)
-            window.open(`https://wa.me/573229247605?text=${encodeURIComponent(text)}`, '_blank');
-        }
-    } catch (error) {
-        console.error("Error al preparar pedido:", error);
-        // Si falla todo, abrir WhatsApp con texto
-        window.open(`https://wa.me/573229247605?text=${encodeURIComponent(text)}`, '_blank');
-    }
-};
 
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
