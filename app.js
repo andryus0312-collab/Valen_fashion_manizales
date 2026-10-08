@@ -48,7 +48,7 @@ window.toggleDebugPanel = (s) => { const p=document.getElementById('debug-panel'
 window.clearDebugLogs = () => { debugLogs.length=0; renderDebugLogs(); };
 function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=setTimeout(()=>rej(new Error(msg)), ms); p.then(v=>{clearTimeout(t);res(v);}).catch(e=>{clearTimeout(t);rej(e);}); }); }
 
-// ============ FASE 2 & 4: BOTONES + MÚSICA + ONDAS ============
+// ============ FASE 2 & 4: BOTONES + MÚSICA AUTO-START ============
 (function initFloatingControls() {
     // 1. TEMA
     const btnTheme = document.getElementById('btn-theme');
@@ -72,18 +72,17 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
     slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
     document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
 
-    // 3. MÚSICA (FASE 4 - AUTOPLAY AL PRIMER TOQUE)
+    // 3. MÚSICA (AUTO-START BLINDADO)
     const btnMusic = document.getElementById('btn-music');
     const audioEl = document.getElementById('bg-music');
     
-    // Configuración
     audioEl.src = "musica.mp3"; 
     audioEl.loop = true;
     audioEl.volume = 0.4;
     
     let isMuted = localStorage.getItem('valen_music_muted') === 'true';
     let hasAudio = true; 
-    let userInteracted = false; // Bandera para saber si ya interactuó
+    let userInteracted = false;
 
     function updateMusicUI() {
         btnMusic.style.display = 'flex';
@@ -96,54 +95,44 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
         }
     }
 
-    // Función centralizada para intentar reproducir
+    // Función maestra para intentar reproducir
     function attemptPlay() {
         if (userInteracted || isMuted || !hasAudio) return;
         
         const playPromise = audioEl.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                // Reproducción exitosa
                 userInteracted = true;
                 updateMusicUI();
-                // Limpiamos los listeners globales ya que ya logramos reproducir
-                document.removeEventListener('click', attemptPlay);
-                document.removeEventListener('touchstart', attemptPlay);
-                document.removeEventListener('keydown', attemptPlay);
+                // Limpiar listeners globales
+                document.removeEventListener('click', attemptPlay, true);
+                document.removeEventListener('touchstart', attemptPlay, true);
+                document.removeEventListener('keydown', attemptPlay, true);
             }).catch(error => {
                 console.log("Autoplay bloqueado, esperando interacción explícita.");
             });
         }
     }
 
-    // Escuchar CUALQUIER interacción en toda la página (no solo clicks en botones)
-    // Usamos 'true' para capturar el evento en la fase de captura (antes que otros handlers)
+    // LISTENERS GLOBALES AGRESIVOS (Capturan el primer toque en CUALQUIER lado)
     document.addEventListener('click', attemptPlay, true);
     document.addEventListener('touchstart', attemptPlay, true);
     document.addEventListener('keydown', attemptPlay, true);
 
-    // Toggle Manual del Botón
+    // Botón Manual
     btnMusic.onclick = (e) => {
-        e.stopPropagation(); // Evita que el click bublee y dispare attemptPlay dos veces
-        userInteracted = true; // Marcamos que hubo interacción
-        
+        e.stopPropagation();
+        userInteracted = true;
         isMuted = !isMuted;
         localStorage.setItem('valen_music_muted', isMuted);
-        
-        if (isMuted) {
-            audioEl.pause();
-        } else {
-            audioEl.play().catch(e => console.log(e));
-        }
+        if (isMuted) audioEl.pause(); else audioEl.play().catch(e => console.log(e));
         updateMusicUI();
     };
     
-    // Sincronizar UI si el audio se pausa por otras razones
     audioEl.onpause = () => { if(userInteracted) updateMusicUI(); };
     audioEl.onplay = updateMusicUI;
-    
-    // Estado inicial
     updateMusicUI();
+})();
 
 // ============ FASE 3: QR ============
 (function initQR() {
@@ -249,7 +238,9 @@ window.downloadProductImage = function(product) {
     const img = new Image(); img.crossOrigin = "Anonymous";
     img.onload = () => {
         const canvas = document.createElement('canvas'); const W = 600, H = 800; canvas.width = W; canvas.height = H;
+        const response = await fetch(product.image);
         const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fdfbf7'; ctx.fillRect(0, 0, W, H);
+        const blob = await response.blob();
         ctx.drawImage(img, 100, 40, 400, 400);
         ctx.fillStyle = '#2e1065'; ctx.font = 'bold 32px Arial'; ctx.textAlign = 'center'; ctx.fillText(product.title, W/2, 480);
         ctx.fillStyle = '#9333ea'; ctx.font = 'bold 28px Arial'; ctx.fillText(product.price, W/2, 520);
