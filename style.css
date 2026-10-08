@@ -23,20 +23,31 @@ body.dark-mode .admin-input { background-color: #1b0c1b; color: #ffffff; border:
 .admin-section-bg { background-color: #f9fafb; } body.dark-mode .admin-section-bg { background-color: rgba(27, 12, 27, 0.5); }
 .admin-item-bg { background-color: #ffffff; border: 1px solid #e9d5ff; } body.dark-mode .admin-item-bg { background-color: #0d0310; border: 1px solid #581c87; }
 
-/* ============ BOTONES FLOTANTES (INDEPENDIENTES DEL TEMA) ============ */
+/* ============ BOTONES FLOTANTES ============ */
 #floating-controls { position: fixed; right: 1rem; top: 50%; transform: translateY(-50%); z-index: 40; display: flex; flex-direction: column; gap: 1rem; }
 .float-btn { 
     width: 3.5rem; height: 3.5rem; border-radius: 9999px; 
     display: flex; align-items: center; justify-content: center; 
     font-size: 1.5rem; cursor: pointer; 
-    /* Degradado Fucsia a Negro (Siempre igual) */
     background: linear-gradient(135deg, #ec4899, #000000); 
     color: white; border: 2px solid rgba(255, 255, 255, 0.3); 
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 0 4px 6px rgba(0,0,0,0.3); 
-    transition: all 0.2s; 
+    transition: all 0.2s; position: relative;
 }
 .float-btn:active { transform: scale(0.9); } 
 .float-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
+
+/* ONDAS DE MÚSICA */
+.float-btn.playing::before, .float-btn.playing::after {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100%; height: 100%; border-radius: 50%; border: 2px solid #d8b4fe; /* Morado claro */
+    opacity: 0; z-index: -1; animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+.float-btn.playing::after { animation-delay: 1s; }
+@keyframes pulse-ring {
+    0% { width: 100%; height: 100%; opacity: 0.8; }
+    100% { width: 180%; height: 180%; opacity: 0; }
+}
 
 /* Slider Texto */
 #text-slider-container { position: fixed; right: 5rem; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.95); padding: 1rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid #e9d5ff; z-index: 41; display: none; flex-direction: column; align-items: center; gap: 0.5rem; min-width: 150px; }
@@ -44,57 +55,19 @@ body.dark-mode #text-slider-container { background: rgba(27, 12, 27, 0.95); bord
 #text-slider-container label { font-size: 0.8rem; font-weight: bold; color: #2d1b36; } body.dark-mode #text-slider-container label { color: #fff; }
 input[type=range] { width: 100%; accent-color: #ec4899; }
 
-/* ============ BOTÓN QR & COMPARTIR (BLANCOS) ============ */
+/* Botón QR & Compartir */
 .qr-btn-fixed, .share-product-btn { background-color: #ffffff !important; color: #2d1b36 !important; border: 1px solid #e9d5ff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
 body.dark-mode .qr-btn-fixed, body.dark-mode .share-product-btn { box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
 
-/* ============ MODAL QR ============ */
+/* Modal QR */
 .qr-modal-content { background-color: #ffffff; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 body.dark-mode .qr-modal-content { background-color: #0d0310; }
 @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 #qrcode-container { background-color: #ffffff !important; border: 2px solid #e9d5ff; }
 body.dark-mode #qrcode-container { border-color: #581c87; }
 
-/* ============ ESTILOS ORIGINALES ============ */
+/* Originales */
 .scrollbar-none::-webkit-scrollbar { display: none; } .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 input[type="color"] { -webkit-appearance: none; appearance: none; padding: 0; }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 9999px; }
 input[type="color"]::-webkit-color-swatch { border: none; border-radius: 9999px; }
-
-/* ============ ONDAS DE MÚSICA (FASE 4) ============ */
-.float-btn.playing {
-    position: relative;
-}
-
-.float-btn.playing::before,
-.float-btn.playing::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid #d8b4fe; /* Morado claro */
-    opacity: 0;
-    z-index: -1;
-    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
-
-.float-btn.playing::after {
-    animation-delay: 1s; /* Retraso para crear efecto de onda continua */
-}
-
-@keyframes pulse-ring {
-    0% {
-        width: 100%;
-        height: 100%;
-        opacity: 0.8;
-    }
-    100% {
-        width: 180%; /* Se expande */
-        height: 180%;
-        opacity: 0; /* Se desvanece */
-    }
-}
