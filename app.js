@@ -72,17 +72,18 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
     slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
     document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
 
-    // 3. MÚSICA (ARCHIVO ESTÁTICO + ONDAS)
+    // 3. MÚSICA (FASE 4 - AUTOPLAY AL PRIMER TOQUE)
     const btnMusic = document.getElementById('btn-music');
     const audioEl = document.getElementById('bg-music');
     
     // Configuración
-    audioEl.src = "musica.mp3"; // Asegúrate de que el archivo se llame así en GitHub
+    audioEl.src = "musica.mp3"; 
     audioEl.loop = true;
     audioEl.volume = 0.4;
     
     let isMuted = localStorage.getItem('valen_music_muted') === 'true';
-    let hasAudio = true; // Asumimos que existe el archivo
+    let hasAudio = true; 
+    let userInteracted = false; // Bandera para saber si ya interactuó
 
     function updateMusicUI() {
         btnMusic.style.display = 'flex';
@@ -95,28 +96,54 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
         }
     }
 
-    function tryPlay() {
-        if (!isMuted) {
-            audioEl.play().then(updateMusicUI).catch(e => console.log("Esperando interacción..."));
+    // Función centralizada para intentar reproducir
+    function attemptPlay() {
+        if (userInteracted || isMuted || !hasAudio) return;
+        
+        const playPromise = audioEl.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                // Reproducción exitosa
+                userInteracted = true;
+                updateMusicUI();
+                // Limpiamos los listeners globales ya que ya logramos reproducir
+                document.removeEventListener('click', attemptPlay);
+                document.removeEventListener('touchstart', attemptPlay);
+                document.removeEventListener('keydown', attemptPlay);
+            }).catch(error => {
+                console.log("Autoplay bloqueado, esperando interacción explícita.");
+            });
         }
     }
 
-    const startAudio = () => { tryPlay(); document.removeEventListener('click', startAudio); document.removeEventListener('touchstart', startAudio); };
-    document.addEventListener('click', startAudio);
-    document.addEventListener('touchstart', startAudio);
+    // Escuchar CUALQUIER interacción en toda la página (no solo clicks en botones)
+    // Usamos 'true' para capturar el evento en la fase de captura (antes que otros handlers)
+    document.addEventListener('click', attemptPlay, true);
+    document.addEventListener('touchstart', attemptPlay, true);
+    document.addEventListener('keydown', attemptPlay, true);
 
+    // Toggle Manual del Botón
     btnMusic.onclick = (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // Evita que el click bublee y dispare attemptPlay dos veces
+        userInteracted = true; // Marcamos que hubo interacción
+        
         isMuted = !isMuted;
         localStorage.setItem('valen_music_muted', isMuted);
-        if (isMuted) audioEl.pause(); else audioEl.play();
+        
+        if (isMuted) {
+            audioEl.pause();
+        } else {
+            audioEl.play().catch(e => console.log(e));
+        }
         updateMusicUI();
     };
     
-    audioEl.onpause = updateMusicUI;
+    // Sincronizar UI si el audio se pausa por otras razones
+    audioEl.onpause = () => { if(userInteracted) updateMusicUI(); };
     audioEl.onplay = updateMusicUI;
+    
+    // Estado inicial
     updateMusicUI();
-})();
 
 // ============ FASE 3: QR ============
 (function initQR() {
