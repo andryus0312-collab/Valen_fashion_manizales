@@ -48,7 +48,7 @@ window.toggleDebugPanel = (s) => { const p=document.getElementById('debug-panel'
 window.clearDebugLogs = () => { debugLogs.length=0; renderDebugLogs(); };
 function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=setTimeout(()=>rej(new Error(msg)), ms); p.then(v=>{clearTimeout(t);res(v);}).catch(e=>{clearTimeout(t);rej(e);}); }); }
 
-// ============ FASE 2: BOTONES FLOTANTES (SIN MÚSICA PARA EVITAR BLOQUEO) ============
+// ============ FASE 2: BOTONES FLOTANTES ============
 (function initFloatingControls() {
     // 1. TEMA
     const btnTheme = document.getElementById('btn-theme');
@@ -72,9 +72,9 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
     slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
     document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
 
-    // 3. MÚSICA (OCULTA TEMPORALMENTE PARA ESTABILIDAD)
+    // 3. MÚSICA (Oculta por ahora, se puede reactivar después)
     const btnMusic = document.getElementById('btn-music');
-    if(btnMusic) btnMusic.style.display = 'none'; // Se oculta hasta que estabilicemos todo
+    if(btnMusic) btnMusic.style.display = 'none'; 
 })();
 
 // ============ FASE 3: QR ============
@@ -124,52 +124,34 @@ window.formatPriceInput = (el) => { let d=el.value.replace(/\D/g,'').replace(/^0
 // ============ BANNER ============
 let bannerImages=[], bannerIndex=0, bannerInterval=null;
 function renderBannerSlides() {
-         const container = document.getElementById('banner-carousel');
-         if (!container) return;
-         if (bannerInterval) { clearInterval(bannerInterval); bannerInterval = null; }
-         if (bannerImages.length === 0) {
-             container.classList.add('hidden');
-             container.innerHTML = '';
-             return;
-         }
-         container.classList.remove('hidden');
-         bannerIndex = 0;
-         
-         // Obtener el modo guardado (default 'cover')
-         const fitMode = window.currentBannerFit || 'cover';
-         // Mapear modo a clase de Tailwind
-         // cover -> object-cover
-         // contain -> object-contain (bg-black ya está en el contenedor)
-         // fill -> object-fill
-         let objectClass = 'object-cover';
-         if (fitMode === 'contain') objectClass = 'object-contain';
-         if (fitMode === 'fill') objectClass = 'object-fill';
+    const container = document.getElementById('banner-carousel');
+    if (!container) return;
+    if (bannerInterval) { clearInterval(bannerInterval); bannerInterval = null; }
+    if (bannerImages.length === 0) { container.classList.add('hidden'); container.innerHTML = ''; return; }
+    container.classList.remove('hidden'); bannerIndex = 0;
+    
+    const fitMode = window.currentBannerFit || 'cover';
+    let objectClass = 'object-cover';
+    if (fitMode === 'contain') objectClass = 'object-contain';
+    if (fitMode === 'fill') objectClass = 'object-fill';
 
-         container.innerHTML = bannerImages.map((b, i) => `
-             <img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full ${objectClass} transition-opacity duration-700 ${i === 0 ? 'opacity-100' : 'opacity-0'}">
-         `).join('') + (bannerImages.length > 1 ? `
-             <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">
-                 ${bannerImages.map((_, i) => `<span class="h-1.5 rounded-full transition-all ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></span>`).join('')}
-             </div>
-         ` : '');
+    container.innerHTML = bannerImages.map((b, i) => `
+        <img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full ${objectClass} transition-opacity duration-700 ${i === 0 ? 'opacity-100' : 'opacity-0'}">
+    `).join('') + (bannerImages.length > 1 ? `
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">
+            ${bannerImages.map((_, i) => `<span class="h-1.5 rounded-full transition-all ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></span>`).join('')}
+        </div>
+    ` : '');
 
-         if (bannerImages.length > 1) {
-             bannerInterval = setInterval(() => {
-                 bannerIndex = (bannerIndex + 1) % bannerImages.length;
-                 const slides = container.querySelectorAll('.banner-slide');
-                 slides.forEach((s, i) => {
-                     s.classList.toggle('opacity-100', i === bannerIndex);
-                     s.classList.toggle('opacity-0', i !== bannerIndex);
-                 });
-                 const dots = document.querySelectorAll('#banner-dots span');
-                 dots.forEach((d, i) => {
-                     d.classList.toggle('bg-white', i === bannerIndex);
-                     d.classList.toggle('w-4', i === bannerIndex);
-                     d.classList.toggle('bg-white/40', i !== bannerIndex);
-                     d.classList.toggle('w-1.5', i !== bannerIndex);
-                 });
-             }, 5000);
-         }
+    if (bannerImages.length > 1) {
+        bannerInterval = setInterval(() => {
+            bannerIndex = (bannerIndex + 1) % bannerImages.length;
+            const slides = container.querySelectorAll('.banner-slide');
+            slides.forEach((s, i) => { s.classList.toggle('opacity-100', i === bannerIndex); s.classList.toggle('opacity-0', i !== bannerIndex); });
+            const dots = document.querySelectorAll('#banner-dots span');
+            dots.forEach((d, i) => { d.classList.toggle('bg-white', i === bannerIndex); d.classList.toggle('w-4', i === bannerIndex); d.classList.toggle('bg-white/40', i !== bannerIndex); d.classList.toggle('w-1.5', i !== bannerIndex); });
+        }, 5000);
+    }
 }
 function renderAdminBannerList() { const l=document.getElementById('admin-banner-list'); if(!l)return; l.innerHTML = bannerImages.length ? bannerImages.map(b=>`<div class="relative aspect-video rounded-xl overflow-hidden border border-purple-500/30 bg-black"><img src="${b.image}" class="w-full h-full object-cover"><button onclick="deleteBannerImage('${b.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-800/90 text-white text-[10px] flex items-center justify-center">🗑️</button></div>`).join('') : '<p class="col-span-3 text-center text-desc text-[11px] py-2">Sin imágenes.</p>'; }
 onValue(ref(db, 'valen_banner'), (s) => { const d=s.val(); bannerImages=d?Object.keys(d).map(k=>({id:k,...d[k]})):[]; renderBannerSlides(); renderAdminBannerList(); });
@@ -232,17 +214,81 @@ window.downloadProductImage = function(product) {
     img.src = product.image;
 };
 
+// ============ RENDERIZADO DE PRODUCTOS (CON ETIQUETAS) ============
 function renderProducts() {
     const c=document.getElementById('products-container');
     const f=selectedCategory==='all'?allProducts:allProducts.filter(p=>p.category===selectedCategory);
     if(!f.length) { c.innerHTML='<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">🛍️</p><p>Sin productos.</p></div>'; return; }
+    
     c.innerHTML = f.map(p => {
         const cat = categories.find(x=>x.id===p.category)?.name || p.category;
         const wa = `https://wa.me/573229247605?text=${encodeURIComponent(`¡Hola! Me interesa: *${p.title}* (${p.price})`)}`;
-        const safeTitle = p.title.replace(/'/g, "\\'"); const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        const safeTitle = p.title.replace(/'/g, "\\'"); 
+        const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+
+        // --- LÓGICA DE ETIQUETAS ---
+        let tagsHtml = '';
+        const now = Date.now();
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        const isNew = p.createdAt && (now - p.createdAt < sevenDays);
+        
+        // 1. Etiqueta Manual (si existe)
+        if (p.tagType) {
+            const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
+            ctx.drawImage(qrSource, 56, 265, 400, 400);
+
+}
+    const btnSize = document.getElementById('btn-text-size');
+        logo.onload = () => {
+    function generateQR() { if (qrGenerated) return; container.innerHTML = ""; new QRCode(container, { text: shareUrl, width: 256, height: 256, colorDark : "#2e1065", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); qrGenerated = true; }
+    container.classList.remove('hidden'); bannerIndex = 0;
+window.selectCustomSolid = () => { selectedRing={mode:'solid',color:document.getElementById('ring-custom-solid').value}; highlightRingPreset(-1); document.getElementById('ring-preview').style.background=selectedRing.color; };
+
+
+        }, 5000);
+function resizeImg(f, max, q) { return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>{ const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); let w=i.width,h=i.height; if(w>h&&w>max){h*=max/w;w=max;}else if(h>max){w*=max/h;h=max;} c.width=w;c.height=h; c.getContext('2d').drawImage(i,0,0,w,h); res(c.toDataURL('image/jpeg',q)); }; i.src=e.target.result; }; r.readAsDataURL(f); }); }
+})();
+    const container = document.getElementById('qrcode-container');
+
+function renderBannerSlides() {
+            bannerIndex = (bannerIndex + 1) % bannerImages.length;
+    };
+    slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
+            tagsHtml += `
+            const link = document.createElement('a'); link.download = 'valen-qr.png'; link.href = canvas.toDataURL('image/png'); link.click();
+// ============ DATOS ============
+    const sliderContainer = document.getElementById('text-slider-container');
+            const canvas = document.createElement('canvas'); const W = 512, H = 720; canvas.width = W; canvas.height = H;
+    btnOpen.onclick = () => { generateQR(); modal.classList.remove('hidden'); modal.classList.add('flex'); btnShare.classList.toggle('hidden', !navigator.share); };
+    
+
+    const btnShare = document.getElementById('btn-qr-share-action');
+        localStorage.setItem('valen_theme', isDark ? 'dark' : 'light');
+    document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
+               <div class="absolute top-3 left-[-10px] z-10 px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded shadow-lg transform -rotate-45 origin-left" 
+                    style="background-color: ${p.tagColor}; color: ${textColor}; width: 120px; text-align: center;">
+                   ${p.tagType}
+               </div>
+            `;
+        }
+
+        // 2. Etiqueta "NUEVO" Automática (si tiene menos de 7 días)
+        if (isNew) {
+            const stylePos = p.tagType ? 'top-8 left-[-5px]' : 'top-3 left-[-10px]';
+            tagsHtml += `
+               <div class="absolute ${stylePos} z-10 px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded shadow-lg transform -rotate-45 origin-left bg-red-500 text-white" style="width: 120px; text-align: center;">
+                   🆕 Nuevo
+               </div>
+            `;
+        }
+        // ---------------------------
+
         return `
-        <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col group">
+        <div class="card-bg rounded-3xl overflow-hidden shadow-xl flex flex-col group relative">
             <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${safeTitle}')">
+                <!-- ETIQUETAS AQUÍ -->
+                ${tagsHtml}
+                
                 <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                 <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full">${cat}</span>
             </div>
@@ -251,7 +297,7 @@ function renderProducts() {
                 <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
             </div>
             <div class="p-4 pt-0 space-y-2">
-        <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
+                <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
                 <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button>
             </div>
         </div>`;
@@ -276,45 +322,65 @@ window.adminLogout = () => signOut(auth);
 window.toggleAdminModal = (s) => { const m=document.getElementById('admin-modal'); s?(m.classList.remove('hidden'),m.classList.add('flex')):(m.classList.remove('flex'),m.classList.add('hidden')); };
 
 window.handleImageInput = (e) => { const f=e.target.files[0]; if(!f)return; resizeImg(f,1000,0.8).then(b64=>{ base64Image=b64; document.getElementById('image-preview').src=b64; document.getElementById('image-preview-container').classList.remove('hidden'); }); };
-window.publishProduct = () => { const t=document.getElementById('new-title').value, p=document.getElementById('new-price').value, c=document.getElementById('new-category').value, d=document.getElementById('new-description').value; if(!t||!p||!base64Image) return alert('Faltan datos'); withTimeout(push(ref(db,'valen_products'),{title:t,price:p,category:c,description:d,image:base64Image,createdAt:Date.now()}),12000,'Timeout').then(()=>{showToast('✅ Publicado'); document.getElementById('new-title').value=''; document.getElementById('new-price').value=''; base64Image=null; document.getElementById('image-preview-container').classList.add('hidden');}).catch(e=>alert('Error')); };
+
+// ============ PUBLICAR PRODUCTO (CON ETIQUETAS) ============
+window.publishProduct = () => { 
+    const t=document.getElementById('new-title').value, 
+          p=document.getElementById('new-price').value, 
+          c=document.getElementById('new-category').value, 
+          d=document.getElementById('new-description').value;
+    
+    // Obtener valores de etiqueta
+    const tagType = document.getElementById('new-tag-type').value;
+    const tagColor = document.getElementById('new-tag-color').value;
+
+    if(!t||!p||!base64Image) return alert('Faltan datos'); 
+    
+    withTimeout(push(ref(db,'valen_products'),{
+        title:t,
+        price:p,
+        category:c,
+        description:d,
+        image:base64Image,
+        createdAt:Date.now(),
+        tagType: tagType,   // NUEVO
+        tagColor: tagColor  // NUEVO
+    }),12000,'Timeout').then(()=>{
+        showToast('✅ Publicado'); 
+        document.getElementById('new-title').value=''; 
+        document.getElementById('new-price').value=''; 
+        document.getElementById('new-description').value='';
+        // Limpiar etiqueta
+        document.getElementById('new-tag-type').value='';
+        document.getElementById('new-tag-color').value='#ef4444';
+        
+        base64Image=null; 
+        document.getElementById('image-preview-container').classList.add('hidden');
+    }).catch(e=>alert('Error: '+e.message)); 
+};
+
 window.deleteProduct = (id) => { if(confirm('¿Borrar?')) remove(ref(db,'valen_products/'+id)); };
 
 window.openLightbox = (u,t) => { document.getElementById('lightbox-img').src=u; document.getElementById('lightbox-title').innerText=t; document.getElementById('lightbox').classList.replace('hidden','flex'); };
 window.closeLightbox = () => document.getElementById('lightbox').classList.replace('flex','hidden');
 
-// ============ AJUSTE DE BANNER (FIT MODE) - CORREGIDO ============
-     
-     // 1. Cargar el modo desde el PERFIL (donde ya tenemos permisos)
-     onValue(ref(db, 'valen_profile'), (snapshot) => {
-         const data = snapshot.val();
-         // Si existe bannerFit en el perfil úsalo, si no, usa 'cover' por defecto
-         const mode = (data && data.bannerFit) ? data.bannerFit : 'cover';
-         window.currentBannerFit = mode;
-         
-         // Actualizar el selector del admin si está abierto
-         const selectEl = document.getElementById('banner-fit-mode');
-         if (selectEl) selectEl.value = mode;
-         
-         // Re-renderizar el banner para aplicar el cambio visual
-         renderBannerSlides();
-     });
+// ============ AJUSTE DE BANNER (FIT MODE) ============
+onValue(ref(db, 'valen_profile'), (snapshot) => {
+    const data = snapshot.val();
+    const mode = (data && data.bannerFit) ? data.bannerFit : 'cover';
+    window.currentBannerFit = mode;
+    const selectEl = document.getElementById('banner-fit-mode');
+    if (selectEl) selectEl.value = mode;
+    renderBannerSlides();
+});
 
-     // 2. Función para guardar (Guarda dentro del perfil existente)
-     window.updateBannerFit = function(mode) {
-         // Primero obtenemos el perfil actual para no borrar los otros datos
-         const currentData = currentProfile || defaultProfile;
-         
-         // Creamos el objeto actualizado con el nuevo modo
-         const updatedData = {
-             ...currentData,
-             bannerFit: mode
-         };
-
-         // Guardamos en valen_profile (ruta segura)
-         set(ref(db, 'valen_profile'), updatedData).then(() => {
-             showToast('✅ Ajuste de imagen guardado');
-         }).catch(err => {
-             console.error(err);
-             alert('Error al guardar ajuste: ' + err.message);
-         });
-     };
+window.updateBannerFit = function(mode) {
+    const currentData = currentProfile || defaultProfile;
+    const updatedData = { ...currentData, bannerFit: mode };
+    set(ref(db, 'valen_profile'), updatedData).then(() => {
+        showToast('✅ Ajuste de imagen guardado');
+    }).catch(err => {
+        console.error(err);
+        alert('Error al guardar ajuste: ' + err.message);
+    });
+};
