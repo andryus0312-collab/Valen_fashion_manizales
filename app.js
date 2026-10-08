@@ -48,7 +48,7 @@ window.toggleDebugPanel = (s) => { const p=document.getElementById('debug-panel'
 window.clearDebugLogs = () => { debugLogs.length=0; renderDebugLogs(); };
 function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=setTimeout(()=>rej(new Error(msg)), ms); p.then(v=>{clearTimeout(t);res(v);}).catch(e=>{clearTimeout(t);rej(e);}); }); }
 
-// ============ FASE 2 & 4: BOTONES + MÚSICA AUTO-START ============
+// ============ FASE 2: BOTONES FLOTANTES (SIN MÚSICA PARA EVITAR BLOQUEO) ============
 (function initFloatingControls() {
     // 1. TEMA
     const btnTheme = document.getElementById('btn-theme');
@@ -72,66 +72,9 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
     slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
     document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
 
-    // 3. MÚSICA (AUTO-START BLINDADO)
+    // 3. MÚSICA (OCULTA TEMPORALMENTE PARA ESTABILIDAD)
     const btnMusic = document.getElementById('btn-music');
-    const audioEl = document.getElementById('bg-music');
-    
-    audioEl.src = "musica.mp3"; 
-    audioEl.loop = true;
-    audioEl.volume = 0.4;
-    
-    let isMuted = localStorage.getItem('valen_music_muted') === 'true';
-    let hasAudio = true; 
-    let userInteracted = false;
-
-    function updateMusicUI() {
-        btnMusic.style.display = 'flex';
-        if (isMuted || audioEl.paused) {
-            btnMusic.innerText = '🔇';
-            btnMusic.classList.remove('playing');
-        } else {
-            btnMusic.innerText = '🔊';
-            btnMusic.classList.add('playing');
-        }
-    }
-
-    // Función maestra para intentar reproducir
-    function attemptPlay() {
-        if (userInteracted || isMuted || !hasAudio) return;
-        
-        const playPromise = audioEl.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                userInteracted = true;
-                updateMusicUI();
-                // Limpiar listeners globales
-                document.removeEventListener('click', attemptPlay, true);
-                document.removeEventListener('touchstart', attemptPlay, true);
-                document.removeEventListener('keydown', attemptPlay, true);
-            }).catch(error => {
-                console.log("Autoplay bloqueado, esperando interacción explícita.");
-            });
-        }
-    }
-
-    // LISTENERS GLOBALES AGRESIVOS (Capturan el primer toque en CUALQUIER lado)
-    document.addEventListener('click', attemptPlay, true);
-    document.addEventListener('touchstart', attemptPlay, true);
-    document.addEventListener('keydown', attemptPlay, true);
-
-    // Botón Manual
-    btnMusic.onclick = (e) => {
-        e.stopPropagation();
-        userInteracted = true;
-        isMuted = !isMuted;
-        localStorage.setItem('valen_music_muted', isMuted);
-        if (isMuted) audioEl.pause(); else audioEl.play().catch(e => console.log(e));
-        updateMusicUI();
-    };
-    
-    audioEl.onpause = () => { if(userInteracted) updateMusicUI(); };
-    audioEl.onplay = updateMusicUI;
-    updateMusicUI();
+    if(btnMusic) btnMusic.style.display = 'none'; // Se oculta hasta que estabilicemos todo
 })();
 
 // ============ FASE 3: QR ============
@@ -238,9 +181,7 @@ window.downloadProductImage = function(product) {
     const img = new Image(); img.crossOrigin = "Anonymous";
     img.onload = () => {
         const canvas = document.createElement('canvas'); const W = 600, H = 800; canvas.width = W; canvas.height = H;
-        const response = await fetch(product.image);
         const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fdfbf7'; ctx.fillRect(0, 0, W, H);
-        const blob = await response.blob();
         ctx.drawImage(img, 100, 40, 400, 400);
         ctx.fillStyle = '#2e1065'; ctx.font = 'bold 32px Arial'; ctx.textAlign = 'center'; ctx.fillText(product.title, W/2, 480);
         ctx.fillStyle = '#9333ea'; ctx.font = 'bold 28px Arial'; ctx.fillText(product.price, W/2, 520);
@@ -269,7 +210,7 @@ function renderProducts() {
                 <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
             </div>
             <div class="p-4 pt-0 space-y-2">
-                <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
+        <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
                 <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button>
             </div>
         </div>`;
