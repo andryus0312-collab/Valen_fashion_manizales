@@ -7,7 +7,6 @@
     <meta property="og:title" content="Valen Fashion Manizales 🤍">
     <meta property="og:description" content="Artículos únicos y especiales para ti. ¡Visítanos! ✨">
     <meta property="og:image" content="https://andryus0312-collab.github.io/Valen_fashion_manizales/logo.jpg">
-    <meta property="og:url" content="https://andryus0312-collab.github.io/Valen_fashion_manizales/">
     <script>
         (function() {
             const theme = localStorage.getItem('valen_theme');
@@ -25,10 +24,8 @@
 </head>
 <body class="font-sans antialiased theme-transition">
 
-    <!-- ELEMENTO DE AUDIO OCULTO -->
     <audio id="bg-music" loop preload="auto"></audio>
 
-    <!-- BOTONES FLOTANTES (Ahora con Música) -->
     <div id="floating-controls">
         <button id="btn-theme" class="float-btn" title="Cambiar Tema">🌙</button>
         <button id="btn-text-size" class="float-btn" title="Tamaño Texto">🔤</button>
@@ -85,9 +82,9 @@
             <p class="text-sm text-desc text-center mb-4">Ayúdanos a crecer compartiendo nuestra página 🤍</p>
             <div id="qrcode-container" class="p-4 rounded-2xl shadow-inner mb-4"></div>
             <div class="text-sm text-desc text-center leading-relaxed mb-4 px-2 space-y-2">
-                <p>📱 <strong>Escanea este código</strong> con tu cámara para entrar rápido.</p>
-                <p>📲 <strong>Desde celular:</strong> Usa el botón "Compartir".</p>
-                <p>💻 <strong>Desde PC:</strong> Descarga la imagen con el logo y envíala.</p>
+                <p>📱 <strong>Escanea este código</strong> con tu cámara.</p>
+                <p>📲 <strong>Desde celular:</strong> Usa "Compartir".</p>
+                <p>💻 <strong>Desde PC:</strong> Descarga la imagen.</p>
                 <p class="pt-2 font-semibold text-purple-600 dark:text-purple-400">¡Gracias por apoyar a Valen Fashion! 💜🛍️</p>
             </div>
             <div class="flex gap-3 w-full">
@@ -97,52 +94,41 @@
         </div>
     </div>
 
-    <!-- MODAL ADMIN (Con nueva sección de Música) -->
+    <!-- MODAL ADMIN (SIN SECCIÓN DE MÚSICA) -->
     <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="admin-panel-bg w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-purple-500/30">
             <div class="flex items-center justify-between p-4 border-b border-purple-500/20 admin-section-bg">
                 <div><h2 class="text-lg font-bold text-title">⚙️ Panel de Control</h2><p class="text-[11px] text-desc">Gestión de Valen Fashion</p></div>
-                <button onclick="toggleAdminModal(false)" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center hover:bg-rose-200 dark:hover:bg-rose-800 transition-all">✕</button>
+                <button onclick="toggleAdminModal(false)" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center">✕</button>
             </div>
-            
             <div class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-none">
                 <div id="admin-login-section" class="flex flex-col items-center justify-center py-12 space-y-4">
                     <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-3xl">🔒</div>
                     <p class="text-sm font-bold text-title">Acceso restringido</p>
                     <div class="w-full max-w-xs space-y-3 mt-4">
-                        <input type="email" id="admin-email" placeholder="Correo electrónico" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <input type="password" id="admin-password" placeholder="Contraseña" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <p id="admin-login-error" class="hidden text-xs text-rose-500 font-bold text-center"></p>
-                        <button id="admin-login-btn" onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm py-2.5 rounded-xl shadow-lg transition-all active:scale-95">Ingresar 🔑</button>
+                        <input type="email" id="admin-email" placeholder="Correo" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm">
+                        <input type="password" id="admin-password" placeholder="Contraseña" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm">
+                        <button id="admin-login-btn" onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm py-2.5 rounded-xl">Ingresar 🔑</button>
                     </div>
                 </div>
-
                 <div id="admin-content-section" class="hidden space-y-6">
-                    <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl border border-rose-500/30 transition-all active:scale-95">🚪 Cerrar sesión</button>
-
-                
-
+                    <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl">🚪 Cerrar sesión</button>
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-3">
-                        <h3 class="text-sm font-bold text-title flex items-center gap-2">🖼️ Banner Promocional</h3>
+                        <h3 class="text-sm font-bold text-title">🖼️ Banner</h3>
                         <div class="flex items-center gap-2">
-                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
-                                Seleccionar imágenes<input type="file" id="banner-image-file" accept="image/*" multiple class="hidden" onchange="handleBannerImagesInput(event)">
-                            </label>
-                            <span id="banner-image-status" class="text-[10px] text-desc font-mono">Ninguna imagen</span>
+                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer">Imágenes<input type="file" id="banner-image-file" accept="image/*" multiple class="hidden" onchange="handleBannerImagesInput(event)"></label>
+                            <span id="banner-image-status" class="text-[10px] text-desc font-mono">Ninguna</span>
                         </div>
                         <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-2"></div>
                     </section>
-
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-4">
-                        <h3 class="text-sm font-bold text-title flex items-center gap-2">✏️ Editar Perfil</h3>
-                        <!-- ... (Campos de perfil iguales a antes) ... -->
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Categoría</label><input type="text" id="profile-category-input" class="w-full admin-input rounded-xl px-3 py-2 text-xs"></div>
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Biografía</label><textarea id="profile-bio-input" rows="2" class="w-full admin-input rounded-xl px-3 py-2 text-xs resize-none"></textarea></div>
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Servicio</label><input type="text" id="profile-service-input" class="w-full admin-input rounded-xl px-3 py-2 text-xs"></div>
-                        <div class="space-y-2"><label class="text-[11px] font-bold text-desc">Dirección</label><input type="text" id="profile-address-input" class="w-full admin-input rounded-xl px-3 py-2 text-xs"></div>
-                        <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg mt-2">Guardar Perfil 💾</button>
+                        <h3 class="text-sm font-bold text-title">✏️ Perfil</h3>
+                        <div class="space-y-2"><input type="text" id="profile-category-input" placeholder="Categoría" class="w-full admin-input rounded-xl px-3 py-2 text-xs"></div>
+                        <div class="space-y-2"><textarea id="profile-bio-input" rows="2" placeholder="Bio" class="w-full admin-input rounded-xl px-3 py-2 text-xs resize-none"></textarea></div>
+                        <div class="space-y-2"><input type="text" id="profile-service-input" placeholder="Servicio" class="w-full admin-input rounded-xl px-3 py-2 text-xs"></div>
+                        <div class="space-y-2"><input type="text" id="profile-address-input" placeholder="Dirección" class="w-full admin-input rounded-xl px-3 py-2 text-xs"></div>
+                        <button id="save-profile-btn" onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs py-2.5 rounded-xl mt-2">Guardar 💾</button>
                     </section>
-
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-4">
                         <h3 class="text-sm font-bold text-title">Productos</h3>
                         <div class="space-y-3 p-3 bg-white dark:bg-[#0d0310] rounded-xl border border-purple-500/20">
@@ -176,7 +162,7 @@
             <div id="debug-log-list" class="bg-[#0d0310] p-3 rounded-xl border border-purple-500/30 text-[11px] font-mono space-y-1 min-h-[200px]"></div>
         </div>
     </div>
-    <div id="lightbox" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm items-center justify-center p-4" onclick="closeLightbox()">
+    <div id="lightbox" class="hidden fixed inset-0 z-50 bg-black/95 items-center justify-center p-4" onclick="closeLightbox()">
         <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
             <button onclick="closeLightbox()" class="absolute -top-10 right-0 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center text-xl">✕</button>
             <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
@@ -186,4 +172,4 @@
     <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#1b0c1b] text-white text-xs font-bold py-2 px-6 rounded-full shadow-2xl border border-purple-500/50 z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
     <script type="module" src="app.js"></script>
 </body>
-                </html>
+                                                                                                                                                                                                                                                                 </html>
