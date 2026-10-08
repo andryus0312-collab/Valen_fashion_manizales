@@ -282,25 +282,39 @@ window.deleteProduct = (id) => { if(confirm('¿Borrar?')) remove(ref(db,'valen_p
 window.openLightbox = (u,t) => { document.getElementById('lightbox-img').src=u; document.getElementById('lightbox-title').innerText=t; document.getElementById('lightbox').classList.replace('hidden','flex'); };
 window.closeLightbox = () => document.getElementById('lightbox').classList.replace('flex','hidden');
 
-// ============ AJUSTE DE BANNER (FIT MODE) ============
+// ============ AJUSTE DE BANNER (FIT MODE) - CORREGIDO ============
      
-     // Cargar el modo guardado al iniciar
-     onValue(ref(db, 'valen_banner_fit'), (snapshot) => {
-         const mode = snapshot.val() || 'cover';
+     // 1. Cargar el modo desde el PERFIL (donde ya tenemos permisos)
+     onValue(ref(db, 'valen_profile'), (snapshot) => {
+         const data = snapshot.val();
+         // Si existe bannerFit en el perfil úsalo, si no, usa 'cover' por defecto
+         const mode = (data && data.bannerFit) ? data.bannerFit : 'cover';
          window.currentBannerFit = mode;
          
          // Actualizar el selector del admin si está abierto
          const selectEl = document.getElementById('banner-fit-mode');
          if (selectEl) selectEl.value = mode;
          
-         // Re-renderizar el banner para aplicar el cambio
+         // Re-renderizar el banner para aplicar el cambio visual
          renderBannerSlides();
      });
 
-     // Función llamada cuando cambias el selector en el Admin
+     // 2. Función para guardar (Guarda dentro del perfil existente)
      window.updateBannerFit = function(mode) {
-         // Guardar en Firebase
-         set(ref(db, 'valen_banner_fit'), mode).then(() => {
+         // Primero obtenemos el perfil actual para no borrar los otros datos
+         const currentData = currentProfile || defaultProfile;
+         
+         // Creamos el objeto actualizado con el nuevo modo
+         const updatedData = {
+             ...currentData,
+             bannerFit: mode
+         };
+
+         // Guardamos en valen_profile (ruta segura)
+         set(ref(db, 'valen_profile'), updatedData).then(() => {
              showToast('✅ Ajuste de imagen guardado');
-         }).catch(err => alert('Error al guardar ajuste: ' + err.message));
+         }).catch(err => {
+             console.error(err);
+             alert('Error al guardar ajuste: ' + err.message);
+         });
      };
