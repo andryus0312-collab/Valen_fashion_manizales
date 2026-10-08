@@ -24,14 +24,17 @@
 </head>
 <body class="font-sans antialiased theme-transition">
 
+    <!-- AUDIO OCULTO -->
     <audio id="bg-music" loop preload="auto"></audio>
 
+    <!-- BOTONES FLOTANTES -->
     <div id="floating-controls">
         <button id="btn-theme" class="float-btn" title="Cambiar Tema">🌙</button>
         <button id="btn-text-size" class="float-btn" title="Tamaño Texto">🔤</button>
         <button id="btn-music" class="float-btn" title="Música" style="display:none;">🔇</button>
     </div>
 
+    <!-- SLIDER TEXTO -->
     <div id="text-slider-container">
         <label>Tamaño Texto</label>
         <input type="range" id="text-slider" min="80" max="150" value="100" step="5">
@@ -94,7 +97,7 @@
         </div>
     </div>
 
-    <!-- MODAL ADMIN (SIN SECCIÓN DE MÚSICA) -->
+    <!-- MODAL ADMIN -->
     <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="admin-panel-bg w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-purple-500/30">
             <div class="flex items-center justify-between p-4 border-b border-purple-500/20 admin-section-bg">
@@ -172,4 +175,4 @@
     <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#1b0c1b] text-white text-xs font-bold py-2 px-6 rounded-full shadow-2xl border border-purple-500/50 z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
     <script type="module" src="app.js"></script>
 </body>
-                                                                                                                                                                                                                                                                 </html>
+            </html>
