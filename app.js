@@ -416,12 +416,12 @@ window.downloadProductImage = function(product) {
 // ============ RENDERIZADO DE PRODUCTOS (CON ETIQUETAS) ============
 
 function renderProducts() {
-    const c=document.getElementById('products-container');
-    const f=selectedCategory==='all'?allProducts:allProducts.filter(p=>p.category===selectedCategory);
-    if(!f.length) { c.innerHTML='<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">🛍️</p><p>Sin productos.</p></div>'; return; }
+    const c = document.getElementById('products-container');
+    const f = selectedCategory === 'all' ? allProducts : allProducts.filter(p => p.category === selectedCategory);
+    if (!f.length) { c.innerHTML = '<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">️</p><p>Sin productos.</p></div>'; return; }
     
     c.innerHTML = f.map(p => {
-        const cat = categories.find(x=>x.id===p.category)?.name || p.category;
+        const cat = categories.find(x => x.id === p.category)?.name || p.category;
         const wa = `https://wa.me/573229247605?text=${encodeURIComponent(`¡Hola! Me interesa: *${p.title}* (${p.price})`)}`;
         const safeTitle = p.title.replace(/'/g, "\\'"); 
         const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
@@ -432,38 +432,47 @@ function renderProducts() {
         const sevenDays = 7 * 24 * 60 * 60 * 1000;
         const isNew = p.createdAt && (now - p.createdAt < sevenDays);
         
-        // 1. Etiqueta Manual
+        // Contar cuántas etiquetas habrá para calcular el espacio reservado
+        let tagCount = 0;
+        if (p.tagType) tagCount++;
+        if (isNew) tagCount++;
+
+        // 1. Etiqueta Manual (primera posición)
         if (p.tagType) {
             const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
             tagsHtml += `
-               <div class="absolute -top-2 -left-8 z-20 px-4 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" 
-                    style="background-color: ${p.tagColor}; color: ${textColor}; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); min-width: 100px; text-align: center;">
+               <div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" 
+                    style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: 14px; left: -34px;">
                    ${p.tagType}
                </div>
             `;
         }
 
-        // 2. Etiqueta "NUEVO" Automática
+        // 2. Etiqueta "NUEVO" Automática (segunda posición, con más espacio)
         if (isNew) {
-            const leftPos = p.tagType ? '-left-8' : '-left-8';
-            const topPos = p.tagType ? 'top-6' : '-top-2';
+            // Si ya hay una etiqueta manual, la de "Nuevo" va más abajo con separación amplia
+            const topPos = p.tagType ? '48px' : '14px';
             tagsHtml += `
-               <div class="absolute ${topPos} ${leftPos} z-20 px-4 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" 
-                    style="transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); min-width: 100px; text-align: center;">
+               <div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" 
+                    style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">
                     Nuevo
                </div>
             `;
         }
         // ---------------------------
 
+        // Espacio reservado arriba de la tarjeta para que todas se alineen igual
+        // Si hay 2 etiquetas: 60px de padding-top. Si hay 1: 36px. Si no hay: 12px (mínimo).
+        const topPadding = tagCount === 2 ? '60px' : (tagCount === 1 ? '36px' : '12px');
+
         return `
-        <div class="relative">
-            <!-- Etiquetas FUERA del contenedor con overflow -->
+        <div class="relative" style="padding-top: ${topPadding};">
+            <!-- Etiquetas (posicionadas absolutamente respecto al wrapper) -->
             ${tagsHtml}
             
             <!-- Contenedor de la tarjeta -->
             <div class="card-bg rounded-3xl shadow-xl flex flex-col group relative overflow-hidden">
-                <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${safeTitle}')">
+                <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer overflow-hidden" onclick="openLightbox('${p.image}','${safeTitle}')">
                     <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                     <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full z-10">${cat}</span>
                 </div>
@@ -478,7 +487,7 @@ function renderProducts() {
             </div>
         </div>`;
     }).join('');
-}
+        }
 
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
