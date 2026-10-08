@@ -124,11 +124,52 @@ window.formatPriceInput = (el) => { let d=el.value.replace(/\D/g,'').replace(/^0
 // ============ BANNER ============
 let bannerImages=[], bannerIndex=0, bannerInterval=null;
 function renderBannerSlides() {
-    const c=document.getElementById('banner-carousel'); if(!c)return; if(bannerInterval) clearInterval(bannerInterval);
-    if(!bannerImages.length) { c.classList.add('hidden'); return; }
-    c.classList.remove('hidden'); bannerIndex=0;
-    c.innerHTML = bannerImages.map((b,i)=>`<img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i===0?'opacity-100':'opacity-0'}">`).join('') + (bannerImages.length>1?`<div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">${bannerImages.map((_,i)=>`<span class="h-1.5 rounded-full transition-all ${i===0?'bg-white w-4':'bg-white/40 w-1.5'}"></span>`).join('')}</div>`:'');
-    if(bannerImages.length>1) bannerInterval=setInterval(()=>{ bannerIndex=(bannerIndex+1)%bannerImages.length; c.querySelectorAll('.banner-slide').forEach((s,i)=>{s.classList.toggle('opacity-100',i===bannerIndex); s.classList.toggle('opacity-0',i!==bannerIndex);}); document.querySelectorAll('#banner-dots span').forEach((d,i)=>{d.classList.toggle('bg-white',i===bannerIndex); d.classList.toggle('w-4',i===bannerIndex); d.classList.toggle('bg-white/40',i!==bannerIndex); d.classList.toggle('w-1.5',i!==bannerIndex);}); }, 5000);
+         const container = document.getElementById('banner-carousel');
+         if (!container) return;
+         if (bannerInterval) { clearInterval(bannerInterval); bannerInterval = null; }
+         if (bannerImages.length === 0) {
+             container.classList.add('hidden');
+             container.innerHTML = '';
+             return;
+         }
+         container.classList.remove('hidden');
+         bannerIndex = 0;
+         
+         // Obtener el modo guardado (default 'cover')
+         const fitMode = window.currentBannerFit || 'cover';
+         // Mapear modo a clase de Tailwind
+         // cover -> object-cover
+         // contain -> object-contain (bg-black ya está en el contenedor)
+         // fill -> object-fill
+         let objectClass = 'object-cover';
+         if (fitMode === 'contain') objectClass = 'object-contain';
+         if (fitMode === 'fill') objectClass = 'object-fill';
+
+         container.innerHTML = bannerImages.map((b, i) => `
+             <img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full ${objectClass} transition-opacity duration-700 ${i === 0 ? 'opacity-100' : 'opacity-0'}">
+         `).join('') + (bannerImages.length > 1 ? `
+             <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">
+                 ${bannerImages.map((_, i) => `<span class="h-1.5 rounded-full transition-all ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></span>`).join('')}
+             </div>
+         ` : '');
+
+         if (bannerImages.length > 1) {
+             bannerInterval = setInterval(() => {
+                 bannerIndex = (bannerIndex + 1) % bannerImages.length;
+                 const slides = container.querySelectorAll('.banner-slide');
+                 slides.forEach((s, i) => {
+                     s.classList.toggle('opacity-100', i === bannerIndex);
+                     s.classList.toggle('opacity-0', i !== bannerIndex);
+                 });
+                 const dots = document.querySelectorAll('#banner-dots span');
+                 dots.forEach((d, i) => {
+                     d.classList.toggle('bg-white', i === bannerIndex);
+                     d.classList.toggle('w-4', i === bannerIndex);
+                     d.classList.toggle('bg-white/40', i !== bannerIndex);
+                     d.classList.toggle('w-1.5', i !== bannerIndex);
+                 });
+             }, 5000);
+         }
 }
 function renderAdminBannerList() { const l=document.getElementById('admin-banner-list'); if(!l)return; l.innerHTML = bannerImages.length ? bannerImages.map(b=>`<div class="relative aspect-video rounded-xl overflow-hidden border border-purple-500/30 bg-black"><img src="${b.image}" class="w-full h-full object-cover"><button onclick="deleteBannerImage('${b.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-800/90 text-white text-[10px] flex items-center justify-center">🗑️</button></div>`).join('') : '<p class="col-span-3 text-center text-desc text-[11px] py-2">Sin imágenes.</p>'; }
 onValue(ref(db, 'valen_banner'), (s) => { const d=s.val(); bannerImages=d?Object.keys(d).map(k=>({id:k,...d[k]})):[]; renderBannerSlides(); renderAdminBannerList(); });
@@ -240,3 +281,26 @@ window.deleteProduct = (id) => { if(confirm('¿Borrar?')) remove(ref(db,'valen_p
 
 window.openLightbox = (u,t) => { document.getElementById('lightbox-img').src=u; document.getElementById('lightbox-title').innerText=t; document.getElementById('lightbox').classList.replace('hidden','flex'); };
 window.closeLightbox = () => document.getElementById('lightbox').classList.replace('flex','hidden');
+
+// ============ AJUSTE DE BANNER (FIT MODE) ============
+     
+     // Cargar el modo guardado al iniciar
+     onValue(ref(db, 'valen_banner_fit'), (snapshot) => {
+         const mode = snapshot.val() || 'cover';
+         window.currentBannerFit = mode;
+         
+         // Actualizar el selector del admin si está abierto
+         const selectEl = document.getElementById('banner-fit-mode');
+         if (selectEl) selectEl.value = mode;
+         
+         // Re-renderizar el banner para aplicar el cambio
+         renderBannerSlides();
+     });
+
+     // Función llamada cuando cambias el selector en el Admin
+     window.updateBannerFit = function(mode) {
+         // Guardar en Firebase
+         set(ref(db, 'valen_banner_fit'), mode).then(() => {
+             showToast('✅ Ajuste de imagen guardado');
+         }).catch(err => alert('Error al guardar ajuste: ' + err.message));
+     };
