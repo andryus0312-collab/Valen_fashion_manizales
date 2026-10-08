@@ -153,6 +153,21 @@
                             <select id="new-category" class="w-full admin-input rounded-lg px-3 py-2 text-xs">
                                 <option value="hogar">🏠 Hogar</option><option value="ninos">🧸 Niños</option><option value="ropa">👗 Ropa</option><option value="tendidos">🛏️ Tendidos</option>
                             </select>
+                            <!-- NUEVO: SELECTOR DE ETIQUETA -->
+                            <div class="space-y-1 mt-2">
+                                <label class="text-[10px] font-bold text-desc">🏷️ Etiqueta (Opcional)</label>
+                                <div class="flex gap-2">
+                                    <select id="new-tag-type" class="flex-1 admin-input rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Sin etiqueta</option>
+                                        <option value="DESCUENTO">💰 Descuento</option>
+                                        <option value="PROMOCIÓN">🎁 Promoción</option>
+                                        <option value="TIEMPO LIMITADO">⏳ Tiempo Limitado</option>
+                                        <option value="OFERTA">🔥 Oferta</option>
+                                    </select>
+                                    <input type="color" id="new-tag-color" value="#ef4444" class="w-10 h-8 rounded cursor-pointer border-0" title="Color de fondo">
+                                </div>
+                                <p class="text-[9px] text-desc italic">💡 "Nuevo" aparece solo por 7 días al publicar.</p>
+                            </div>
                             <textarea id="new-description" placeholder="Descripción" rows="2" class="w-full admin-input rounded-lg px-3 py-2 text-xs resize-none"></textarea>
                             <div class="flex items-center gap-2">
                                 <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer">Foto<input type="file" id="new-image-file" accept="image/*" class="hidden" onchange="handleImageInput(event)"></label>
