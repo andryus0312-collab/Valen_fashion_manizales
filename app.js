@@ -442,7 +442,7 @@ function renderProducts() {
             `;
         }
 
-        // 2. Etiqueta "NUEVO" Automática
+                        // 2. Etiqueta "NUEVO" Automática
         if (isNew) {
             const stylePos = p.tagType ? 'top-8 left-[-5px]' : 'top-3 left-[-10px]';
             tagsHtml += `
@@ -472,8 +472,6 @@ function renderProducts() {
     }).join('');
 }
 
- d=0; 
-}
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
     l.innerHTML = allProducts.length ? allProducts.map(p=>`
@@ -531,7 +529,7 @@ window.publishProduct = () => {
     const tagColor = document.getElementById('new-tag-color') ? document.getElementById('new-tag-color').value : '#ef4444';
 
     if(!t||!p||!base64Image) return alert('Faltan datos'); 
-
+    
     withTimeout(push(ref(db,'valen_products'),{
         title:t,
         price:p,
