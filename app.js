@@ -157,17 +157,40 @@ window.setCategory = (id) => { selectedCategory=id; renderCategories(); renderPr
 // ============ FUNCIONES COMPARTIR PRODUCTO ============
 function getGreeting() { const h = new Date().getHours(); return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches'; }
 
+// ============ FUNCIÓN COMPARTIR PRODUCTO (CON IMAGEN) ============
 window.shareProduct = async function(product) {
     const greeting = getGreeting();
     const text = `${greeting}! 🤍✨\n\nMira qué encontré en *Valen Fashion Manizales* y pensé en ti: \n\n🛍️ *${product.title}*\n💰 ${product.price}\n\n${product.description ? '📝 ' + product.description + '\n\n' : ''}Me pareció súper interesante y quería compartirlo contigo. 😍\n\n👉 Recuerda seguirnos en Instagram y visitar nuestra página para ver más cositas lindas:\nhttps://andryus0312-collab.github.io/Valen_fashion_manizales/\n\n¡Un abrazo! 💜`;
-    
-    if (navigator.share) {
-        try {
-            await navigator.share({ title: `Valen Fashion: ${product.title}`, text: text });
-        } catch (err) { console.log('Share cancelado'); }
-    } else {
-        // Fallback: Copiar al portapapeles o descargar imagen
-        downloadProductImage(product);
+
+    try {
+        // 1. Intentar descargar la imagen del producto para compartirla como archivo
+        const response = await fetch(product.image);
+        const blob = await response.blob();
+        const file = new File([blob], "valen-product.jpg", { type: "image/jpeg" });
+
+        // 2. Verificar si el navegador soporta compartir archivos
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                files: [file],
+                title: `Valen Fashion: ${product.title}`,
+                text: text,
+            });
+            console.log('✅ Producto compartido con imagen');
+        } else {
+            // 3. Fallback: Si no soporta archivos (PC o celulares viejos), compartir solo texto
+            console.log('⚠️ El dispositivo no soporta compartir archivos, enviando solo texto.');
+            await navigator.share({
+                title: `Valen Fashion: ${product.title}`,
+                text: text,
+            });
+        }
+    } catch (error) {
+        console.error('Error al compartir:', error);
+        // Si el usuario cancela o hay error, intentamos descargar la imagen como último recurso
+        if (error.name !== 'AbortError') {
+            showToast('⚠️ No se pudo compartir la imagen, descargando...');
+            downloadProductImage(product);
+        }
     }
 };
 
