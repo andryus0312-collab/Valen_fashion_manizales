@@ -60,3 +60,41 @@ body.dark-mode #qrcode-container { border-color: #581c87; }
 input[type="color"] { -webkit-appearance: none; appearance: none; padding: 0; }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 9999px; }
 input[type="color"]::-webkit-color-swatch { border: none; border-radius: 9999px; }
+
+/* ============ ONDAS DE MÚSICA (FASE 4) ============ */
+.float-btn.playing {
+    position: relative;
+}
+
+.float-btn.playing::before,
+.float-btn.playing::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #d8b4fe; /* Morado claro */
+    opacity: 0;
+    z-index: -1;
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.float-btn.playing::after {
+    animation-delay: 1s; /* Retraso para crear efecto de onda continua */
+}
+
+@keyframes pulse-ring {
+    0% {
+        width: 100%;
+        height: 100%;
+        opacity: 0.8;
+    }
+    100% {
+        width: 180%; /* Se expande */
+        height: 180%;
+        opacity: 0; /* Se desvanece */
+    }
+}
