@@ -72,58 +72,71 @@ function withTimeout(p, ms, msg) { return new Promise((res, rej) => { const t=se
     slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
     document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
 
-    // 3. MÚSICA (FASE 4)
+    
+            // 3. MÚSICA (FASE 4 - SIMPLIFICADA + ONDAS)
     const btnMusic = document.getElementById('btn-music');
     const audioEl = document.getElementById('bg-music');
+    
+    // Configuración inicial
+    audioEl.src = "musica.mp3"; // Archivo que subiste a GitHub
+    audioEl.loop = true;
+    audioEl.volume = 0.4; // Volumen suave
+    
     let isMuted = localStorage.getItem('valen_music_muted') === 'true';
-    let hasAudio = false;
+    let hasAudio = true; // Asumimos que hay audio porque el archivo está en GitHub
 
-    // Actualizar icono
-    function updateMusicIcon() {
-        if (!hasAudio) { btnMusic.style.display = 'none'; return; }
-        btnMusic.style.display = 'flex';
-        btnMusic.innerText = isMuted ? '🔇' : '🔊';
-    }
-
-    // Intentar reproducir (requiere interacción previa del usuario)
-    function tryPlay() {
-        if (!hasAudio || isMuted) return;
-        const playPromise = audioEl.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => { console.log("Autoplay bloqueado, esperando interacción."); });
-        }
-    }
-
-    // Escuchar cambios en Firebase para la música
-    onValue(ref(db, 'valen_music'), (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.url) {
-            hasAudio = true;
-            audioEl.src = data.url;
-            updateMusicIcon();
-            // Si no está muteado, intentar reproducir al primer toque del usuario en la página
-            if (!isMuted) {
-                const startAudio = () => { tryPlay(); document.removeEventListener('click', startAudio); document.removeEventListener('touchstart', startAudio); };
-                document.addEventListener('click', startAudio);
-                document.addEventListener('touchstart', startAudio);
-            }
+    // Función para actualizar icono y ondas
+    function updateMusicUI() {
+        if (isMuted || audioEl.paused) {
+            btnMusic.innerText = '🔇';
+            btnMusic.classList.remove('playing'); // Quita las ondas
         } else {
-            hasAudio = false;
-            audioEl.pause();
-            audioEl.src = "";
-            updateMusicIcon();
+            btnMusic.innerText = '🔊';
+            btnMusic.classList.add('playing'); // Añade las ondas
         }
-    });
+    }
+
+    // Mostrar botón siempre (ya que el archivo existe)
+    btnMusic.style.display = 'flex';
+    updateMusicUI();
+
+    // Intentar reproducir (requiere interacción)
+    function tryPlay() {
+        if (!isMuted) {
+            audioEl.play().then(() => {
+                updateMusicUI();
+            }).catch(e => {
+                console.log("Esperando interacción para reproducir.");
+            });
+        }
+    }
+
+    // Interacción del usuario (Política de navegadores)
+    const startAudio = () => { 
+        tryPlay(); 
+        document.removeEventListener('click', startAudio); 
+        document.removeEventListener('touchstart', startAudio); 
+    };
+    document.addEventListener('click', startAudio);
+    document.addEventListener('touchstart', startAudio);
 
     // Toggle Mute/Unmute
-    btnMusic.onclick = () => {
-        if (!hasAudio) return;
+    btnMusic.onclick = (e) => {
+        e.stopPropagation();
         isMuted = !isMuted;
         localStorage.setItem('valen_music_muted', isMuted);
-        if (isMuted) { audioEl.pause(); } else { audioEl.play().catch(e => console.log(e)); }
-        updateMusicIcon();
+        
+        if (isMuted) {
+            audioEl.pause();
+        } else {
+            audioEl.play();
+        }
+        updateMusicUI();
     };
-})();
+
+    // Si la música termina o se pausa por alguna razón, actualizar UI
+    audioEl.onpause = updateMusicUI;
+    audioEl.onplay = updateMusicUI;
 
 // ============ FASE 3: QR GLOBAL ============
 (function initQR() {
