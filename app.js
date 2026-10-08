@@ -426,7 +426,7 @@ function renderProducts() {
         const safeTitle = p.title.replace(/'/g, "\\'"); 
         const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
-        // --- LÓGICA DE ETIQUETAS CORREGIDA ---
+        // --- LÓGICA DE ETIQUETAS ---
         let tagsHtml = '';
         const now = Date.now();
         const sevenDays = 7 * 24 * 60 * 60 * 1000;
@@ -436,8 +436,8 @@ function renderProducts() {
         if (p.tagType) {
             const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
             tagsHtml += `
-               <div class="absolute top-3 left-[-32px] z-20 px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded shadow-lg" 
-                    style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+               <div class="absolute -top-2 -left-8 z-20 px-4 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" 
+                    style="background-color: ${p.tagColor}; color: ${textColor}; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); min-width: 100px; text-align: center;">
                    ${p.tagType}
                </div>
             `;
@@ -445,31 +445,36 @@ function renderProducts() {
 
         // 2. Etiqueta "NUEVO" Automática
         if (isNew) {
-            const topPos = p.tagType ? 'top-9' : 'top-3';
+            const leftPos = p.tagType ? '-left-8' : '-left-8';
+            const topPos = p.tagType ? 'top-6' : '-top-2';
             tagsHtml += `
-               <div class="absolute ${topPos} left-[-32px] z-20 px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded shadow-lg bg-red-500 text-white" 
-                    style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                   🆕 Nuevo
+               <div class="absolute ${topPos} ${leftPos} z-20 px-4 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" 
+                    style="transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); min-width: 100px; text-align: center;">
+                    Nuevo
                </div>
             `;
         }
         // ---------------------------
 
         return `
-        <div class="card-bg rounded-3xl shadow-xl flex flex-col group relative">
-            <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer overflow-hidden" onclick="openLightbox('${p.image}','${safeTitle}')">
-                <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
-                <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full z-10">${cat}</span>
-            </div>
-            <!-- Etiquetas FUERA del overflow-hidden -->
+        <div class="relative">
+            <!-- Etiquetas FUERA del contenedor con overflow -->
             ${tagsHtml}
-            <div class="p-4 space-y-1 flex-1">
-                <div class="flex justify-between"><h3 class="text-sm font-bold text-title">${p.title}</h3><span class="text-price font-extrabold text-sm">${p.price}</span></div>
-                <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
-            </div>
-            <div class="p-4 pt-0 space-y-2">
-                <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
-                <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button>
+            
+            <!-- Contenedor de la tarjeta -->
+            <div class="card-bg rounded-3xl shadow-xl flex flex-col group relative overflow-hidden">
+                <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${safeTitle}')">
+                    <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                    <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full z-10">${cat}</span>
+                </div>
+                <div class="p-4 space-y-1 flex-1">
+                    <div class="flex justify-between"><h3 class="text-sm font-bold text-title">${p.title}</h3><span class="text-price font-extrabold text-sm">${p.price}</span></div>
+                    <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
+                </div>
+                <div class="p-4 pt-0 space-y-2">
+                    <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
+                    <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button>
+                </div>
             </div>
         </div>`;
     }).join('');
