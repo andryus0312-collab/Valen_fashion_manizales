@@ -115,14 +115,28 @@
                 </div>
                 <div id="admin-content-section" class="hidden space-y-6">
                     <button onclick="adminLogout()" class="w-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 rounded-xl">🚪 Cerrar sesión</button>
-                    <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-3">
-                        <h3 class="text-sm font-bold text-title">🖼️ Banner</h3>
+<section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-3">
+                        <h3 class="text-sm font-bold text-title flex items-center gap-2">🖼️ Banner Promocional</h3>
+                        <p class="text-[11px] text-desc">Sube una o varias imágenes (promos, avisos, descuentos)</p>
+                        
+                        <!-- NUEVO: Selector de Ajuste de Imagen -->
+                        <div class="flex items-center justify-between bg-white dark:bg-[#0d0310] p-2 rounded-lg border border-purple-500/20">
+                            <span class="text-[11px] font-bold text-desc">Ajuste de imagen:</span>
+                            <select id="banner-fit-mode" onchange="updateBannerFit(this.value)" class="bg-transparent text-xs font-bold text-title focus:outline-none cursor-pointer">
+                                <option value="cover">Rellenar (Recortar)</option>
+                                <option value="contain">Centrado (Fondo Negro)</option>
+                                <option value="fill">Estirar (Ajustar bordes)</option>
+                            </select>
+                        </div>
+
                         <div class="flex items-center gap-2">
-                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer">Imágenes<input type="file" id="banner-image-file" accept="image/*" multiple class="hidden" onchange="handleBannerImagesInput(event)"></label>
-                            <span id="banner-image-status" class="text-[10px] text-desc font-mono">Ninguna</span>
+                            <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold py-2 px-3 rounded-xl text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                Seleccionar imágenes<input type="file" id="banner-image-file" accept="image/*" multiple class="hidden" onchange="handleBannerImagesInput(event)">
+                            </label>
+                            <span id="banner-image-status" class="text-[10px] text-desc font-mono">Ninguna imagen</span>
                         </div>
                         <div id="admin-banner-list" class="grid grid-cols-3 gap-2 pt-2"></div>
-                    </section>
+</section>
                     <section class="admin-section-bg p-4 rounded-2xl border border-purple-500/20 space-y-4">
                         <h3 class="text-sm font-bold text-title">✏️ Perfil</h3>
                         <div class="space-y-2"><input type="text" id="profile-category-input" placeholder="Categoría" class="w-full admin-input rounded-xl px-3 py-2 text-xs"></div>
