@@ -418,59 +418,51 @@ window.downloadProductImage = function(product) {
 function renderProducts() {
     const c = document.getElementById('products-container');
     const f = selectedCategory === 'all' ? allProducts : allProducts.filter(p => p.category === selectedCategory);
-    if (!f.length) { c.innerHTML = '<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">️</p><p>Sin productos.</p></div>'; return; }
+    
+    if (!f.length) { 
+        c.innerHTML = '<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">🛍️</p><p>Sin productos.</p></div>'; 
+        return; 
+    }
     
     c.innerHTML = f.map(p => {
         const cat = categories.find(x => x.id === p.category)?.name || p.category;
-        const wa = `https://wa.me/573229247605?text=${encodeURIComponent(`¡Hola! Me interesa: *${p.title}* (${p.price})`)}`;
+        
+        // Mensaje personalizado para WhatsApp
+        const greeting = getGreeting();
+        const waText = `${greeting}! 🤍✨\n\nHola Valen, me encantó este producto de tu catálogo:\n\n️ *${p.title}*\n💰 ${p.price}\n\n¿Podrías confirmarme si aún está disponible? 😊\n\n¡Muchas gracias de antemano! 💜`;
+        
+        // Enlace base de WhatsApp (se usará como fallback)
+        const waBaseLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
+        
         const safeTitle = p.title.replace(/'/g, "\\'"); 
         const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
-        // --- LÓGICA DE ETIQUETAS ---
+        // --- LÓGICA DE ETIQUETAS (Ya corregida y funcionando) ---
         let tagsHtml = '';
         const now = Date.now();
         const sevenDays = 7 * 24 * 60 * 60 * 1000;
         const isNew = p.createdAt && (now - p.createdAt < sevenDays);
         
-        // Contar cuántas etiquetas habrá para calcular el espacio reservado
         let tagCount = 0;
         if (p.tagType) tagCount++;
         if (isNew) tagCount++;
 
-        // 1. Etiqueta Manual (primera posición)
         if (p.tagType) {
             const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
-            tagsHtml += `
-               <div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" 
-                    style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: 14px; left: -34px;">
-                   ${p.tagType}
-               </div>
-            `;
+            tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: 14px; left: -34px;">${p.tagType}</div>`;
         }
 
-        // 2. Etiqueta "NUEVO" Automática (segunda posición, con más espacio)
         if (isNew) {
-            // Si ya hay una etiqueta manual, la de "Nuevo" va más abajo con separación amplia
             const topPos = p.tagType ? '48px' : '14px';
-            tagsHtml += `
-               <div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" 
-                    style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">
-                    Nuevo
-               </div>
-            `;
+            tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">Nuevo</div>`;
         }
         // ---------------------------
 
-        // Espacio reservado arriba de la tarjeta para que todas se alineen igual
-        // Si hay 2 etiquetas: 60px de padding-top. Si hay 1: 36px. Si no hay: 12px (mínimo).
         const topPadding = tagCount === 2 ? '60px' : (tagCount === 1 ? '36px' : '12px');
 
         return `
         <div class="relative" style="padding-top: ${topPadding};">
-            <!-- Etiquetas (posicionadas absolutamente respecto al wrapper) -->
             ${tagsHtml}
-            
-            <!-- Contenedor de la tarjeta -->
             <div class="card-bg rounded-3xl shadow-xl flex flex-col group relative overflow-hidden">
                 <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer overflow-hidden" onclick="openLightbox('${p.image}','${safeTitle}')">
                     <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
@@ -481,13 +473,47 @@ function renderProducts() {
                     <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
                 </div>
                 <div class="p-4 pt-0 space-y-2">
-                    <a href="${wa}" target="_blank" class="block w-full bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center">Pedir 📱</a>
-                    <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button>
+                    <!-- NUEVO BOTÓN PEDIR CON LÓGICA DE COMPARTIR IMAGEN -->
+                    <button onclick="orderProduct({title: '${safeTitle}', price: '${p.price}', image: '${p.image}'})" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">
+                        Pedir 
+                    </button>
+                    <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">
+                        Compartir 🔗
+                    </button>
                 </div>
             </div>
         </div>`;
     }).join('');
+}
+
+// Nueva función para manejar el pedido con imagen
+window.orderProduct = async function(product) {
+    const greeting = getGreeting();
+    const text = `${greeting}! 🤍✨\n\nHola Valen, me encantó este producto de tu catálogo:\n\n🛍️ *${product.title}*\n💰 ${product.price}\n\n¿Podrías confirmarme si aún está disponible? 😊\n\n¡Muchas gracias de antemano! 💜`;
+    
+    try {
+        // Intentar descargar y compartir la imagen
+        const response = await fetch(product.image);
+        const blob = await response.blob();
+        const file = new File([blob], "valen-product.jpg", { type: "image/jpeg" });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            // Si soporta archivos, abre el menú nativo para elegir WhatsApp
+            await navigator.share({ 
+                files: [file], 
+                title: `Valen Fashion: ${product.title}`, 
+                text: text 
+            });
+        } else {
+            // Fallback: Redirige directo a WhatsApp solo con texto
+            window.open(`https://wa.me/573229247605?text=${encodeURIComponent(text)}`, '_blank');
         }
+    } catch (error) {
+        console.error("Error al preparar imagen:", error);
+        // Si falla todo, redirige directo a WhatsApp
+        window.open(`https://wa.me/573229247605?text=${encodeURIComponent(text)}`, '_blank');
+    }
+};
 
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
