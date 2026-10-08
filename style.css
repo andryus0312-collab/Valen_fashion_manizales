@@ -32,15 +32,15 @@ body.dark-mode .admin-input { background-color: #1b0c1b; color: #ffffff; border:
     background: linear-gradient(135deg, #ec4899, #000000); 
     color: white; border: 2px solid rgba(255, 255, 255, 0.3); 
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 0 4px 6px rgba(0,0,0,0.3); 
-    transition: all 0.2s; position: relative;
+    transition: all 0.2s; position: relative; z-index: 50;
 }
 .float-btn:active { transform: scale(0.9); } 
 .float-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
 
-/* ONDAS DE MÚSICA */
+/* ONDAS DE MÚSICA (Morado Claro) */
 .float-btn.playing::before, .float-btn.playing::after {
     content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 100%; height: 100%; border-radius: 50%; border: 2px solid #d8b4fe; /* Morado claro */
+    width: 100%; height: 100%; border-radius: 50%; border: 2px solid #d8b4fe;
     opacity: 0; z-index: -1; animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 .float-btn.playing::after { animation-delay: 1s; }
