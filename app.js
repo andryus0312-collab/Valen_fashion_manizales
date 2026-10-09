@@ -269,7 +269,8 @@ function withTimeout(p, ms, msg) {
         renderSearchResults(filtered, text || dateFrom || dateTo || priceMin || priceMax);
     }
     
-    // Renderizar resultados
+
+        // Renderizar resultados (COPIA EXACTA DEL FORMATO PRINCIPAL)
     function renderSearchResults(products, hasFilters) {
         // Actualizar contador
         if (hasFilters) {
@@ -286,36 +287,77 @@ function withTimeout(p, ms, msg) {
                     <div class="empty-title text-title">No encontramos resultados</div>
                     <div class="empty-desc text-desc">
                         Parece que no hay productos que coincidan con tu búsqueda.<br><br>
-                        ✨ Intenta con otros términos, ajusta los filtros o explora nuestro catálogo completo.
+                         Intenta con otros términos, ajusta los filtros o explora nuestro catálogo completo.
                     </div>
                 </div>
             `;
             return;
         }
         
-        // Renderizar tarjetas (reutilizando el estilo existente)
+        // Renderizar tarjetas (USANDO EXACTAMENTE EL MISMO HTML QUE LA PÁGINA PRINCIPAL)
         resultsContainer.innerHTML = `
             <div class="search-results-grid">
                 ${products.map(p => {
                     const cat = categories.find(x => x.id === p.category)?.name || p.category;
-                    const safeTitle = (p.title || '').replace(/'/g, "\\'");
-                    const waText = `¡Hola Valen! Me interesa: *${p.title}* (${p.price})`;
+                    
+                    // --- MENSAJE BONITO PARA WHATSAPP (Igual que en main) ---
+                    const greeting = getGreeting();
+                    const descripcion = p.description ? p.description : 'Sin descripción';
+                    const waText = `${greeting}! ✨\n\n` +
+                                   `Hola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n` +
+                                   `️ *Producto:* ${p.title}\n` +
+                                   `💰 *Precio:* ${p.price}\n` +
+                                   `📂 *Categoría:* ${cat}\n\n` +
+                                   ` *Descripción:*\n${descripcion}\n\n` +
+                                   `¿Podrías confirmarme si aún está disponible? 😊\n` +
+                                   `¡Muchas gracias de antemano! ✨`;
                     const waLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
                     
+                    const safeTitle = (p.title || '').replace(/'/g, "\\'"); 
+                    const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+
+                    // --- LÓGICA DE ETIQUETAS (Exacta copia) ---
+                    let tagsHtml = '';
+                    const now = Date.now();
+                    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+                    const isNew = p.createdAt && (now - p.createdAt < sevenDays);
+                    
+                    let tagCount = 0;
+                    if (p.tagType) tagCount++;
+                    if (isNew) tagCount++;
+
+                    if (p.tagType) {
+                        const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
+                        tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: 14px; left: -34px;">${p.tagType}</div>`;
+                    }
+
+                    if (isNew) {
+                        const topPos = p.tagType ? '48px' : '14px';
+                        tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">Nuevo</div>`;
+                    }
+
+                    const topPadding = tagCount === 2 ? '60px' : (tagCount === 1 ? '36px' : '12px');
+
                     return `
-                    <div class="card-bg rounded-2xl overflow-hidden shadow-lg flex flex-col">
-                        <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${safeTitle}')">
-                            <img src="${p.image}" class="w-full h-full object-cover">
-                            <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full">${cat}</span>
-                        </div>
-                        <div class="p-3 space-y-1 flex-1">
-                            <div class="flex justify-between">
-                                <h3 class="text-xs font-bold text-title line-clamp-2">${p.title}</h3>
-                                <span class="text-price font-extrabold text-xs whitespace-nowrap ml-2">${p.price}</span>
+                    <div class="relative" style="padding-top: ${topPadding};">
+                        ${tagsHtml}
+                        <div class="card-bg rounded-3xl shadow-xl flex flex-col group relative overflow-hidden">
+                            <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer overflow-hidden" onclick="openLightbox('${p.image}','${safeTitle}')">
+                                <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full z-10">${cat}</span>
                             </div>
-                        </div>
-                        <div class="p-3 pt-0">
-                            <a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 text-white text-[10px] font-bold py-1.5 rounded-lg text-center">Pedir 📱</a>
+                            <div class="p-4 space-y-1 flex-1">
+                                <div class="flex justify-between"><h3 class="text-sm font-bold text-title">${p.title}</h3><span class="text-price font-extrabold text-sm">${p.price}</span></div>
+                                <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
+                            </div>
+                            <div class="p-4 pt-0 space-y-2">
+                                <a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">
+                                    Pedir por WhatsApp 💬
+                                </a>
+                                <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">
+                                    Compartir 🔗
+                                </button>
+                            </div>
                         </div>
                     </div>
                     `;
