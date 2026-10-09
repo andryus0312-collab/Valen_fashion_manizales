@@ -102,6 +102,36 @@ body.dark-mode #qrcode-container { border-color: #581c87; }
 #search-drawer { display: none; }
 #search-drawer.active { display: block; }
 
+/* Contenedor de resultados con margen superior para separar de los filtros */
+#search-results {
+    margin-top: 1rem; /* Espacio entre filtros y productos */
+    padding-bottom: 2rem; /* Espacio al final para scroll */
+}
+
+/* Grid de resultados adaptativo */
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en móvil */
+    gap: 1rem; /* Espacio entre tarjetas */
+    padding: 0 0.5rem; /* Margen lateral pequeño */
+}
+
+/* Tablet: 3 columnas */
+@media (min-width: 768px) {
+    .search-results-grid { 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 1.5rem;
+    }
+}
+
+/* Desktop: 4 columnas (igual que la página principal) */
+@media (min-width: 1024px) {
+    .search-results-grid { 
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 1.5rem;
+    }
+}
+
 /* Estado vacío de resultados */
 .search-empty-state {
     display: flex;
@@ -116,19 +146,6 @@ body.dark-mode .search-empty-state { color: #cbd5e1; }
 .search-empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.6; }
 .search-empty-state .empty-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; }
 .search-empty-state .empty-desc { font-size: 0.85rem; line-height: 1.5; }
-
-/* Grid de resultados (reutiliza el estilo de productos) */
-.search-results-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-@media (min-width: 768px) {
-    .search-results-grid { grid-template-columns: repeat(3, 1fr); }
-}
-@media (min-width: 1024px) {
-    .search-results-grid { grid-template-columns: repeat(4, 1fr); }
-                          }
 
 /* Originales */
 .scrollbar-none::-webkit-scrollbar { display: none; } .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
