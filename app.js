@@ -192,6 +192,170 @@ function withTimeout(p, ms, msg) {
     };
 })();
 
+// ============ NUEVO: BÚSQUEDA FLOTANTE ============
+(function initSearch() {
+    const btnSearch = document.getElementById('btn-search');
+    const drawer = document.getElementById('search-drawer');
+    const resultsContainer = document.getElementById('search-results');
+    const resultsCount = document.getElementById('search-results-count');
+    const inputText = document.getElementById('search-text');
+    const inputDateFrom = document.getElementById('search-date-from');
+    const inputDateTo = document.getElementById('search-date-to');
+    const inputPriceMin = document.getElementById('search-price-min');
+    const inputPriceMax = document.getElementById('search-price-max');
+    
+    // Abrir drawer
+    btnSearch.onclick = () => {
+        drawer.classList.add('active');
+        inputText.focus();
+    };
+    
+    // Cerrar drawer (función global)
+    window.closeSearchDrawer = () => {
+        drawer.classList.remove('active');
+    };
+    
+    // Limpiar filtros (función global)
+    window.clearSearchFilters = () => {
+        inputText.value = '';
+        inputDateFrom.value = '';
+        inputDateTo.value = '';
+        inputPriceMin.value = '';
+        inputPriceMax.value = '';
+        performSearch();
+    };
+    
+    // Escuchar cambios en todos los filtros (búsqueda en tiempo real)
+    [inputText, inputDateFrom, inputDateTo, inputPriceMin, inputPriceMax].forEach(input => {
+        input.addEventListener('input', performSearch);
+    });
+    
+    // Función para parsear precio (ej: "$110.000" -> 110000)
+    function parsePrice(priceStr) {
+        if (!priceStr) return 0;
+        const num = parseInt(priceStr.toString().replace(/[^0-9]/g, ''), 10);
+        return isNaN(num) ? 0 : num;
+    }
+    
+    // Función principal de búsqueda
+    function performSearch() {
+        const text = inputText.value.toLowerCase().trim();
+        const dateFrom = inputDateFrom.value ? new Date(inputDateFrom.value).getTime() : null;
+        const dateTo = inputDateTo.value ? new Date(inputDateTo.value + 'T23:59:59').getTime() : null;
+        const priceMin = inputPriceMin.value ? parseInt(inputPriceMin.value, 10) : null;
+        const priceMax = inputPriceMax.value ? parseInt(inputPriceMax.value, 10) : null;
+        
+        // Filtrar productos
+        const filtered = allProducts.filter(p => {
+            // Filtro por texto (nombre o descripción)
+            if (text) {
+                const titleMatch = (p.title || '').toLowerCase().includes(text);
+                const descMatch = (p.description || '').toLowerCase().includes(text);
+                if (!titleMatch && !descMatch) return false;
+            }
+            
+            // Filtro por fecha
+            if (dateFrom && p.createdAt && p.createdAt < dateFrom) return false;
+            if (dateTo && p.createdAt && p.createdAt > dateTo) return false;
+            
+            // Filtro por precio
+            const price = parsePrice(p.price);
+            if (priceMin !== null && price < priceMin) return false;
+            if (priceMax !== null && price > priceMax) return false;
+            
+            return true;
+        });
+        
+        renderSearchResults(filtered, text || dateFrom || dateTo || priceMin || priceMax);
+    }
+    
+    // Renderizar resultados
+    function renderSearchResults(products, hasFilters) {
+        // Actualizar contador
+        if (hasFilters) {
+            resultsCount.innerText = `${products.length} resultado${products.length !== 1 ? 's' : ''} encontrado${products.length !== 1 ? 's' : ''}`;
+        } else {
+            resultsCount.innerText = '';
+        }
+        
+        // Estado vacío
+        if (products.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="search-empty-state">
+                    <div class="empty-icon">🔍💭</div>
+                    <div class="empty-title text-title">No encontramos resultados</div>
+                    <div class="empty-desc text-desc">
+                        Parece que no hay productos que coincidan con tu búsqueda.<br><br>
+                        ✨ Intenta con otros términos, ajusta los filtros o explora nuestro catálogo completo.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Renderizar tarjetas (reutilizando el estilo existente)
+        resultsContainer.innerHTML = `
+            <div class="search-results-grid">
+                ${products.map(p => {
+                    const cat = categories.find(x => x.id === p.category)?.name || p.category;
+                    const safeTitle = (p.title || '').replace(/'/g, "\\'");
+                    const waText = `¡Hola Valen! Me interesa: *${p.title}* (${p.price})`;
+                    const waLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
+                    
+                    return `
+                    <div class="card-bg rounded-2xl overflow-hidden shadow-lg flex flex-col">
+                        <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer" onclick="openLightbox('${p.image}','${safeTitle}')">
+                            <img src="${p.image}" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full">${cat}</span>
+                        </div>
+                        <div class="p-3 space-y-1 flex-1">
+                            <div class="flex justify-between">
+                                <h3 class="text-xs font-bold text-title line-clamp-2">${p.title}</h3>
+                                <span class="text-price font-extrabold text-xs whitespace-nowrap ml-2">${p.price}</span>
+                            </div>
+                        </div>
+                        <div class="p-3 pt-0">
+                            <a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 text-white text-[10px] font-bold py-1.5 rounded-lg text-center">Pedir 📱</a>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+    
+    // Ocultar botón cuando el admin, lightbox o QR están abiertos
+    function updateSearchButtonVisibility() {
+        const adminOpen = !document.getElementById('admin-modal').classList.contains('hidden') && 
+                         !document.getElementById('admin-content-section').classList.contains('hidden');
+        const lightboxOpen = !document.getElementById('lightbox').classList.contains('hidden');
+        const qrOpen = !document.getElementById('qr-modal').classList.contains('hidden');
+        
+        if (adminOpen || lightboxOpen || qrOpen) {
+            btnSearch.style.display = 'none';
+        } else {
+            btnSearch.style.display = 'flex';
+        }
+    }
+    
+    // Observar cambios en los modales
+    const observer = new MutationObserver(updateSearchButtonVisibility);
+    ['admin-modal', 'lightbox', 'qr-modal', 'admin-content-section'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+    
+    // Cerrar drawer con tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drawer.classList.contains('active')) {
+            closeSearchDrawer();
+        }
+    });
+    
+    // Inicializar visibilidad
+    updateSearchButtonVisibility();
+})();
+
 // ============ DATOS ============
 const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'🛏️ Tendidos'}];
 const ringPresets = [{name:'Morado',mode:'solid',color:'#a855f7'},{name:'Negro',mode:'solid',color:'#000000'},{name:'Blanco',mode:'solid',color:'#ffffff'},{name:'Rosa',mode:'solid',color:'#ec4899'}];
