@@ -318,16 +318,16 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSearchDrawer()"></div>
         
         <!-- Drawer -->
-        <div class="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-white dark:bg-[#0d0310] rounded-t-3xl shadow-2xl flex flex-col overflow-hidden border-t-2 border-purple-500/30">
+        <div class="search-drawer-panel absolute bottom-0 left-0 right-0 bg-white dark:bg-[#0d0310] rounded-t-3xl shadow-2xl flex flex-col overflow-hidden border-t-2 border-purple-500/30" style="height: 85vh;">
             
-            <!-- Header -->
-            <div class="flex items-center justify-between p-4 border-b border-purple-500/20 bg-gray-50 dark:bg-[#1b0c1b]">
+            <!-- Header (fijo) -->
+            <div class="flex items-center justify-between p-4 border-b border-purple-500/20 bg-gray-50 dark:bg-[#1b0c1b] flex-shrink-0">
                 <h2 class="text-lg font-bold text-title flex items-center gap-2">🔍 Buscar productos</h2>
                 <button onclick="closeSearchDrawer()" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center hover:bg-rose-200 transition-all">✕</button>
             </div>
             
-            <!-- Filtros -->
-            <div class="p-4 space-y-3 overflow-y-auto scrollbar-none">
+            <!-- Contenedor de filtros (SIEMPRE VISIBLE, no scrollea) -->
+            <div class="search-filters-container p-4 space-y-3 border-b border-purple-500/20 bg-gray-50/50 dark:bg-[#1b0c1b]/50 flex-shrink-0">
                 
                 <!-- Búsqueda por texto -->
                 <div class="relative">
@@ -336,8 +336,8 @@
                            class="w-full pl-10 pr-4 py-2.5 rounded-xl admin-input text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
                 
-                <!-- Filtros avanzados (desplegables) -->
-                <details class="bg-gray-50 dark:bg-[#1b0c1b]/50 rounded-xl border border-purple-500/20">
+                <!-- Filtros avanzados (siempre visibles) -->
+                <details class="bg-white dark:bg-[#0d0310] rounded-xl border border-purple-500/20" open>
                     <summary class="p-3 text-xs font-bold text-title cursor-pointer flex items-center justify-between">
                         <span>⚙️ Filtros avanzados (fecha y precio)</span>
                         <span class="text-purple-500">▼</span>
@@ -375,12 +375,13 @@
                 <p id="search-results-count" class="text-[10px] text-desc font-bold text-center"></p>
             </div>
             
-            <!-- Resultados -->
-            <div id="search-results" class="flex-1 overflow-y-auto p-4 pt-0 scrollbar-none">
+            <!-- Contenedor de resultados (SCROLL PROPIO, independiente) -->
+            <div id="search-results" class="search-results-scroll flex-1 overflow-y-auto p-4 scrollbar-none">
                 <!-- Aquí se inyectan los resultados dinámicamente -->
             </div>
         </div>
     </div>
+    
     
     <script type="module" src="app.js"></script>
 </body>
