@@ -66,6 +66,70 @@ body.dark-mode .qr-modal-content { background-color: #0d0310; }
 #qrcode-container { background-color: #ffffff !important; border: 2px solid #e9d5ff; }
 body.dark-mode #qrcode-container { border-color: #581c87; }
 
+/* ============ BOTÓN FLOTANTE DE BÚSQUEDA ============ */
+.float-btn-search {
+    position: fixed;
+    bottom: 2rem; /* Margen decente del borde inferior */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ec4899, #000000);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 0 4px 6px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+    font-size: 1rem;
+    font-weight: bold;
+}
+.float-btn-search:active { transform: translateX(-50%) scale(0.95); }
+.float-btn-search:hover { box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
+.float-btn-search .search-icon { font-size: 1.25rem; }
+.float-btn-search .search-label { font-size: 0.9rem; }
+
+/* Responsive: en pantallas muy pequeñas, solo el ícono */
+@media (max-width: 360px) {
+    .float-btn-search .search-label { display: none; }
+    .float-btn-search { padding: 0.75rem; }
+}
+
+/* ============ PANEL DE BÚSQUEDA (DRAWER) ============ */
+#search-drawer { display: none; }
+#search-drawer.active { display: block; }
+
+/* Estado vacío de resultados */
+.search-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #4b5563;
+}
+body.dark-mode .search-empty-state { color: #cbd5e1; }
+.search-empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.6; }
+.search-empty-state .empty-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; }
+.search-empty-state .empty-desc { font-size: 0.85rem; line-height: 1.5; }
+
+/* Grid de resultados (reutiliza el estilo de productos) */
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+@media (min-width: 768px) {
+    .search-results-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+    .search-results-grid { grid-template-columns: repeat(4, 1fr); }
+                          }
+
 /* Originales */
 .scrollbar-none::-webkit-scrollbar { display: none; } .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 input[type="color"] { -webkit-appearance: none; appearance: none; padding: 0; }
