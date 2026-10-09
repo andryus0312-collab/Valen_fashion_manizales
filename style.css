@@ -102,21 +102,36 @@ body.dark-mode #qrcode-container { border-color: #581c87; }
 #search-drawer { display: none; }
 #search-drawer.active { display: block; }
 
-/* Contenedor de resultados con margen superior para separar de los filtros */
-#search-results {
-    margin-top: 1rem; /* Espacio entre filtros y productos */
-    padding-bottom: 2rem; /* Espacio al final para scroll */
+/* Panel principal del drawer con altura fija */
+.search-drawer-panel {
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+}
+
+/* Contenedor de filtros: siempre visible, no scrollea */
+.search-filters-container {
+    flex-shrink: 0;
+    max-height: 45vh; /* Para que no ocupe todo en pantallas pequeñas */
+    overflow-y: auto;
+}
+
+/* Contenedor de resultados: scroll propio, nunca se superpone */
+.search-results-scroll {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0; /* Importante para que flex funcione bien */
+    padding-top: 1rem;
 }
 
 /* Grid de resultados adaptativo */
 .search-results-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas en móvil */
-    gap: 1rem; /* Espacio entre tarjetas */
-    padding: 0 0.5rem; /* Margen lateral pequeño */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 0 0.5rem;
 }
 
-/* Tablet: 3 columnas */
 @media (min-width: 768px) {
     .search-results-grid { 
         grid-template-columns: repeat(3, 1fr); 
@@ -124,7 +139,6 @@ body.dark-mode #qrcode-container { border-color: #581c87; }
     }
 }
 
-/* Desktop: 4 columnas (igual que la página principal) */
 @media (min-width: 1024px) {
     .search-results-grid { 
         grid-template-columns: repeat(4, 1fr); 
@@ -141,6 +155,7 @@ body.dark-mode #qrcode-container { border-color: #581c87; }
     padding: 3rem 1rem;
     text-align: center;
     color: #4b5563;
+    min-height: 200px;
 }
 body.dark-mode .search-empty-state { color: #cbd5e1; }
 .search-empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.6; }
