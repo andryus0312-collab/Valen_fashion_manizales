@@ -399,19 +399,25 @@ function withTimeout(p, ms, msg) {
 })();
 
 
+})();
+
 // ============ NUEVO: VER MÁS PRODUCTOS (PLEGABLE) ============
 (function initShowMore() {
     const container = document.getElementById('products-container');
     const showMoreContainer = document.getElementById('show-more-container');
     const btnShowMore = document.getElementById('btn-show-more');
     
-    // Umbral: cuántas filas mostrar antes de ocultar (aprox 2 filas completas)
-    // En móvil 2 cols = ~6 productos, Tablet 3 cols = ~9, Desktop 4 cols = ~12
+    if (!container || !showMoreContainer || !btnShowMore) {
+        console.log('Elementos del show-more no encontrados');
+        return;
+    }
+    
+    // Umbral: cuántos productos mostrar antes de ocultar
     function getThreshold() {
         const w = window.innerWidth;
-        if (w >= 1024) return 12; // 3 filas de 4
-        if (w >= 768) return 9;   // 3 filas de 3
-        return 6;                 // 3 filas de 2
+        if (w >= 1024) return 12; // Desktop: 3 filas de 4
+        if (w >= 768) return 9;   // Tablet: 3 filas de 3
+        return 6;                 // Móvil: 3 filas de 2
     }
 
     function updateShowMoreVisibility() {
@@ -439,33 +445,30 @@ function withTimeout(p, ms, msg) {
         
         // Scroll suave hacia los productos nuevos
         setTimeout(() => {
-            const firstHiddenCard = container.querySelectorAll('.card-bg')[getThreshold()];
-            if (firstHiddenCard) {
-                firstHiddenCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const cards = container.querySelectorAll('.card-bg');
+            if (cards[getThreshold()]) {
+                cards[getThreshold()].scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }, 100);
     };
 
-    // Escuchar cambios de categoría para reevaluar
-    // Sobrescribimos setCategory temporalmente para inyectar nuestra lógica
+    // Escuchar cambios de categoría
     const originalSetCategory = window.setCategory;
     window.setCategory = (id) => {
         originalSetCategory(id);
-        // Pequeño delay para que renderProducts termine
-        setTimeout(updateShowMoreVisibility, 50);
+        setTimeout(updateShowMoreVisibility, 100);
     };
 
     // Inicializar
-    updateShowMoreVisibility();
+    setTimeout(updateShowMoreVisibility, 200);
     
-    // Recalcular al cambiar tamaño de ventana
+    // Recalcular al cambiar tamaño
     window.addEventListener('resize', () => {
         if (!container.classList.contains('expanded')) {
             updateShowMoreVisibility();
         }
     });
 })();
-
 
 // ============ DATOS ============
 const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'🛏️ Tendidos'}];
