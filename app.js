@@ -398,6 +398,75 @@ function withTimeout(p, ms, msg) {
     updateSearchButtonVisibility();
 })();
 
+
+// ============ NUEVO: VER MÁS PRODUCTOS (PLEGABLE) ============
+(function initShowMore() {
+    const container = document.getElementById('products-container');
+    const showMoreContainer = document.getElementById('show-more-container');
+    const btnShowMore = document.getElementById('btn-show-more');
+    
+    // Umbral: cuántas filas mostrar antes de ocultar (aprox 2 filas completas)
+    // En móvil 2 cols = ~6 productos, Tablet 3 cols = ~9, Desktop 4 cols = ~12
+    function getThreshold() {
+        const w = window.innerWidth;
+        if (w >= 1024) return 12; // 3 filas de 4
+        if (w >= 768) return 9;   // 3 filas de 3
+        return 6;                 // 3 filas de 2
+    }
+
+    function updateShowMoreVisibility() {
+        const isAllCategory = selectedCategory === 'all';
+        const totalProducts = isAllCategory ? allProducts.length : allProducts.filter(p => p.category === selectedCategory).length;
+        const threshold = getThreshold();
+        
+        // Solo mostrar botón si estamos en "Todo" Y hay más productos que el umbral
+        if (isAllCategory && totalProducts > threshold) {
+            showMoreContainer.classList.remove('hidden');
+            container.classList.add('collapsed');
+            container.classList.remove('expanded');
+        } else {
+            showMoreContainer.classList.add('hidden');
+            container.classList.remove('collapsed');
+            container.classList.add('expanded');
+        }
+    }
+
+    // Evento click en "Ver más"
+    btnShowMore.onclick = () => {
+        container.classList.remove('collapsed');
+        container.classList.add('expanded');
+        showMoreContainer.classList.add('hidden');
+        
+        // Scroll suave hacia los productos nuevos
+        setTimeout(() => {
+            const firstHiddenCard = container.querySelectorAll('.card-bg')[getThreshold()];
+            if (firstHiddenCard) {
+                firstHiddenCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    };
+
+    // Escuchar cambios de categoría para reevaluar
+    // Sobrescribimos setCategory temporalmente para inyectar nuestra lógica
+    const originalSetCategory = window.setCategory;
+    window.setCategory = (id) => {
+        originalSetCategory(id);
+        // Pequeño delay para que renderProducts termine
+        setTimeout(updateShowMoreVisibility, 50);
+    };
+
+    // Inicializar
+    updateShowMoreVisibility();
+    
+    // Recalcular al cambiar tamaño de ventana
+    window.addEventListener('resize', () => {
+        if (!container.classList.contains('expanded')) {
+            updateShowMoreVisibility();
+        }
+    });
+})();
+
+
 // ============ DATOS ============
 const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'🛏️ Tendidos'}];
 const ringPresets = [{name:'Morado',mode:'solid',color:'#a855f7'},{name:'Negro',mode:'solid',color:'#000000'},{name:'Blanco',mode:'solid',color:'#ffffff'},{name:'Rosa',mode:'solid',color:'#ec4899'}];
