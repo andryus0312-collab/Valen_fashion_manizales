@@ -383,6 +383,10 @@ function renderProducts() {
             </div>
         </div>`;
     }).join('');
+    // Actualizar visibilidad del botón "Ver más"
+    if (typeof updateShowMoreVisibility === 'function') {
+        setTimeout(updateShowMoreVisibility, 100);
+    }
 }
 
 function renderAdminList() {
