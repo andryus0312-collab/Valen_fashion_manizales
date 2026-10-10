@@ -1,0 +1,91 @@
+/* ============ ESTILOS DEL DASHBOARD ============ */
+body { background-color: #fdfbf7; color: #2d1b36; }
+body.dark-mode { background-color: #0a020a; color: #f3f4f6; }
+
+.text-title { color: #2d1b36; } body.dark-mode .text-title { color: #ffffff; }
+.text-desc { color: #4b5563; } body.dark-mode .text-desc { color: #cbd5e1; }
+.admin-input { background-color: #ffffff; color: #2d1b36; border: 1px solid #e9d5ff; }
+body.dark-mode .admin-input { background-color: #1b0c1b; color: #ffffff; border: 1px solid #581c87; }
+
+/* Tarjetas de estadísticas */
+.stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(253,251,247,0.9));
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.1);
+    transition: transform 0.2s ease;
+}
+body.dark-mode .stat-card {
+    background: linear-gradient(135deg, rgba(27,12,27,0.9), rgba(13,3,16,0.95));
+    border-color: rgba(212, 175, 55, 0.4);
+}
+.stat-card:hover { transform: translateY(-2px); }
+.stat-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.stat-value { font-size: 1.75rem; font-weight: bold; color: #9333ea; }
+body.dark-mode .stat-value { color: #c084fc; }
+.stat-label { font-size: 0.75rem; color: #4b5563; font-weight: 600; }
+body.dark-mode .stat-label { color: #cbd5e1; }
+
+/* Tarjetas de gráficas */
+.chart-card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+body.dark-mode .chart-card {
+    background: rgba(27, 12, 27, 0.85);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+.chart-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #2d1b36;
+}
+body.dark-mode .chart-title { color: #ffffff; }
+
+/* Coach card */
+.coach-card {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(168, 85, 247, 0.1));
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+body.dark-mode .coach-card {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(168, 85, 247, 0.15));
+}
+.coach-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.coach-avatar {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #D4AF37, #A8842C);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+.coach-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #A8842C;
+}
+body.dark-mode .coach-title { color: #E6C76A; }
+.coach-message {
+    padding-left: 4.5rem;
+}
+
+/* Transiciones */
+body, .theme-transition, .theme-transition * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
