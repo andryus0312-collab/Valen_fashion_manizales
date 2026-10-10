@@ -615,14 +615,16 @@ window.updateBannerFit = function(mode) {
 })();
 
 
-// ============ TESTIMONIOS (FASE CORONA) ============
+// ============ TESTIMONIOS (FASE CORONA) - CORREGIDO PERMISOS ============
 let allTestimonials = [];
 
-// Cargar testimonios desde Firebase
-onValue(ref(db, 'valen_testimonials'), (snapshot) => {
+// Cargar testimonios desde el PERFIL (donde ya tenemos permisos)
+onValue(ref(db, 'valen_profile'), (snapshot) => {
     const data = snapshot.val();
-    allTestimonials = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })).sort((a, b) => b.createdAt - a.createdAt) : [];
+    // Los testimonios se guardan dentro del perfil como un array
+    allTestimonials = (data && data.testimonials) ? data.testimonials.sort((a, b) => b.createdAt - a.createdAt) : [];
     renderTestimonials();
+    renderAdminTestimonialsList();
 });
 
 // Renderizar testimonios en el slider
@@ -673,18 +675,16 @@ window.closeTestimonialsDrawer = () => {
     if (drawer) drawer.classList.remove('active');
 };
 
-// Botón flotante izquierdo (solo en homepage, desaparece con scroll)
+// Botón flotante izquierdo
 (function initTestimonialsButton() {
     const btn = document.getElementById('btn-testimonials');
     if (!btn) return;
 
-    // Mostrar botón solo si estamos en la página principal (no en admin, no en lightbox)
     function updateTestimonialsButtonVisibility() {
         const adminOpen = !document.getElementById('admin-modal').classList.contains('hidden') && 
                          !document.getElementById('admin-content-section').classList.contains('hidden');
         const lightboxOpen = !document.getElementById('lightbox').classList.contains('hidden');
-        const testimonialsOpen = !document.getElementById('testimonials-drawer').classList.contains('hidden') &&
-                                  document.getElementById('testimonials-drawer').classList.contains('active');
+        const testimonialsOpen = document.getElementById('testimonials-drawer').classList.contains('active');
         
         if (adminOpen || lightboxOpen || testimonialsOpen) {
             btn.classList.add('hidden');
@@ -698,14 +698,12 @@ window.closeTestimonialsDrawer = () => {
         updateTestimonialsButtonVisibility();
     };
 
-    // Observar cambios en modales
     const observer = new MutationObserver(updateTestimonialsButtonVisibility);
     ['admin-modal', 'lightbox', 'testimonials-drawer', 'admin-content-section'].forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el, { attributes: true, attributeFilter: ['class'] });
     });
 
-    // Cerrar con Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && document.getElementById('testimonials-drawer').classList.contains('active')) {
             closeTestimonialsDrawer();
@@ -716,7 +714,7 @@ window.closeTestimonialsDrawer = () => {
     updateTestimonialsButtonVisibility();
 })();
 
-// ============ ADMIN: GESTIÓN DE TESTIMONIOS ============
+// ============ ADMIN: GESTIÓN DE TESTIMONIOS (CORREGIDO PERMISOS) ============
 window.handleTestimonialImageInput = (e) => {
     const f = e.target.files[0];
     if (!f) return;
@@ -736,13 +734,29 @@ window.publishTestimonial = () => {
         return alert('Faltan datos (foto, texto o nombre)');
     }
     
-    withTimeout(push(ref(db, 'valen_testimonials'), {
+    // Obtener perfil actual para no borrar otros datos
+    const currentData = currentProfile || defaultProfile;
+    const existingTestimonials = currentData.testimonials || [];
+    
+    // Crear nuevo testimonio
+    const newTestimonial = {
         image: window.testimonialBase64Image,
         text: text,
         name: name,
         fit: fit,
         createdAt: Date.now()
-    }), 12000, 'Timeout').then(() => {
+    };
+    
+    // Añadir al array existente
+    const updatedTestimonials = [...existingTestimonials, newTestimonial];
+    
+    // Guardar en valen_profile (ruta segura)
+    const updatedData = {
+        ...currentData,
+        testimonials: updatedTestimonials
+    };
+    
+    withTimeout(set(ref(db, 'valen_profile'), updatedData), 12000, 'Timeout').then(() => {
         showToast('✅ Testimonio publicado');
         document.getElementById('new-testimonial-text').value = '';
         document.getElementById('new-testimonial-name').value = '';
@@ -752,9 +766,20 @@ window.publishTestimonial = () => {
     }).catch(e => alert('Error: ' + e.message));
 };
 
-window.deleteTestimonial = (id) => {
+window.deleteTestimonial = (index) => {
     if (confirm('¿Borrar este testimonio?')) {
-        remove(ref(db, 'valen_testimonials/' + id));
+        const currentData = currentProfile || defaultProfile;
+        const existingTestimonials = currentData.testimonials || [];
+        const updatedTestimonials = existingTestimonials.filter((_, i) => i !== index);
+        
+        const updatedData = {
+            ...currentData,
+            testimonials: updatedTestimonials
+        };
+        
+        set(ref(db, 'valen_profile'), updatedData).then(() => {
+            showToast('✅ Testimonio eliminado');
+        }).catch(err => alert('Error: ' + err.message));
     }
 };
 
@@ -763,18 +788,13 @@ function renderAdminTestimonialsList() {
     const l = document.getElementById('admin-testimonials-list');
     if (!l) return;
     
-    l.innerHTML = allTestimonials.length ? allTestimonials.map(t => `
+    l.innerHTML = allTestimonials.length ? allTestimonials.map((t, index) => `
         <div class="flex items-center justify-between admin-item-bg p-2 rounded-xl">
             <div class="flex items-center gap-2 overflow-hidden">
                 <img src="${t.image}" class="w-8 h-8 rounded-lg object-cover">
                 <p class="text-xs font-bold text-title truncate">${t.name}</p>
             </div>
-            <button onclick="deleteTestimonial('${t.id}')" class="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-lg">🗑️</button>
+            <button onclick="deleteTestimonial(${index})" class="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-lg">🗑️</button>
         </div>
     `).join('') : '<p class="text-center text-desc text-xs py-4">Sin testimonios aún.</p>';
 }
-
-// Actualizar lista de admin cuando cambian los testimonios
-onValue(ref(db, 'valen_testimonials'), () => {
-    renderAdminTestimonialsList();
-});
