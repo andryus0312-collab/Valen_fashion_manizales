@@ -281,6 +281,47 @@
                                 <option value="tendidos">🛏️ Tendidos</option>
                             </select>
                             
+                            <!-- NUEVO: Sección de Testimonios (Admin) -->
+                    <section class="admin-testimonials-section space-y-4">
+                        <h3 class="text-sm font-bold text-title flex items-center gap-2">👑 Testimonios</h3>
+                        <p class="text-[11px] text-desc">Gestiona las voces de tus clientas felices</p>
+                        
+                        <div class="space-y-3 p-3 bg-white dark:bg-[#0d0310] rounded-xl border border-[#D4AF37]/30">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-desc">📸 Foto de la clienta</label>
+                                <div class="flex items-center gap-2">
+                                    <label class="flex-1 bg-[#D4AF37]/20 text-[#A8842C] dark:text-[#E6C76A] text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer border border-[#D4AF37]/40 active:scale-95 transition-all">
+                                        Seleccionar archivo<input type="file" id="new-testimonial-image" accept="image/*" class="hidden" onchange="handleTestimonialImageInput(event)">
+                                    </label>
+                                    <select id="new-testimonial-fit" class="admin-input rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                                        <option value="cover">Rellenar</option>
+                                        <option value="contain">Centrado</option>
+                                        <option value="fill">Estirar</option>
+                                    </select>
+                                </div>
+                                <div id="testimonial-image-preview-container" class="hidden mt-2">
+                                    <img id="testimonial-image-preview" class="w-full h-32 object-cover rounded-lg border border-[#D4AF37]/30">
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-desc">💬 Texto del testimonio</label>
+                                <textarea id="new-testimonial-text" rows="3" placeholder="Escribe aquí las palabras de tu clienta..." class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37] resize-none"></textarea>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-desc">👤 Nombre o alias</label>
+                                <input type="text" id="new-testimonial-name" placeholder="Nombre de la clienta" class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                            </div>
+                            
+                            <button onclick="publishTestimonial()" class="w-full bg-gradient-to-r from-[#D4AF37] to-[#A8842C] text-[#1b0c1b] font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">
+                                Publicar en el Libro 👑
+                            </button>
+                        </div>
+                        
+                        <div id="admin-testimonials-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-none pr-1"></div>
+                    </section>
+                            
                                                         <!-- NUEVO: SELECTOR DE ETIQUETA -->
                             <div class="space-y-1 mt-2">
                                 <label class="text-[10px] font-bold text-desc">🏷️ Etiqueta (Opcional)</label>
