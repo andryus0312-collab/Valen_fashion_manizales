@@ -17,10 +17,7 @@ let db, auth, isLoggedIn = false;
 try {
     const app = initializeApp(firebaseConfig);
     db = getDatabase(app); auth = getAuth(app);
-} catch (initError) { 
-    console.error(initError);
-    throw initError; 
-}
+} catch (initError) { console.error(initError); throw initError; }
 
 let allProducts = [], selectedCategory = 'all', base64Image = null, profileBase64Image = null, selectedRing = null;
 
@@ -32,8 +29,8 @@ function pushDebugLog(type, args) {
     if (debugLogs.length > 150) debugLogs.shift();
     renderDebugLogs();
 }
-console.log = (...a) => pushDebugLog('log', a); 
-console.warn = (...a) => pushDebugLog('warn', a); 
+console.log = (...a) => pushDebugLog('log', a);
+console.warn = (...a) => pushDebugLog('warn', a);
 console.error = (...a) => pushDebugLog('error', a);
 window.addEventListener('error', (e) => pushDebugLog('error', [e.message]));
 
@@ -53,31 +50,30 @@ function renderDebugLogs() {
     l.innerHTML = debugLogs.slice().reverse().map(x => `<div class="border-b border-purple-500/10 py-1"><span class="text-slate-500">[${x.time}]</span> <span class="${colors[x.type]}">${x.msg.replace(/</g,'&lt;')}</span></div>`).join('');
 }
 
-window.toggleDebugPanel = (s) => { 
-    const p=document.getElementById('debug-panel'); 
-    s?(p.classList.remove('hidden'),p.classList.add('flex'),updateDebugStatus(),renderDebugLogs()):(p.classList.remove('flex'),p.classList.add('hidden')); 
+window.toggleDebugPanel = (s) => {
+    const p=document.getElementById('debug-panel');
+    s?(p.classList.remove('hidden'),p.classList.add('flex'),updateDebugStatus(),renderDebugLogs()):(p.classList.remove('flex'),p.classList.add('hidden'));
 };
 window.clearDebugLogs = () => { debugLogs.length=0; renderDebugLogs(); };
 
-function withTimeout(p, ms, msg) { 
-    return new Promise((res, rej) => { 
-        const t=setTimeout(()=>rej(new Error(msg)), ms); 
-        p.then(v=>{clearTimeout(t);res(v);}).catch(e=>{clearTimeout(t);rej(e);}); 
-    }); 
+function withTimeout(p, ms, msg) {
+    return new Promise((res, rej) => {
+        const t=setTimeout(()=>rej(new Error(msg)), ms);
+        p.then(v=>{clearTimeout(t);res(v);}).catch(e=>{clearTimeout(t);rej(e);});
+    });
 }
 
 // ============ FASE 2: BOTONES FLOTANTES ============
 (function initFloatingControls() {
-    // 1. TEMA
     const btnTheme = document.getElementById('btn-theme');
     const savedTheme = localStorage.getItem('valen_theme') || 'light';
-    if (savedTheme === 'dark') { 
-        document.body.classList.add('dark-mode'); 
-        document.documentElement.classList.add('dark'); 
-        btnTheme.innerText = '☀️'; 
-    } else { 
-        document.documentElement.classList.remove('dark'); 
-        btnTheme.innerText = '🌙'; 
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark');
+        btnTheme.innerText = '☀️';
+    } else {
+        document.documentElement.classList.remove('dark');
+        btnTheme.innerText = '🌙';
     }
     btnTheme.onclick = () => {
         const isDark = document.body.classList.toggle('dark-mode');
@@ -86,32 +82,20 @@ function withTimeout(p, ms, msg) {
         btnTheme.innerText = isDark ? '☀️' : '🌙';
     };
 
-    // 2. TEXTO
     const btnSize = document.getElementById('btn-text-size');
     const sliderContainer = document.getElementById('text-slider-container');
     const slider = document.getElementById('text-slider');
     const sizeVal = document.getElementById('text-size-val');
     const savedSize = localStorage.getItem('valen_text_size') || '100';
-    document.documentElement.style.fontSize = savedSize + '%'; 
-    slider.value = savedSize; 
+    document.documentElement.style.fontSize = savedSize + '%';
+    slider.value = savedSize;
     sizeVal.innerText = savedSize + '%';
-    
-    btnSize.onclick = () => { 
-        sliderContainer.style.display = sliderContainer.style.display === 'flex' ? 'none' : 'flex'; 
-    };
-    slider.oninput = (e) => { 
-        const val = e.target.value; 
-        document.documentElement.style.fontSize = val + '%'; 
-        sizeVal.innerText = val + '%'; 
-        localStorage.setItem('valen_text_size', val); 
-    };
-    document.addEventListener('click', (e) => { 
-        if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; 
-    });
+    btnSize.onclick = () => { sliderContainer.style.display = sliderContainer.style.display === 'flex' ? 'none' : 'flex'; };
+    slider.oninput = (e) => { const val = e.target.value; document.documentElement.style.fontSize = val + '%'; sizeVal.innerText = val + '%'; localStorage.setItem('valen_text_size', val); };
+    document.addEventListener('click', (e) => { if (!sliderContainer.contains(e.target) && e.target !== btnSize) sliderContainer.style.display = 'none'; });
 
-    // 3. MÚSICA (Oculta por estabilidad)
     const btnMusic = document.getElementById('btn-music');
-    if(btnMusic) btnMusic.style.display = 'none'; 
+    if(btnMusic) btnMusic.style.display = 'none';
 })();
 
 // ============ FASE 3: QR ============
@@ -124,25 +108,19 @@ function withTimeout(p, ms, msg) {
     const shareUrl = "https://andryus0312-collab.github.io/Valen_fashion_manizales/";
     let qrGenerated = false;
 
-    function getGreeting() { 
-        const h = new Date().getHours(); 
-        return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches'; 
+    function getGreeting() {
+        const h = new Date().getHours();
+        return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches';
     }
 
-    function generateQR() { 
-        if (qrGenerated) return; 
-        container.innerHTML = ""; 
-        new QRCode(container, { text: shareUrl, width: 256, height: 256, colorDark : "#2e1065", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); 
-        qrGenerated = true; 
+    function generateQR() {
+        if (qrGenerated) return;
+        container.innerHTML = "";
+        new QRCode(container, { text: shareUrl, width: 256, height: 256, colorDark: "#2e1065", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+        qrGenerated = true;
     }
 
-    btnOpen.onclick = () => { 
-        generateQR(); 
-        modal.classList.remove('hidden'); 
-        modal.classList.add('flex'); 
-        btnShare.classList.toggle('hidden', !navigator.share); 
-    };
-
+    btnOpen.onclick = () => { generateQR(); modal.classList.remove('hidden'); modal.classList.add('flex'); btnShare.classList.toggle('hidden', !navigator.share); };
     window.closeQRModal = () => { modal.classList.remove('flex'); modal.classList.add('hidden'); };
     modal.onclick = (e) => { if (e.target === modal) closeQRModal(); };
 
@@ -156,373 +134,59 @@ function withTimeout(p, ms, msg) {
         if (!qrSource) return;
         const logo = new Image();
         logo.onload = () => {
-            const canvas = document.createElement('canvas'); 
-            const W = 512, H = 720; 
-            canvas.width = W; canvas.height = H;
-            const ctx = canvas.getContext('2d'); 
-            ctx.fillStyle = '#ffffff'; 
-            ctx.fillRect(0, 0, W, H);
-            
-            const logoSize = 140; 
-            ctx.save(); 
-            ctx.beginPath(); 
-            ctx.arc(W/2, 100, logoSize/2, 0, Math.PI*2); 
-            ctx.clip(); 
-            ctx.drawImage(logo, W/2 - logoSize/2, 30, logoSize, logoSize); 
-            ctx.restore();
-            
-            ctx.beginPath(); 
-            ctx.arc(W/2, 100, logoSize/2, 0, Math.PI*2); 
-            ctx.lineWidth = 6; 
-            ctx.strokeStyle = '#a855f7'; 
-            ctx.stroke();
-            
-            ctx.fillStyle = '#2e1065'; 
-            ctx.font = 'bold 30px Arial'; 
-            ctx.textAlign = 'center'; 
+            const canvas = document.createElement('canvas');
+            const W = 512, H = 720; canvas.width = W; canvas.height = H;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+            const logoSize = 140;
+            ctx.save(); ctx.beginPath(); ctx.arc(W/2, 100, logoSize/2, 0, Math.PI*2); ctx.clip();
+            ctx.drawImage(logo, W/2 - logoSize/2, 30, logoSize, logoSize); ctx.restore();
+            ctx.beginPath(); ctx.arc(W/2, 100, logoSize/2, 0, Math.PI*2);
+            ctx.lineWidth = 6; ctx.strokeStyle = '#a855f7'; ctx.stroke();
+            ctx.fillStyle = '#2e1065'; ctx.font = 'bold 30px Arial'; ctx.textAlign = 'center';
             ctx.fillText('Valen Fashion', W/2, 210);
             ctx.drawImage(qrSource, 56, 265, 400, 400);
-            
-            const link = document.createElement('a'); 
-            link.download = 'valen-qr.png'; 
-            link.href = canvas.toDataURL('image/png'); 
-            link.click();
+            const link = document.createElement('a'); link.download = 'valen-qr.png'; link.href = canvas.toDataURL('image/png'); link.click();
         };
         logo.src = 'logo.jpg';
     };
 })();
 
-// ============ NUEVO: BÚSQUEDA FLOTANTE ============
-(function initSearch() {
-    const btnSearch = document.getElementById('btn-search');
-    const drawer = document.getElementById('search-drawer');
-    const resultsContainer = document.getElementById('search-results');
-    const resultsCount = document.getElementById('search-results-count');
-    const inputText = document.getElementById('search-text');
-    const inputDateFrom = document.getElementById('search-date-from');
-    const inputDateTo = document.getElementById('search-date-to');
-    const inputPriceMin = document.getElementById('search-price-min');
-    const inputPriceMax = document.getElementById('search-price-max');
-    
-    // Abrir drawer
-    btnSearch.onclick = () => {
-        drawer.classList.add('active');
-        inputText.focus();
-    };
-    
-    // Cerrar drawer (función global)
-    window.closeSearchDrawer = () => {
-        drawer.classList.remove('active');
-    };
-    
-    // Limpiar filtros (función global)
-    window.clearSearchFilters = () => {
-        inputText.value = '';
-        inputDateFrom.value = '';
-        inputDateTo.value = '';
-        inputPriceMin.value = '';
-        inputPriceMax.value = '';
-        performSearch();
-    };
-    
-    // Escuchar cambios en todos los filtros (búsqueda en tiempo real)
-    [inputText, inputDateFrom, inputDateTo, inputPriceMin, inputPriceMax].forEach(input => {
-        input.addEventListener('input', performSearch);
-    });
-    
-    // Función para parsear precio (ej: "$110.000" -> 110000)
-    function parsePrice(priceStr) {
-        if (!priceStr) return 0;
-        const num = parseInt(priceStr.toString().replace(/[^0-9]/g, ''), 10);
-        return isNaN(num) ? 0 : num;
-    }
-    
-    // Función principal de búsqueda
-    function performSearch() {
-        const text = inputText.value.toLowerCase().trim();
-        const dateFrom = inputDateFrom.value ? new Date(inputDateFrom.value).getTime() : null;
-        const dateTo = inputDateTo.value ? new Date(inputDateTo.value + 'T23:59:59').getTime() : null;
-        const priceMin = inputPriceMin.value ? parseInt(inputPriceMin.value, 10) : null;
-        const priceMax = inputPriceMax.value ? parseInt(inputPriceMax.value, 10) : null;
-        
-        // Filtrar productos
-        const filtered = allProducts.filter(p => {
-            // Filtro por texto (nombre o descripción)
-            if (text) {
-                const titleMatch = (p.title || '').toLowerCase().includes(text);
-                const descMatch = (p.description || '').toLowerCase().includes(text);
-                if (!titleMatch && !descMatch) return false;
-            }
-            
-            // Filtro por fecha
-            if (dateFrom && p.createdAt && p.createdAt < dateFrom) return false;
-            if (dateTo && p.createdAt && p.createdAt > dateTo) return false;
-            
-            // Filtro por precio
-            const price = parsePrice(p.price);
-            if (priceMin !== null && price < priceMin) return false;
-            if (priceMax !== null && price > priceMax) return false;
-            
-            return true;
-        });
-        
-        renderSearchResults(filtered, text || dateFrom || dateTo || priceMin || priceMax);
-    }
-    
-
-        // Renderizar resultados (COPIA EXACTA DEL FORMATO PRINCIPAL)
-    function renderSearchResults(products, hasFilters) {
-        // Actualizar contador
-        if (hasFilters) {
-            resultsCount.innerText = `${products.length} resultado${products.length !== 1 ? 's' : ''} encontrado${products.length !== 1 ? 's' : ''}`;
-        } else {
-            resultsCount.innerText = '';
-        }
-        
-        // Estado vacío
-        if (products.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="search-empty-state">
-                    <div class="empty-icon">🔍💭</div>
-                    <div class="empty-title text-title">No encontramos resultados</div>
-                    <div class="empty-desc text-desc">
-                        Parece que no hay productos que coincidan con tu búsqueda.<br><br>
-                         Intenta con otros términos, ajusta los filtros o explora nuestro catálogo completo.
-                    </div>
-                </div>
-            `;
-            return;
-        }
-        
-        // Renderizar tarjetas (USANDO EXACTAMENTE EL MISMO HTML QUE LA PÁGINA PRINCIPAL)
-        resultsContainer.innerHTML = `
-            <div class="search-results-grid">
-                ${products.map(p => {
-                    const cat = categories.find(x => x.id === p.category)?.name || p.category;
-                    
-                    // --- MENSAJE BONITO PARA WHATSAPP (Igual que en main) ---
-                    const greeting = getGreeting();
-                    const descripcion = p.description ? p.description : 'Sin descripción';
-                    const waText = `${greeting}! ✨\n\n` +
-                                   `Hola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n` +
-                                   `️ *Producto:* ${p.title}\n` +
-                                   `💰 *Precio:* ${p.price}\n` +
-                                   `📂 *Categoría:* ${cat}\n\n` +
-                                   ` *Descripción:*\n${descripcion}\n\n` +
-                                   `¿Podrías confirmarme si aún está disponible? 😊\n` +
-                                   `¡Muchas gracias de antemano! ✨`;
-                    const waLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
-                    
-                    const safeTitle = (p.title || '').replace(/'/g, "\\'"); 
-                    const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
-
-                    // --- LÓGICA DE ETIQUETAS (Exacta copia) ---
-                    let tagsHtml = '';
-                    const now = Date.now();
-                    const sevenDays = 7 * 24 * 60 * 60 * 1000;
-                    const isNew = p.createdAt && (now - p.createdAt < sevenDays);
-                    
-                    let tagCount = 0;
-                    if (p.tagType) tagCount++;
-                    if (isNew) tagCount++;
-
-                    if (p.tagType) {
-                        const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
-                        tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: 14px; left: -34px;">${p.tagType}</div>`;
-                    }
-
-                    if (isNew) {
-                        const topPos = p.tagType ? '48px' : '14px';
-                        tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">Nuevo</div>`;
-                    }
-
-                    const topPadding = tagCount === 2 ? '60px' : (tagCount === 1 ? '36px' : '12px');
-
-                    return `
-                    <div class="relative" style="padding-top: ${topPadding};">
-                        ${tagsHtml}
-                        <div class="card-bg rounded-3xl shadow-xl flex flex-col group relative overflow-hidden">
-                            <div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer overflow-hidden" onclick="openLightbox('${p.image}','${safeTitle}')">
-                                <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
-                                <span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full z-10">${cat}</span>
-                            </div>
-                            <div class="p-4 space-y-1 flex-1">
-                                <div class="flex justify-between"><h3 class="text-sm font-bold text-title">${p.title}</h3><span class="text-price font-extrabold text-sm">${p.price}</span></div>
-                                <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
-                            </div>
-                            <div class="p-4 pt-0 space-y-2">
-                                <a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">
-                                    Pedir por WhatsApp 💬
-                                </a>
-                                <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">
-                                    Compartir 🔗
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    }
-    
-    // Ocultar botón cuando el admin, lightbox o QR están abiertos
-    function updateSearchButtonVisibility() {
-        const adminOpen = !document.getElementById('admin-modal').classList.contains('hidden') && 
-                         !document.getElementById('admin-content-section').classList.contains('hidden');
-        const lightboxOpen = !document.getElementById('lightbox').classList.contains('hidden');
-        const qrOpen = !document.getElementById('qr-modal').classList.contains('hidden');
-        
-        if (adminOpen || lightboxOpen || qrOpen) {
-            btnSearch.style.display = 'none';
-        } else {
-            btnSearch.style.display = 'flex';
-        }
-    }
-    
-    // Observar cambios en los modales
-    const observer = new MutationObserver(updateSearchButtonVisibility);
-    ['admin-modal', 'lightbox', 'qr-modal', 'admin-content-section'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el, { attributes: true, attributeFilter: ['class'] });
-    });
-    
-    // Cerrar drawer con tecla Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && drawer.classList.contains('active')) {
-            closeSearchDrawer();
-        }
-    });
-    
-    // Inicializar visibilidad
-    updateSearchButtonVisibility();
-})();
-
-
-})();
-
-// ============ NUEVO: VER MÁS PRODUCTOS (PLEGABLE) ============
-(function initShowMore() {
-    const container = document.getElementById('products-container');
-    const showMoreContainer = document.getElementById('show-more-container');
-    const btnShowMore = document.getElementById('btn-show-more');
-    
-    if (!container || !showMoreContainer || !btnShowMore) {
-        console.log('Elementos del show-more no encontrados');
-        return;
-    }
-    
-    // Umbral: cuántos productos mostrar antes de ocultar
-    function getThreshold() {
-        const w = window.innerWidth;
-        if (w >= 1024) return 12; // Desktop: 3 filas de 4
-        if (w >= 768) return 9;   // Tablet: 3 filas de 3
-        return 6;                 // Móvil: 3 filas de 2
-    }
-
-    function updateShowMoreVisibility() {
-        const isAllCategory = selectedCategory === 'all';
-        const totalProducts = isAllCategory ? allProducts.length : allProducts.filter(p => p.category === selectedCategory).length;
-        const threshold = getThreshold();
-        
-        // Solo mostrar botón si estamos en "Todo" Y hay más productos que el umbral
-        if (isAllCategory && totalProducts > threshold) {
-            showMoreContainer.classList.remove('hidden');
-            container.classList.add('collapsed');
-            container.classList.remove('expanded');
-        } else {
-            showMoreContainer.classList.add('hidden');
-            container.classList.remove('collapsed');
-            container.classList.add('expanded');
-        }
-    }
-
-    // Evento click en "Ver más"
-    btnShowMore.onclick = () => {
-        container.classList.remove('collapsed');
-        container.classList.add('expanded');
-        showMoreContainer.classList.add('hidden');
-        
-        // Scroll suave hacia los productos nuevos
-        setTimeout(() => {
-            const cards = container.querySelectorAll('.card-bg');
-            if (cards[getThreshold()]) {
-                cards[getThreshold()].scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 100);
-    };
-
-    // Escuchar cambios de categoría
-    const originalSetCategory = window.setCategory;
-    window.setCategory = (id) => {
-        originalSetCategory(id);
-        setTimeout(updateShowMoreVisibility, 100);
-    };
-
-    // Inicializar
-    setTimeout(updateShowMoreVisibility, 200);
-    
-    // Recalcular al cambiar tamaño
-    window.addEventListener('resize', () => {
-        if (!container.classList.contains('expanded')) {
-            updateShowMoreVisibility();
-        }
-    });
-})();
-
 // ============ DATOS ============
-const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'🛏️ Tendidos'}];
+const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'️ Tendidos'}];
 const ringPresets = [{name:'Morado',mode:'solid',color:'#a855f7'},{name:'Negro',mode:'solid',color:'#000000'},{name:'Blanco',mode:'solid',color:'#ffffff'},{name:'Rosa',mode:'solid',color:'#ec4899'}];
-const defaultProfile = { 
-    photo: 'https://andryus0312-collab.github.io/Valen_fashion_manizales/logo.jpg', 
-    name: 'Valen Fashion', 
-    tagline: '✨ Mereces lo que sueñas 🤍', 
-    category: '🛍️ Compras y ventas minoristas', 
-    bio: 'Tenemos cosas hermosas y exclusivas para ti 💥', 
-    service: '🚚 Domicilios en Manizales 💎', 
-    address: '📍 Cra 38 #66-20, Manizales', 
-    ring: {mode:'solid',color:'#a855f7'} 
+const defaultProfile = {
+    photo: 'https://andryus0312-collab.github.io/Valen_fashion_manizales/logo.jpg',
+    name: 'Valen Fashion',
+    tagline: '✨ Mereces lo que sueñas 🤍',
+    category: '🛍️ Compras y ventas minoristas',
+    bio: 'Tenemos cosas hermosas y exclusivas para ti ',
+    service: '🚚 Domicilios en Manizales 💎',
+    address: '📍 Cra 38 #66-20, Manizales',
+    ring: {mode:'solid',color:'#a855f7'}
 };
 let currentProfile = defaultProfile;
 
-function showToast(m) { 
-    const e=document.getElementById('toast'); 
-    if(!e)return; 
-    e.innerText=m; 
-    e.classList.remove('hidden'); 
-    e.style.opacity='1'; 
-    setTimeout(()=>{e.style.opacity='0'; setTimeout(()=>e.classList.add('hidden'),300);},2200); 
+function showToast(m) {
+    const e=document.getElementById('toast'); if(!e)return;
+    e.innerText=m; e.classList.remove('hidden'); e.style.opacity='1';
+    setTimeout(()=>{e.style.opacity='0'; setTimeout(()=>e.classList.add('hidden'),300);},2200);
 }
-
-window.formatPriceInput = (el) => { 
-    let d=el.value.replace(/\D/g,'').replace(/^0+(?=\d)/,''); 
-    el.value=d?'$'+d.replace(/\B(?=(\d{3})+(?!\d))/g,'.'):''; 
-};
+window.formatPriceInput = (el) => { let d=el.value.replace(/\D/g,'').replace(/^0+(?=\d)/,''); el.value=d?'$'+d.replace(/\B(?=(\d{3})+(?!\d))/g,'.'):''; };
 
 // ============ BANNER ============
 let bannerImages=[], bannerIndex=0, bannerInterval=null;
-
 function renderBannerSlides() {
     const container = document.getElementById('banner-carousel');
     if (!container) return;
     if (bannerInterval) { clearInterval(bannerInterval); bannerInterval = null; }
     if (bannerImages.length === 0) { container.classList.add('hidden'); container.innerHTML = ''; return; }
-    
-    container.classList.remove('hidden'); 
-    bannerIndex = 0;
+    container.classList.remove('hidden'); bannerIndex = 0;
     const fitMode = window.currentBannerFit || 'cover';
     let objectClass = 'object-cover';
     if (fitMode === 'contain') objectClass = 'object-contain';
     if (fitMode === 'fill') objectClass = 'object-fill';
-
-    container.innerHTML = bannerImages.map((b, i) => `
-        <img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full ${objectClass} transition-opacity duration-700 ${i === 0 ? 'opacity-100' : 'opacity-0'}">
-    `).join('') + (bannerImages.length > 1 ? `
-        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">
-            ${bannerImages.map((_, i) => `<span class="h-1.5 rounded-full transition-all ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></span>`).join('')}
-        </div>
-    ` : '');
-
+    container.innerHTML = bannerImages.map((b, i) => `<img src="${b.image}" class="banner-slide absolute inset-0 w-full h-full ${objectClass} transition-opacity duration-700 ${i === 0 ? 'opacity-100' : 'opacity-0'}">`).join('') + (bannerImages.length > 1 ? `<div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10" id="banner-dots">${bannerImages.map((_, i) => `<span class="h-1.5 rounded-full transition-all ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></span>`).join('')}</div>` : '');
     if (bannerImages.length > 1) {
         bannerInterval = setInterval(() => {
             bannerIndex = (bannerIndex + 1) % bannerImages.length;
@@ -533,52 +197,40 @@ function renderBannerSlides() {
         }, 5000);
     }
 }
+function renderAdminBannerList() {
+    const l=document.getElementById('admin-banner-list'); if(!l)return;
+    l.innerHTML = bannerImages.length ? bannerImages.map(b=>`<div class="relative aspect-video rounded-xl overflow-hidden border border-purple-500/30 bg-black"><img src="${b.image}" class="w-full h-full object-cover"><button onclick="deleteBannerImage('${b.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-800/90 text-white text-[10px] flex items-center justify-center">🗑️</button></div>`).join('') : '<p class="col-span-3 text-center text-desc text-[11px] py-2">Sin imágenes.</p>';
+}
+onValue(ref(db, 'valen_banner'), (s) => { const d=s.val(); bannerImages=d?Object.keys(d).map(k=>({id:k,...d[k]})):[]; renderBannerSlides(); renderAdminBannerList(); });
 
-function renderAdminBannerList() { 
-    const l=document.getElementById('admin-banner-list'); 
-    if(!l)return; 
-    l.innerHTML = bannerImages.length ? bannerImages.map(b=>`<div class="relative aspect-video rounded-xl overflow-hidden border border-purple-500/30 bg-black"><img src="${b.image}" class="w-full h-full object-cover"><button onclick="deleteBannerImage('${b.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-800/90 text-white text-[10px] flex items-center justify-center">🗑️</button></div>`).join('') : '<p class="col-span-3 text-center text-desc text-[11px] py-2">Sin imágenes.</p>'; 
+function resizeImg(f, max, q) {
+    return new Promise((res,rej)=>{
+        const r=new FileReader();
+        r.onload=e=>{
+            const i=new Image();
+            i.onload=()=>{
+                const c=document.createElement('canvas');
+                let w=i.width,h=i.height;
+                if(w>h&&w>max){h*=max/w;w=max;}else if(h>max){w*=max/h;h=max;}
+                c.width=w;c.height=h;
+                c.getContext('2d').drawImage(i,0,0,w,h);
+                res(c.toDataURL('image/jpeg',q));
+            };
+            i.src=e.target.result;
+        };
+        r.readAsDataURL(f);
+    });
 }
 
-onValue(ref(db, 'valen_banner'), (s) => { 
-    const d=s.val(); 
-    bannerImages=d?Object.keys(d).map(k=>({id:k,...d[k]})):[]; 
-    renderBannerSlides(); 
-    renderAdminBannerList(); 
-});
-
-function resizeImg(f, max, q) { 
-    return new Promise((res,rej)=>{ 
-        const r=new FileReader(); 
-        r.onload=e=>{ 
-            const i=new Image(); 
-            i.onload=()=>{ 
-                const c=document.createElement('canvas'); 
-                let w=i.width,h=i.height; 
-                if(w>h&&w>max){h*=max/w;w=max;}else if(h>max){w*=max/h;h=max;} 
-                c.width=w;c.height=h; 
-                c.getContext('2d').drawImage(i,0,0,w,h); 
-                res(c.toDataURL('image/jpeg',q)); 
-            }; 
-            i.src=e.target.result; 
-        }; 
-        r.readAsDataURL(f); 
-    }); 
-}
-
-window.handleBannerImagesInput = (e) => { 
-    const f=Array.from(e.target.files||[]); 
-    if(!f.length)return; 
-    const st=document.getElementById('banner-image-status'); 
-    let d=0; 
-    st.innerText=`Subiendo...`; 
-    f.forEach(file=>{ 
-        resizeImg(file,1200,0.8).then(b64=>withTimeout(push(ref(db,'valen_banner'),{image:b64,createdAt:Date.now()}),12000,'Timeout')).then(()=>{ 
-            if(++d===f.length){st.innerText='OK'; showToast('✅ Banner OK'); document.getElementById('banner-image-file').value='';} 
-        }).catch(err=>alert('Error')); 
-    }); 
+window.handleBannerImagesInput = (e) => {
+    const f=Array.from(e.target.files||[]); if(!f.length)return;
+    const st=document.getElementById('banner-image-status'); let d=0; st.innerText=`Subiendo...`;
+    f.forEach(file=>{
+        resizeImg(file,1200,0.8).then(b64=>withTimeout(push(ref(db,'valen_banner'),{image:b64,createdAt:Date.now()}),12000,'Timeout')).then(()=>{
+            if(++d===f.length){st.innerText='OK'; showToast('✅ Banner OK'); document.getElementById('banner-image-file').value='';}
+        }).catch(err=>alert('Error'));
+    });
 };
-
 window.deleteBannerImage = (id) => { if(confirm('¿Eliminar?')) remove(ref(db,'valen_banner/'+id)); };
 
 if(new URLSearchParams(window.location.search).get('admin')==='1') document.getElementById('btn-admin').classList.remove('hidden');
@@ -590,45 +242,35 @@ window.selectRingPreset = (i) => { selectedRing=ringPresets[i].mode==='solid'?{m
 window.selectCustomSolid = () => { selectedRing={mode:'solid',color:document.getElementById('ring-custom-solid').value}; highlightRingPreset(-1); document.getElementById('ring-preview').style.background=selectedRing.color; };
 window.selectCustomGradient = () => { selectedRing={mode:'gradient',from:document.getElementById('ring-custom-from').value,to:document.getElementById('ring-custom-to').value}; highlightRingPreset(-1); document.getElementById('ring-preview').style.background=ringToCss(selectedRing); };
 
-function renderProfile(p) { 
-    p=p||defaultProfile; 
-    document.getElementById('profile-photo').src=p.photo; 
-    document.getElementById('profile-name').innerText=p.name; 
-    document.getElementById('profile-tagline').innerText=p.tagline; 
-    document.getElementById('profile-category').innerText=p.category; 
-    document.getElementById('profile-bio').innerText=p.bio; 
-    document.getElementById('profile-service').innerText=p.service; 
-    document.getElementById('profile-address').innerText=p.address; 
-    document.getElementById('profile-ring').style.background=ringToCss(p.ring); 
+function renderProfile(p) {
+    p=p||defaultProfile;
+    document.getElementById('profile-photo').src=p.photo;
+    document.getElementById('profile-name').innerText=p.name;
+    document.getElementById('profile-tagline').innerText=p.tagline;
+    document.getElementById('profile-category').innerText=p.category;
+    document.getElementById('profile-bio').innerText=p.bio;
+    document.getElementById('profile-service').innerText=p.service;
+    document.getElementById('profile-address').innerText=p.address;
+    document.getElementById('profile-ring').style.background=ringToCss(p.ring);
 }
-
-function prefillProfileForm() { 
-    const p=currentProfile||defaultProfile; 
-    document.getElementById('profile-category-input').value=p.category; 
-    document.getElementById('profile-bio-input').value=p.bio; 
-    document.getElementById('profile-service-input').value=p.service; 
-    document.getElementById('profile-address-input').value=p.address; 
-    selectedRing=p.ring; 
-    renderRingPresets(); 
-    document.getElementById('ring-preview').style.background=ringToCss(selectedRing); 
+function prefillProfileForm() {
+    const p=currentProfile||defaultProfile;
+    document.getElementById('profile-category-input').value=p.category;
+    document.getElementById('profile-bio-input').value=p.bio;
+    document.getElementById('profile-service-input').value=p.service;
+    document.getElementById('profile-address-input').value=p.address;
+    selectedRing=p.ring; renderRingPresets();
+    document.getElementById('ring-preview').style.background=ringToCss(selectedRing);
 }
-
-window.handleProfileImageInput = (e) => { 
-    const f=e.target.files[0]; 
-    if(!f)return; 
-    resizeImg(f,600,0.85).then(b64=>{ 
-        profileBase64Image=b64; 
-        document.getElementById('profile-image-preview').src=b64; 
-        document.getElementById('profile-image-preview-container').classList.remove('hidden'); 
-    }); 
+window.handleProfileImageInput = (e) => {
+    const f=e.target.files[0]; if(!f)return;
+    resizeImg(f,600,0.85).then(b64=>{ profileBase64Image=b64; document.getElementById('profile-image-preview').src=b64; document.getElementById('profile-image-preview-container').classList.remove('hidden'); });
 };
-
-window.saveProfile = () => { 
-    const up={...(currentProfile||defaultProfile), category:document.getElementById('profile-category-input').value, bio:document.getElementById('profile-bio-input').value, service:document.getElementById('profile-service-input').value, address:document.getElementById('profile-address-input').value, ring:selectedRing}; 
-    if(profileBase64Image)up.photo=profileBase64Image; 
-    withTimeout(set(ref(db,'valen_profile'),up),12000,'Timeout').then(()=>showToast('✅ Guardado')).catch(e=>alert('Error')); 
+window.saveProfile = () => {
+    const up={...(currentProfile||defaultProfile), category:document.getElementById('profile-category-input').value, bio:document.getElementById('profile-bio-input').value, service:document.getElementById('profile-service-input').value, address:document.getElementById('profile-address-input').value, ring:selectedRing};
+    if(profileBase64Image)up.photo=profileBase64Image;
+    withTimeout(set(ref(db,'valen_profile'),up),12000,'Timeout').then(()=>showToast('✅ Guardado')).catch(e=>alert('Error'));
 };
-
 onValue(ref(db, 'valen_profile'), (s) => { currentProfile=s.val()||defaultProfile; renderProfile(currentProfile); });
 
 function renderCategories() {
@@ -640,9 +282,9 @@ function renderCategories() {
 window.setCategory = (id) => { selectedCategory=id; renderCategories(); renderProducts(); };
 
 // ============ COMPARTIR PRODUCTO ============
-function getGreeting() { 
-    const h = new Date().getHours(); 
-    return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches'; 
+function getGreeting() {
+    const h = new Date().getHours();
+    return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches';
 }
 
 window.shareProduct = async function(product) {
@@ -663,73 +305,41 @@ window.shareProduct = async function(product) {
 };
 
 window.downloadProductImage = function(product) {
-    const img = new Image(); 
-    img.crossOrigin = "Anonymous";
+    const img = new Image(); img.crossOrigin = "Anonymous";
     img.onload = () => {
-        const canvas = document.createElement('canvas'); 
-        const W = 600, H = 800; 
-        canvas.width = W; canvas.height = H;
-        const ctx = canvas.getContext('2d'); 
-        ctx.fillStyle = '#fdfbf7'; 
-        ctx.fillRect(0, 0, W, H);
+        const canvas = document.createElement('canvas');
+        const W = 600, H = 800; canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fdfbf7'; ctx.fillRect(0, 0, W, H);
         ctx.drawImage(img, 100, 40, 400, 400);
-        ctx.fillStyle = '#2e1065'; 
-        ctx.font = 'bold 32px Arial'; 
-        ctx.textAlign = 'center'; 
-        ctx.fillText(product.title, W/2, 480);
-        ctx.fillStyle = '#9333ea'; 
-        ctx.font = 'bold 28px Arial'; 
-        ctx.fillText(product.price, W/2, 520);
-        ctx.fillStyle = '#2e1065'; 
-        ctx.font = 'bold 20px Arial'; 
-        ctx.fillText('Valen Fashion 🤍', W/2, H - 40);
-        const link = document.createElement('a'); 
-        link.download = `valen-${product.title}.png`; 
-        link.href = canvas.toDataURL('image/png'); 
-        link.click();
+        ctx.fillStyle = '#2e1065'; ctx.font = 'bold 32px Arial'; ctx.textAlign = 'center'; ctx.fillText(product.title, W/2, 480);
+        ctx.fillStyle = '#9333ea'; ctx.font = 'bold 28px Arial'; ctx.fillText(product.price, W/2, 520);
+        ctx.fillStyle = '#2e1065'; ctx.font = 'bold 20px Arial'; ctx.fillText('Valen Fashion 🤍', W/2, H - 40);
+        const link = document.createElement('a'); link.download = `valen-${product.title}.png`; link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = product.image;
 };
 
 // ============ RENDERIZADO DE PRODUCTOS (CON ETIQUETAS) ============
-
 function renderProducts() {
     const c = document.getElementById('products-container');
     const f = selectedCategory === 'all' ? allProducts : allProducts.filter(p => p.category === selectedCategory);
-    
-    if (!f.length) { 
-        c.innerHTML = '<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">🛍️</p><p>Sin productos.</p></div>'; 
-        return; 
-    }
-    
+    if (!f.length) { c.innerHTML = '<div class="col-span-full py-16 text-center text-desc"><p class="text-3xl">️</p><p>Sin productos.</p></div>'; return; }
+
     c.innerHTML = f.map(p => {
         const cat = categories.find(x => x.id === p.category)?.name || p.category;
-        
-        // --- MENSAJE BONITO Y COMPLETO PARA WHATSAPP ---
         const greeting = getGreeting();
-        const descripcion = p.description ? p.description : 'Sin descripción';
         
-        const waText = `${greeting}! 🌸✨\n\n` +
-                       `Hola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n` +
-                       `️ *Producto:* ${p.title}\n` +
-                       `💰 *Precio:* ${p.price}\n` +
-                       `📂 *Categoría:* ${cat}\n\n` +
-                       `📝 *Descripción:*\n${descripcion}\n\n` +
-                       `¿Podrías confirmarme si aún está disponible? 😊\n` +
-                       `¡Muchas gracias de antemano! ✨`;
-        
+        const waText = `${greeting}! 🌸✨\n\nHola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n🛍️ *Producto:* ${p.title}\n💰 *Precio:* ${p.price}\n📂 *Categoría:* ${cat}\n\n📝 *Descripción:*\n${descripcion}\n\n¿Podrías confirmarme si aún está disponible? 😊\n¡Muchas gracias de antemano! ✨`;
         const waLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
-        // -----------------------------------------------
-        
-        const safeTitle = p.title.replace(/'/g, "\\'"); 
+
+        const safeTitle = p.title.replace(/'/g, "\\'");
         const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
-        // --- LÓGICA DE ETIQUETAS ---
         let tagsHtml = '';
         const now = Date.now();
         const sevenDays = 7 * 24 * 60 * 60 * 1000;
         const isNew = p.createdAt && (now - p.createdAt < sevenDays);
-        
         let tagCount = 0;
         if (p.tagType) tagCount++;
         if (isNew) tagCount++;
@@ -738,12 +348,10 @@ function renderProducts() {
             const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
             tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: 14px; left: -34px;">${p.tagType}</div>`;
         }
-
         if (isNew) {
             const topPos = p.tagType ? '48px' : '14px';
             tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">Nuevo</div>`;
         }
-
         const topPadding = tagCount === 2 ? '60px' : (tagCount === 1 ? '36px' : '12px');
 
         return `
@@ -759,13 +367,8 @@ function renderProducts() {
                     <p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p>
                 </div>
                 <div class="p-4 pt-0 space-y-2">
-                    <!-- BOTÓN PEDIR: DIRECTO A WHATSAPP (sin menú de compartir) -->
-                    <a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">
-                        Pedir por WhatsApp 💬
-                    </a>
-                    <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">
-                        Compartir 🔗
-                    </button>
+                    <a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">Pedir por WhatsApp 💬</a>
+                    <button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button>
                 </div>
             </div>
         </div>`;
@@ -774,91 +377,56 @@ function renderProducts() {
 
 function renderAdminList() {
     const l=document.getElementById('admin-products-list'); if(!l)return;
-    l.innerHTML = allProducts.length ? allProducts.map(p=>`
-        <div class="flex items-center justify-between admin-item-bg p-2 rounded-xl">
-            <div class="flex items-center gap-2 overflow-hidden"><img src="${p.image}" class="w-8 h-8 rounded-lg object-cover"><p class="text-xs font-bold text-title truncate">${p.title}</p></div>
-            <button onclick="deleteProduct('${p.firebaseId}')" class="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-lg">🗑️</button>
-        </div>`).join('') : '<p class="text-center text-desc text-xs py-4">Sin productos.</p>';
+    l.innerHTML = allProducts.length ? allProducts.map(p=>`<div class="flex items-center justify-between admin-item-bg p-2 rounded-xl"><div class="flex items-center gap-2 overflow-hidden"><img src="${p.image}" class="w-8 h-8 rounded-lg object-cover"><p class="text-xs font-bold text-title truncate">${p.title}</p></div><button onclick="deleteProduct('${p.firebaseId}')" class="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-lg">🗑️</button></div>`).join('') : '<p class="text-center text-desc text-xs py-4">Sin productos.</p>';
 }
 
-onValue(ref(db, 'valen_products'), (s) => { 
-    const d=s.val(); 
-    allProducts=d?Object.keys(d).map(k=>({firebaseId:k,...d[k]})).reverse():[]; 
-    renderCategories(); 
-    renderProducts(); 
-    renderAdminList(); 
-    updateDebugStatus(); 
+onValue(ref(db, 'valen_products'), (s) => {
+    const d=s.val();
+    allProducts=d?Object.keys(d).map(k=>({firebaseId:k,...d[k]})).reverse():[];
+    renderCategories(); renderProducts(); renderAdminList(); updateDebugStatus();
+});
+onAuthStateChanged(auth, u => {
+    isLoggedIn=!!u;
+    document.getElementById('debug-btn').classList.toggle('hidden',!isLoggedIn);
+    const ls=document.getElementById('admin-login-section'), cs=document.getElementById('admin-content-section');
+    if(isLoggedIn){ls.classList.add('hidden'); cs.classList.remove('hidden'); prefillProfileForm();}else{ls.classList.remove('hidden'); cs.classList.add('hidden');}
+    updateDebugStatus();
 });
 
-onAuthStateChanged(auth, u => { 
-    isLoggedIn=!!u; 
-    document.getElementById('debug-btn').classList.toggle('hidden',!isLoggedIn); 
-    const ls=document.getElementById('admin-login-section'), cs=document.getElementById('admin-content-section'); 
-    if(isLoggedIn){ls.classList.add('hidden'); cs.classList.remove('hidden'); prefillProfileForm();}else{ls.classList.remove('hidden'); cs.classList.add('hidden');} 
-    updateDebugStatus(); 
-});
-
-window.adminLogin = () => { 
-    const e=document.getElementById('admin-email').value, p=document.getElementById('admin-password').value; 
-    signInWithEmailAndPassword(auth,e,p).catch(()=>alert('Error login')); 
-};
+window.adminLogin = () => { const e=document.getElementById('admin-email').value, p=document.getElementById('admin-password').value; signInWithEmailAndPassword(auth,e,p).catch(()=>alert('Error login')); };
 window.adminLogout = () => signOut(auth);
-window.toggleAdminModal = (s) => { 
-    const m=document.getElementById('admin-modal'); 
-    s?(m.classList.remove('hidden'),m.classList.add('flex')):(m.classList.remove('flex'),m.classList.add('hidden')); 
+window.toggleAdminModal = (s) => { const m=document.getElementById('admin-modal'); s?(m.classList.remove('hidden'),m.classList.add('flex')):(m.classList.remove('flex'),m.classList.add('hidden')); };
+
+window.handleImageInput = (e) => {
+    const f=e.target.files[0]; if(!f)return;
+    resizeImg(f,1000,0.8).then(b64=>{ base64Image=b64; document.getElementById('image-preview').src=b64; document.getElementById('image-preview-container').classList.remove('hidden'); });
 };
 
-window.handleImageInput = (e) => { 
-    const f=e.target.files[0]; 
-    if(!f)return; 
-    resizeImg(f,1000,0.8).then(b64=>{ 
-        base64Image=b64; 
-        document.getElementById('image-preview').src=b64; 
-        document.getElementById('image-preview-container').classList.remove('hidden'); 
-    }); 
-};
-
-// ============ PUBLICAR PRODUCTO (CON ETIQUETAS) ============
-window.publishProduct = () => { 
-    const t=document.getElementById('new-title').value, 
-          p=document.getElementById('new-price').value, 
-          c=document.getElementById('new-category').value, 
+window.publishProduct = () => {
+    const t=document.getElementById('new-title').value,
+          p=document.getElementById('new-price').value,
+          c=document.getElementById('new-category').value,
           d=document.getElementById('new-description').value;
-    
     const tagType = document.getElementById('new-tag-type') ? document.getElementById('new-tag-type').value : '';
     const tagColor = document.getElementById('new-tag-color') ? document.getElementById('new-tag-color').value : '#ef4444';
-
-    if(!t||!p||!base64Image) return alert('Faltan datos'); 
-    
+    if(!t||!p||!base64Image) return alert('Faltan datos');
     withTimeout(push(ref(db,'valen_products'),{
-        title:t,
-        price:p,
-        category:c,
-        description:d,
-        image:base64Image,
-        createdAt:Date.now(),
-        tagType: tagType,
-        tagColor: tagColor
+        title:t, price:p, category:c, description:d, image:base64Image,
+        createdAt:Date.now(), tagType: tagType, tagColor: tagColor
     }),12000,'Timeout').then(()=>{
-        showToast('✅ Publicado'); 
-        document.getElementById('new-title').value=''; 
-        document.getElementById('new-price').value=''; 
+        showToast('✅ Publicado');
+        document.getElementById('new-title').value='';
+        document.getElementById('new-price').value='';
         document.getElementById('new-description').value='';
         if(document.getElementById('new-tag-type')) document.getElementById('new-tag-type').value='';
         if(document.getElementById('new-tag-color')) document.getElementById('new-tag-color').value='#ef4444';
-        
-        base64Image=null; 
+        base64Image=null;
         document.getElementById('image-preview-container').classList.add('hidden');
-    }).catch(e=>alert('Error: '+e.message)); 
+    }).catch(e=>alert('Error: '+e.message));
 };
 
 window.deleteProduct = (id) => { if(confirm('¿Borrar?')) remove(ref(db,'valen_products/'+id)); };
-
-window.openLightbox = (u,t) => { 
-    document.getElementById('lightbox-img').src=u; 
-    document.getElementById('lightbox-title').innerText=t; 
-    document.getElementById('lightbox').classList.replace('hidden','flex'); 
-};
+window.openLightbox = (u,t) => { document.getElementById('lightbox-img').src=u; document.getElementById('lightbox-title').innerText=t; document.getElementById('lightbox').classList.replace('hidden','flex'); };
 window.closeLightbox = () => document.getElementById('lightbox').classList.replace('flex','hidden');
 
 // ============ AJUSTE DE BANNER ============
@@ -870,14 +438,164 @@ onValue(ref(db, 'valen_profile'), (snapshot) => {
     if (selectEl) selectEl.value = mode;
     renderBannerSlides();
 });
-
 window.updateBannerFit = function(mode) {
     const currentData = currentProfile || defaultProfile;
     const updatedData = { ...currentData, bannerFit: mode };
-    set(ref(db, 'valen_profile'), updatedData).then(() => {
-        showToast('✅ Ajuste guardado');
-    }).catch(err => {
-        console.error(err);
-        alert('Error: ' + err.message);
-    });
+    set(ref(db, 'valen_profile'), updatedData).then(() => { showToast('✅ Ajuste guardado'); }).catch(err => { console.error(err); alert('Error: ' + err.message); });
 };
+
+// ============ BÚSQUEDA FLOTANTE ============
+(function initSearch() {
+    const btnSearch = document.getElementById('btn-search');
+    const drawer = document.getElementById('search-drawer');
+    const resultsContainer = document.getElementById('search-results');
+    const resultsCount = document.getElementById('search-results-count');
+    const inputText = document.getElementById('search-text');
+    const inputDateFrom = document.getElementById('search-date-from');
+    const inputDateTo = document.getElementById('search-date-to');
+    const inputPriceMin = document.getElementById('search-price-min');
+    const inputPriceMax = document.getElementById('search-price-max');
+
+    btnSearch.onclick = () => { drawer.classList.add('active'); inputText.focus(); };
+    window.closeSearchDrawer = () => { drawer.classList.remove('active'); };
+    window.clearSearchFilters = () => { inputText.value = ''; inputDateFrom.value = ''; inputDateTo.value = ''; inputPriceMin.value = ''; inputPriceMax.value = ''; performSearch(); };
+
+    [inputText, inputDateFrom, inputDateTo, inputPriceMin, inputPriceMax].forEach(input => { input.addEventListener('input', performSearch); });
+
+    function parsePrice(priceStr) {
+        if (!priceStr) return 0;
+        const num = parseInt(priceStr.toString().replace(/[^0-9]/g, ''), 10);
+        return isNaN(num) ? 0 : num;
+    }
+
+    function performSearch() {
+        const text = inputText.value.toLowerCase().trim();
+        const dateFrom = inputDateFrom.value ? new Date(inputDateFrom.value).getTime() : null;
+        const dateTo = inputDateTo.value ? new Date(inputDateTo.value + 'T23:59:59').getTime() : null;
+        const priceMin = inputPriceMin.value ? parseInt(inputPriceMin.value, 10) : null;
+        const priceMax = inputPriceMax.value ? parseInt(inputPriceMax.value, 10) : null;
+
+        const filtered = allProducts.filter(p => {
+            if (text) {
+                const titleMatch = (p.title || '').toLowerCase().includes(text);
+                const descMatch = (p.description || '').toLowerCase().includes(text);
+                if (!titleMatch && !descMatch) return false;
+            }
+            if (dateFrom && p.createdAt && p.createdAt < dateFrom) return false;
+            if (dateTo && p.createdAt && p.createdAt > dateTo) return false;
+            const price = parsePrice(p.price);
+            if (priceMin !== null && price < priceMin) return false;
+            if (priceMax !== null && price > priceMax) return false;
+            return true;
+        });
+
+        renderSearchResults(filtered, text || dateFrom || dateTo || priceMin || priceMax);
+    }
+
+    function renderSearchResults(products, hasFilters) {
+        if (hasFilters) {
+            resultsCount.innerText = `${products.length} resultado${products.length !== 1 ? 's' : ''} encontrado${products.length !== 1 ? 's' : ''}`;
+        } else {
+            resultsCount.innerText = '';
+        }
+
+        if (products.length === 0) {
+            resultsContainer.innerHTML = `<div class="search-empty-state"><div class="empty-icon">🔍💭</div><div class="empty-title text-title">No encontramos resultados</div><div class="empty-desc text-desc">Parece que no hay productos que coincidan con tu búsqueda.<br><br>✨ Intenta con otros términos, ajusta los filtros o explora nuestro catálogo completo.</div></div>`;
+            return;
+        }
+
+    resultsContainer.innerHTML = `<div class="search-results-grid">${products.map(p => {
+            const cat = categories.find(x => x.id === p.category)?.name || p.category;
+            const greeting = getGreeting();
+            const descripcion = p.description ? p.description : 'Sin descripción';
+            const waText = `${greeting}! 🌸✨\n\nHola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n️ *Producto:* ${p.title}\n *Precio:* ${p.price}\n📂 *Categoría:* ${cat}\n\n *Descripción:*\n${descripcion}\n\n¿Podrías confirmarme si aún está disponible? \n¡Muchas gracias de antemano! ✨`;
+            const waLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
+            const safeTitle = (p.title || '').replace(/'/g, "\\'");
+            const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+
+            let tagsHtml = '';
+            const now = Date.now();
+            const sevenDays = 7 * 24 * 60 * 60 * 1000;
+            const isNew = p.createdAt && (now - p.createdAt < sevenDays);
+            let tagCount = 0;
+            if (p.tagType) tagCount++;
+            if (isNew) tagCount++;
+            if (p.tagType) {
+                const textColor = (p.tagColor === '#facc15' || p.tagColor === '#ffffff') ? '#000000' : '#ffffff';
+                tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg" style="background-color: ${p.tagColor}; color: ${textColor}; width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: 14px; left: -34px;">${p.tagType}</div>`;
+            }
+            if (isNew) {
+                const topPos = p.tagType ? '48px' : '14px';
+                tagsHtml += `<div class="absolute z-20 px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-lg bg-red-500 text-white" style="width: 110px; text-align: center; transform: rotate(-45deg); transform-origin: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); top: ${topPos}; left: -34px;">Nuevo</div>`;
+            }
+            const topPadding = tagCount === 2 ? '60px' : (tagCount === 1 ? '36px' : '12px');
+
+            return `<div class="relative" style="padding-top: ${topPadding};">${tagsHtml}<div class="card-bg rounded-3xl shadow-xl flex flex-col group relative overflow-hidden"><div class="relative aspect-square bg-gray-100 dark:bg-black cursor-pointer overflow-hidden" onclick="openLightbox('${p.image}','${safeTitle}')"><img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform"><span class="absolute top-2 right-2 bg-white/80 dark:bg-black/70 text-purple-700 dark:text-purple-300 text-[9px] font-bold px-2 py-1 rounded-full z-10">${cat}</span></div><div class="p-4 space-y-1 flex-1"><div class="flex justify-between"><h3 class="text-sm font-bold text-title">${p.title}</h3><span class="text-price font-extrabold text-sm">${p.price}</span></div><p class="text-[11px] text-desc line-clamp-2">${p.description||''}</p></div><div class="p-4 pt-0 space-y-2"><a href="${waLink}" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95 shadow-lg">Pedir por WhatsApp 💬</a><button onclick="shareProduct({title: '${safeTitle}', price: '${p.price}', description: '${safeDesc}', image: '${p.image}'})" class="share-product-btn w-full text-xs font-bold py-2 rounded-xl text-center transition-all active:scale-95">Compartir 🔗</button></div></div></div>`;
+        }).join('')}</div>`;
+    }
+
+    function updateSearchButtonVisibility() {
+        const adminOpen = !document.getElementById('admin-modal').classList.contains('hidden') && !document.getElementById('admin-content-section').classList.contains('hidden');
+        const lightboxOpen = !document.getElementById('lightbox').classList.contains('hidden');
+        const qrOpen = !document.getElementById('qr-modal').classList.contains('hidden');
+        if (adminOpen || lightboxOpen || qrOpen) { btnSearch.style.display = 'none'; } else { btnSearch.style.display = 'flex'; }
+    }
+
+    const observer = new MutationObserver(updateSearchButtonVisibility);
+    ['admin-modal', 'lightbox', 'qr-modal', 'admin-content-section'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('active')) { closeSearchDrawer(); } });
+    updateSearchButtonVisibility();
+})();
+
+// ============ VER MÁS PRODUCTOS (PLEGABLE) ============
+(function initShowMore() {
+    const container = document.getElementById('products-container');
+    const showMoreContainer = document.getElementById('show-more-container');
+    const btnShowMore = document.getElementById('btn-show-more');
+    if (!container || !showMoreContainer || !btnShowMore) return;
+
+    function getThreshold() {
+        const w = window.innerWidth;
+        if (w >= 1024) return 12;
+        if (w >= 768) return 9;
+        return 6;
+    }
+
+ function updateShowMoreVisibility() {
+        const isAllCategory = selectedCategory === 'all';
+        const totalProducts = isAllCategory ? allProducts.length : allProducts.filter(p => p.category === selectedCategory).length;
+        const threshold = getThreshold();
+        if (isAllCategory && totalProducts > threshold) {
+            showMoreContainer.classList.remove('hidden');
+            container.classList.add('collapsed');
+            container.classList.remove('expanded');
+        } else {
+            showMoreContainer.classList.add('hidden');
+            container.classList.remove('collapsed');
+            container.classList.add('expanded');
+        }
+    }
+
+    btnShowMore.onclick = () => {
+        container.classList.remove('collapsed');
+        container.classList.add('expanded');
+        showMoreContainer.classList.add('hidden');
+        setTimeout(() => {
+            const cards = container.querySelectorAll('.card-bg');
+            if (cards[getThreshold()]) { cards[getThreshold()].scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        }, 100);
+    };
+
+    const originalSetCategory = window.setCategory;
+    window.setCategory = (id) => {
+        originalSetCategory(id);
+        setTimeout(updateShowMoreVisibility, 100);
+    };
+
+    setTimeout(updateShowMoreVisibility, 200);
+    window.addEventListener('resize', () => { if (!container.classList.contains('expanded')) { updateShowMoreVisibility(); } });
+})();
