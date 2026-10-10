@@ -68,7 +68,7 @@ function loadDashboardData() {
     renderCommercialCalendar();
 }
 
-// ============ GRÁFICAS ============
+// ============ GRÁFICAS MEJORADAS ============
 function renderDevicesChart() {
     const ctx = document.getElementById('chart-devices').getContext('2d');
     new Chart(ctx, {
@@ -76,12 +76,27 @@ function renderDevicesChart() {
         data: {
             labels: ['📱 Celular', '💻 PC', '📟 Tablet'],
             datasets: [{
-                data: [65, 25, 10], // Datos simulados — luego reales
+                data: [65, 25, 10],
                 backgroundColor: ['#ec4899', '#a855f7', '#D4AF37'],
-                borderWidth: 0
+                borderWidth: 0,
+                hoverOffset: 15
             }]
         },
-        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } },
+                tooltip: {
+                    backgroundColor: 'rgba(27, 12, 27, 0.9)',
+                    titleColor: '#D4AF37',
+                    bodyColor: '#fff',
+                    borderColor: '#D4AF37',
+                    borderWidth: 1
+                }
+            },
+            animation: { animateRotate: true, animateScale: true }
+        }
     });
 }
 
@@ -98,47 +113,186 @@ function renderCategoriesChart(products) {
                 label: 'Productos',
                 data: [counts.hogar, counts.ninos, counts.ropa, counts.tendidos],
                 backgroundColor: ['#a855f7', '#ec4899', '#D4AF37', '#9333ea'],
-                borderRadius: 8
+                borderRadius: 8,
+                borderSkipped: false
             }]
         },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(168, 85, 247, 0.1)' } },
+                x: { grid: { display: false } }
+            },
+            animation: { duration: 1500, easing: 'easeOutQuart' }
+        }
     });
 }
 
 function renderVisitsChart() {
     const ctx = document.getElementById('chart-visits').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(168, 85, 247, 0.4)');
+    gradient.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+    
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
             datasets: [{
                 label: 'Visitas',
-                data: [12, 19, 15, 25, 22, 30, 28], // Simulado
+                data: [12, 19, 15, 25, 22, 30, 28],
                 borderColor: '#a855f7',
-                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                backgroundColor: gradient,
                 tension: 0.4,
-                fill: true
+                fill: true,
+                pointBackgroundColor: '#D4AF37',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 8
             }]
         },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(168, 85, 247, 0.1)' } },
+                x: { grid: { display: false } }
+            },
+            animation: { duration: 2000, easing: 'easeInOutQuart' }
+        }
     });
 }
 
-// ============ CALENDARIO COMERCIAL ============
+// ============ MODAL DE GRÁFICA AMPLIADA ============
+window.openChartModal = function(chartType) {
+    const modal = document.getElementById('chart-modal');
+    const title = document.getElementById('modal-chart-title');
+    const container = document.getElementById('modal-chart-container');
+    const interp = document.getElementById('modal-chart-interpretation');
+    
+    const chartData = {
+        devices: { title: '📱 Dispositivos', canvas: 'chart-devices', interp: document.querySelector('#card-devices .chart-interpretation').innerHTML },
+        categories: { title: '🏆 Categorías', canvas: 'chart-categories', interp: document.querySelector('#card-categories .chart-interpretation').innerHTML },
+        visits: { title: '📈 Visitas', canvas: 'chart-visits', interp: document.querySelector('#card-visits .chart-interpretation').innerHTML }
+    };
+    
+    const data = chartData[chartType];
+    title.innerText = data.title;
+    container.innerHTML = `<canvas id="modal-canvas" style="max-height: 400px;"></canvas>`;
+    interp.innerHTML = data.interp;
+    
+    // Clonar la gráfica al modal
+    const originalCanvas = document.getElementById(data.canvas);
+    const modalCanvas = document.getElementById('modal-canvas');
+    const chartInstance = Chart.getChart(originalCanvas);
+    if (chartInstance) {
+        new Chart(modalCanvas, {
+            type: chartInstance.config.type,
+            data: JSON.parse(JSON.stringify(chartInstance.data)),
+            options: { ...chartInstance.options, responsive: true, maintainAspectRatio: false }
+        });
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeChartModal = function() {
+    const modal = document.getElementById('chart-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+// ============ DESCARGAR GRÁFICA COMO IMAGEN ============
+window.downloadChart = function(cardId, title) {
+    const card = document.getElementById(cardId);
+    html2canvas(card, {
+        backgroundColor: '#fdfbf7',
+        scale: 2,
+        useCORS: true
+    }).then(canvas => {
+        // Crear canvas final con logo + texto
+        const finalCanvas = document.createElement('canvas');
+        const ctx = finalCanvas.getContext('2d');
+        const W = 800, H = canvas.height + 200;
+        finalCanvas.width = W;
+        finalCanvas.height = H;
+        
+        // Fondo degradado
+        const gradient = ctx.createLinearGradient(0, 0, W, H);
+        gradient.addColorStop(0, '#fdfbf7');
+        gradient.addColorStop(1, '#f3e8ff');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, W, H);
+        
+        // Logo
+        const logo = new Image();
+        logo.onload = () => {
+            ctx.drawImage(logo, 20, 20, 80, 80);
+            ctx.fillStyle = '#2e1065';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('Valen Fashion 📊', 120, 60);
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#4b5563';
+            ctx.fillText(title + ' • ' + new Date().toLocaleDateString('es-CO'), 120, 85);
+            
+            // Gráfica
+            ctx.drawImage(canvas, 50, 120, W - 100, canvas.height);
+            
+            // Descargar
+            const link = document.createElement('a');
+            link.download = `valen-stats-${title.toLowerCase()}.png`;
+            link.href = finalCanvas.toDataURL('image/png');
+            link.click();
+        };
+        logo.src = '../logo.jpg';
+    });
+};
+
+// ============ CALENDARIO COMERCIAL DETALLADO (COLOMBIA) ============
 function renderCommercialCalendar() {
     const dates = [
-        { name: '💘 Amor y Amistad', date: '2026-09-19', daysLeft: getDaysLeft('2026-09-19') },
-        { name: '🎃 Halloween', date: '2026-10-31', daysLeft: getDaysLeft('2026-10-31') },
-        { name: '🛍️ Black Friday', date: '2026-11-27', daysLeft: getDaysLeft('2026-11-27') },
-        { name: '🎄 Navidad', date: '2026-12-25', daysLeft: getDaysLeft('2026-12-25') },
-        { name: '💐 Día de la Madre', date: '2027-05-09', daysLeft: getDaysLeft('2027-05-09') }
-    ].filter(d => d.daysLeft > 0).sort((a, b) => a.daysLeft - b.daysLeft);
+        { 
+            name: '🎃 Halloween', 
+            date: '2026-10-31', 
+            strategy: '👻 Sube disfraces de niños, peluches de monstruositos y cobijas con temática oscura. Haz promo "2x1 en peluches" por WhatsApp. Publica historias de Instagram con maquillaje de Halloween.' 
+        },
+        { 
+            name: '🛍️ Black Friday', 
+            date: '2026-11-27', 
+            strategy: '💰 Ofertas flash solo por 24h. Crea combos "Hogar + Niños" con descuento. Envía mensaje masivo por WhatsApp a clientas anteriores. Usa etiqueta "🔥 OFERTA" en productos.' 
+        },
+        { 
+            name: '🎄 Navidad', 
+            date: '2026-12-25', 
+            strategy: '🎁 Empieza a subir regalos desde noviembre. Peluches, cobijas y maletas son ideales. Haz promo "Envío gratis en Manizales". Publica reels de "ideas de regalo".' 
+        },
+        { 
+            name: '💐 Día de la Madre', 
+            date: '2027-05-09', 
+            strategy: '💝 Cobijas suaves, peluches grandes y sets de tocador son perfectos. Crea combo "Mamá merece lo mejor". Publica testimonios de clientas felices.' 
+        },
+        { 
+            name: '💘 Amor y Amistad', 
+            date: '2026-09-19', 
+            strategy: '💌 Peluches rosados, cobijas para pareja. Promo "2x1 para compartir". Publica en Instagram con hashtag #AmorYAmistadManizales.' 
+        }
+    ].map(d => ({ ...d, daysLeft: getDaysLeft(d.date) }))
+      .filter(d => d.daysLeft > 0)
+      .sort((a, b) => a.daysLeft - b.daysLeft);
 
     const container = document.getElementById('commercial-calendar');
     container.innerHTML = dates.map(d => `
-        <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-[#D4AF37]/20">
-            <span class="font-bold text-title">${d.name}</span>
-            <span class="text-xs font-bold text-[#A8842C] dark:text-[#E6C76A]">⏳ ${d.daysLeft} días</span>
+        <div class="calendar-item">
+            <div class="calendar-header">
+                <span class="calendar-name">${d.name}</span>
+                <span class="calendar-days">⏳ ${d.daysLeft} días</span>
+            </div>
+            <p class="calendar-strategy">${d.strategy}</p>
         </div>
     `).join('') || '<p class="text-desc text-center">No hay fechas próximas</p>';
 }
@@ -147,4 +301,4 @@ function getDaysLeft(dateStr) {
     const target = new Date(dateStr);
     const now = new Date();
     return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-      }
+}
