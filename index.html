@@ -281,7 +281,44 @@
                                 <option value="tendidos">🛏️ Tendidos</option>
                             </select>
                             
-                            <!-- NUEVO: Sección de Testimonios (Admin) -->
+                            
+                                                        <!-- NUEVO: SELECTOR DE ETIQUETA -->
+                            <div class="space-y-1 mt-2">
+                                <label class="text-[10px] font-bold text-desc">🏷️ Etiqueta (Opcional)</label>
+                                <div class="flex gap-2">
+                                    <select id="new-tag-type" class="flex-1 admin-input rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Sin etiqueta</option>
+                                        <option value="DESCUENTO">💰 Descuento</option>
+                                        <option value="PROMOCIÓN">🎁 Promoción</option>
+                                        <option value="TIEMPO LIMITADO">⏳ Tiempo Limitado</option>
+                                        <option value="OFERTA">🔥 Oferta</option>
+                                    </select>
+                                    <input type="color" id="new-tag-color" value="#ef4444" class="w-10 h-8 rounded cursor-pointer border-0" title="Color de fondo">
+                                </div>
+                                <p class="text-[9px] text-desc italic">💡 "Nuevo" aparece solo por 7 días al publicar.</p>
+                            </div>
+
+                            <textarea id="new-description" placeholder="Descripción (opcional)" rows="2" class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-desc">📸 Fotografía del Producto</label>
+                                <div class="flex items-center gap-2">
+                                    <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
+                                        Seleccionar archivo<input type="file" id="new-image-file" accept="image/*" class="hidden" onchange="handleImageInput(event)">
+                                    </label>
+                                    <span id="image-status" class="text-[10px] text-desc font-mono">Ningún archivo</span>
+                                </div>
+                                <div id="image-preview-container" class="hidden mt-2"><img id="image-preview" class="w-full h-32 object-cover rounded-lg border border-purple-500/30"></div>
+                            </div>
+                            <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Publicar Producto ✨</button>
+                        </div>
+                        <div id="admin-products-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-none pr-1"></div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUEVO: Sección de Testimonios (Admin) -->
                     <section class="admin-testimonials-section space-y-4">
                         <h3 class="text-sm font-bold text-title flex items-center gap-2">👑 Testimonios</h3>
                         <p class="text-[11px] text-desc">Gestiona las voces de tus clientas felices</p>
@@ -322,41 +359,6 @@
                         <div id="admin-testimonials-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-none pr-1"></div>
                     </section>
                             
-                                                        <!-- NUEVO: SELECTOR DE ETIQUETA -->
-                            <div class="space-y-1 mt-2">
-                                <label class="text-[10px] font-bold text-desc">🏷️ Etiqueta (Opcional)</label>
-                                <div class="flex gap-2">
-                                    <select id="new-tag-type" class="flex-1 admin-input rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                        <option value="">Sin etiqueta</option>
-                                        <option value="DESCUENTO">💰 Descuento</option>
-                                        <option value="PROMOCIÓN">🎁 Promoción</option>
-                                        <option value="TIEMPO LIMITADO">⏳ Tiempo Limitado</option>
-                                        <option value="OFERTA">🔥 Oferta</option>
-                                    </select>
-                                    <input type="color" id="new-tag-color" value="#ef4444" class="w-10 h-8 rounded cursor-pointer border-0" title="Color de fondo">
-                                </div>
-                                <p class="text-[9px] text-desc italic">💡 "Nuevo" aparece solo por 7 días al publicar.</p>
-                            </div>
-
-                            <textarea id="new-description" placeholder="Descripción (opcional)" rows="2" class="w-full admin-input rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-bold text-desc">📸 Fotografía del Producto</label>
-                                <div class="flex items-center gap-2">
-                                    <label class="flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[11px] font-bold py-2 px-3 rounded-lg text-center cursor-pointer border border-purple-500/30 active:scale-95 transition-all">
-                                        Seleccionar archivo<input type="file" id="new-image-file" accept="image/*" class="hidden" onchange="handleImageInput(event)">
-                                    </label>
-                                    <span id="image-status" class="text-[10px] text-desc font-mono">Ningún archivo</span>
-                                </div>
-                                <div id="image-preview-container" class="hidden mt-2"><img id="image-preview" class="w-full h-32 object-cover rounded-lg border border-purple-500/30"></div>
-                            </div>
-                            <button id="publish-btn" onclick="publishProduct()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg transition-all active:scale-95 mt-2">Publicar Producto ✨</button>
-                        </div>
-                        <div id="admin-products-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-none pr-1"></div>
-                    </section>
-                </div>
-            </div>
-        </div>
-    </div>
 
        <!-- Panel Diagnóstico -->
     <div id="debug-panel" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex-col p-4">
