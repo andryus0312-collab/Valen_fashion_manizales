@@ -11,6 +11,9 @@
     
     <!-- Chart.js para gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- html2canvas para descargar gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     
     <!-- Estilos propios -->
     <link rel="stylesheet" href="stats.css">
@@ -71,27 +74,75 @@
             </div>
         </section>
 
-        <!-- Gráficas -->
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="chart-card">
-                <h3 class="chart-title">📱 Dispositivos</h3>
-                <canvas id="chart-devices"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 class="chart-title">🏆 Categorías más vistas</h3>
-                <canvas id="chart-categories"></canvas>
-            </div>
-            <div class="chart-card md:col-span-2">
-                <h3 class="chart-title">📈 Visitas por día</h3>
-                <canvas id="chart-visits"></canvas>
-            </div>
-        </section>
+        <!-- Gráficas Mejoradas -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    
+    <!-- Gráfica 1: Dispositivos -->
+    <div class="chart-card-enhanced" id="card-devices">
+        <div class="chart-header">
+            <h3 class="chart-title">📱 ¿Desde dónde te visitan?</h3>
+            <button onclick="openChartModal('devices')" class="chart-expand-btn">🔍 Ampliar</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="chart-devices"></canvas>
+        </div>
+        <div class="chart-interpretation">
+            <p class="interp-text">✨ <strong>El 65% de tus clientas entran desde celular</strong> 📱. Esto significa que tu tienda se ve principalmente en pantallas pequeñas.</p>
+            <p class="interp-action">👉 <strong>Acción:</strong> Asegúrate de que todas las fotos de productos se vean bien en móvil. Publica historias de Instagram a las 8pm (hora pico).</p>
+        </div>
+        <button onclick="downloadChart('card-devices', 'Dispositivos')" class="download-chart-btn">📥 Descargar Gráfica</button>
+    </div>
 
-        <!-- Calendario comercial -->
-        <section class="chart-card mb-8">
-            <h3 class="chart-title">📅 Próximas fechas comerciales</h3>
-            <div id="commercial-calendar" class="space-y-3"></div>
-        </section>
+    <!-- Gráfica 2: Categorías -->
+    <div class="chart-card-enhanced" id="card-categories">
+        <div class="chart-header">
+            <h3 class="chart-title">🏆 ¿Qué categorías gustan más?</h3>
+            <button onclick="openChartModal('categories')" class="chart-expand-btn">🔍 Ampliar</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="chart-categories"></canvas>
+        </div>
+        <div class="chart-interpretation">
+            <p class="interp-text">🧸 <strong>Niños y Hogar lideran tu catálogo</strong>. Tienes 24 productos en Niños y 22 en Hogar.</p>
+            <p class="interp-action">👉 <strong>Acción:</strong> Sube más peluches y cobijas (son tus estrellas ⭐). Considera una promo "Combo Hogar + Niños".</p>
+        </div>
+        <button onclick="downloadChart('card-categories', 'Categorías')" class="download-chart-btn">📥 Descargar Gráfica</button>
+    </div>
+
+    <!-- Gráfica 3: Visitas (ocupa todo el ancho) -->
+    <div class="chart-card-enhanced md:col-span-2" id="card-visits">
+        <div class="chart-header">
+            <h3 class="chart-title">📈 ¿Cuándo entra más gente?</h3>
+            <button onclick="openChartModal('visits')" class="chart-expand-btn">🔍 Ampliar</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="chart-visits"></canvas>
+        </div>
+        <div class="chart-interpretation">
+            <p class="interp-text">📅 <strong>Sábado y Domingo son tus días fuertes</strong> (30 y 28 visitas). La gente navega tu tienda en fines de semana.</p>
+            <p class="interp-action">👉 <strong>Acción:</strong> Publica nuevos productos los viernes en la noche. Haz lives de Instagram los sábados.</p>
+        </div>
+        <button onclick="downloadChart('card-visits', 'Visitas')" class="download-chart-btn">📥 Descargar Gráfica</button>
+    </div>
+</section>
+
+<!-- Modal para gráfica ampliada -->
+<div id="chart-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#0d0310] rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 border-2 border-[#D4AF37]/30">
+        <div class="flex justify-between items-center mb-4">
+            <h3 id="modal-chart-title" class="text-xl font-bold text-title"></h3>
+            <button onclick="closeChartModal()" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 flex items-center justify-center">✕</button>
+        </div>
+        <div id="modal-chart-container" class="mb-4"></div>
+        <div id="modal-chart-interpretation" class="chart-interpretation"></div>
+    </div>
+</div>
+
+        <!-- Calendario Comercial Detallado -->
+<section class="chart-card-enhanced mb-8">
+    <h3 class="chart-title">📅 Próximas fechas comerciales (Colombia)</h3>
+    <div id="commercial-calendar" class="space-y-4"></div>
+</section>
 
         <!-- Coach IA (bloque visual, sin lógica aún) -->
         <section class="coach-card">
