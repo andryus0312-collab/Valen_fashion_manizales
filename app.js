@@ -579,7 +579,7 @@ window.updateBannerFit = function(mode) {
         return 6;
     }
 
- function updateShowMoreVisibility() {
+ window.updateShowMoreVisibility = function() {
         const isAllCategory = selectedCategory === 'all';
         const totalProducts = isAllCategory ? allProducts.length : allProducts.filter(p => p.category === selectedCategory).length;
         const threshold = getThreshold();
