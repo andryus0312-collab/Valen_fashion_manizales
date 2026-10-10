@@ -103,6 +103,34 @@
             </div>
         </main>
         
+<!-- NUEVO: Botón Flotante Izquierdo (Testimonios) -->
+    <button id="btn-testimonials" class="testimonials-float-btn hidden">
+        <span class="shimmer"></span>
+        <span class="btn-content">👑 Testimonios</span>
+    </button>
+
+    <!-- NUEVO: Slider Lateral de Testimonios -->
+    <div id="testimonials-drawer" class="hidden fixed inset-0 z-50">
+        <!-- Fondo oscuro -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeTestimonialsDrawer()"></div>
+        
+        <!-- Drawer desde la izquierda -->
+        <div class="testimonials-drawer-panel absolute left-0 top-0 bottom-0 bg-white dark:bg-[#0d0310] shadow-2xl flex flex-col overflow-hidden border-r-2 border-[#D4AF37]/50" style="width: 50%; max-width: 50%;">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between p-4 border-b border-[#D4AF37]/30 bg-gray-50 dark:bg-[#1b0c1b] flex-shrink-0">
+                <h2 class="text-lg font-bold text-title flex items-center gap-2">👑 Testimonios</h2>
+                <button onclick="closeTestimonialsDrawer()" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center hover:bg-rose-200 transition-all">✕</button>
+            </div>
+            
+            <!-- Contenido con scroll -->
+            <div id="testimonials-content" class="flex-1 overflow-y-auto p-4 scrollbar-none">
+                <!-- Aquí se inyectan los testimonios dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+        
         <!-- NUEVO: Contenedor "Ver Más Productos" -->
     <div id="show-more-container" class="hidden flex flex-col items-center justify-center py-8 relative z-10">
         <button id="btn-show-more" class="group relative px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg border border-purple-500/30 overflow-hidden">
