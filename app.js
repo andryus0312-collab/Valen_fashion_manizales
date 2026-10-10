@@ -613,3 +613,168 @@ window.updateBannerFit = function(mode) {
     setTimeout(updateShowMoreVisibility, 200);
     window.addEventListener('resize', () => { if (!container.classList.contains('expanded')) { updateShowMoreVisibility(); } });
 })();
+
+
+// ============ TESTIMONIOS (FASE CORONA) ============
+let allTestimonials = [];
+
+// Cargar testimonios desde Firebase
+onValue(ref(db, 'valen_testimonials'), (snapshot) => {
+    const data = snapshot.val();
+    allTestimonials = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })).sort((a, b) => b.createdAt - a.createdAt) : [];
+    renderTestimonials();
+});
+
+// Renderizar testimonios en el slider
+function renderTestimonials() {
+    const container = document.getElementById('testimonials-content');
+    if (!container) return;
+
+    if (allTestimonials.length === 0) {
+        container.innerHTML = `
+            <div class="testimonials-empty">
+                <div class="empty-icon">👑✨</div>
+                <div class="empty-title text-title">Aún no hay páginas en nuestro libro dorado...</div>
+                <div class="empty-desc text-desc">¡Muy pronto tendrás voces reales aquí!</div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="testimonials-grid">
+            ${allTestimonials.map((t, index) => {
+                const fitClass = t.fit === 'contain' ? 'contain' : (t.fit === 'fill' ? 'fill' : '');
+                const safeText = (t.text || '').replace(/'/g, "\\'").replace(/\n/g, '<br>');
+                const safeName = (t.name || 'Anónimo').replace(/'/g, "\\'");
+                
+                return `
+                <div>
+                    <div class="testimonial-card">
+                        <img src="${t.image}" class="testimonial-photo ${fitClass}" onclick="openLightbox('${t.image}', '${safeName}')" alt="${safeName}">
+                        <div class="testimonial-text">«${safeText}»</div>
+                        <div class="testimonial-name">✦ ${safeName}</div>
+                    </div>
+                    ${index < allTestimonials.length - 1 ? '<div class="testimonial-divider">· · · 👑 · · ·</div>' : ''}
+                </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+// Abrir/cerrar slider
+window.openTestimonialsDrawer = () => {
+    const drawer = document.getElementById('testimonials-drawer');
+    if (drawer) drawer.classList.add('active');
+};
+window.closeTestimonialsDrawer = () => {
+    const drawer = document.getElementById('testimonials-drawer');
+    if (drawer) drawer.classList.remove('active');
+};
+
+// Botón flotante izquierdo (solo en homepage, desaparece con scroll)
+(function initTestimonialsButton() {
+    const btn = document.getElementById('btn-testimonials');
+    if (!btn) return;
+
+    // Mostrar botón solo si estamos en la página principal (no en admin, no en lightbox)
+    function updateTestimonialsButtonVisibility() {
+        const adminOpen = !document.getElementById('admin-modal').classList.contains('hidden') && 
+                         !document.getElementById('admin-content-section').classList.contains('hidden');
+        const lightboxOpen = !document.getElementById('lightbox').classList.contains('hidden');
+        const testimonialsOpen = !document.getElementById('testimonials-drawer').classList.contains('hidden') &&
+                                  document.getElementById('testimonials-drawer').classList.contains('active');
+        
+        if (adminOpen || lightboxOpen || testimonialsOpen) {
+            btn.classList.add('hidden');
+        } else {
+            btn.classList.remove('hidden');
+        }
+    }
+
+    btn.onclick = () => {
+        openTestimonialsDrawer();
+        updateTestimonialsButtonVisibility();
+    };
+
+    // Observar cambios en modales
+    const observer = new MutationObserver(updateTestimonialsButtonVisibility);
+    ['admin-modal', 'lightbox', 'testimonials-drawer', 'admin-content-section'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    // Cerrar con Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('testimonials-drawer').classList.contains('active')) {
+            closeTestimonialsDrawer();
+            updateTestimonialsButtonVisibility();
+        }
+    });
+
+    updateTestimonialsButtonVisibility();
+})();
+
+// ============ ADMIN: GESTIÓN DE TESTIMONIOS ============
+window.handleTestimonialImageInput = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    resizeImg(f, 800, 0.8).then(b64 => {
+        window.testimonialBase64Image = b64;
+        document.getElementById('testimonial-image-preview').src = b64;
+        document.getElementById('testimonial-image-preview-container').classList.remove('hidden');
+    });
+};
+
+window.publishTestimonial = () => {
+    const text = document.getElementById('new-testimonial-text').value;
+    const name = document.getElementById('new-testimonial-name').value;
+    const fit = document.getElementById('new-testimonial-fit').value;
+    
+    if (!text || !name || !window.testimonialBase64Image) {
+        return alert('Faltan datos (foto, texto o nombre)');
+    }
+    
+    withTimeout(push(ref(db, 'valen_testimonials'), {
+        image: window.testimonialBase64Image,
+        text: text,
+        name: name,
+        fit: fit,
+        createdAt: Date.now()
+    }), 12000, 'Timeout').then(() => {
+        showToast('✅ Testimonio publicado');
+        document.getElementById('new-testimonial-text').value = '';
+        document.getElementById('new-testimonial-name').value = '';
+        document.getElementById('new-testimonial-fit').value = 'cover';
+        window.testimonialBase64Image = null;
+        document.getElementById('testimonial-image-preview-container').classList.add('hidden');
+    }).catch(e => alert('Error: ' + e.message));
+};
+
+window.deleteTestimonial = (id) => {
+    if (confirm('¿Borrar este testimonio?')) {
+        remove(ref(db, 'valen_testimonials/' + id));
+    }
+};
+
+// Renderizar lista de testimonios en admin
+function renderAdminTestimonialsList() {
+    const l = document.getElementById('admin-testimonials-list');
+    if (!l) return;
+    
+    l.innerHTML = allTestimonials.length ? allTestimonials.map(t => `
+        <div class="flex items-center justify-between admin-item-bg p-2 rounded-xl">
+            <div class="flex items-center gap-2 overflow-hidden">
+                <img src="${t.image}" class="w-8 h-8 rounded-lg object-cover">
+                <p class="text-xs font-bold text-title truncate">${t.name}</p>
+            </div>
+            <button onclick="deleteTestimonial('${t.id}')" class="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-lg">🗑️</button>
+        </div>
+    `).join('') : '<p class="text-center text-desc text-xs py-4">Sin testimonios aún.</p>';
+}
+
+// Actualizar lista de admin cuando cambian los testimonios
+onValue(ref(db, 'valen_testimonials'), () => {
+    renderAdminTestimonialsList();
+});
