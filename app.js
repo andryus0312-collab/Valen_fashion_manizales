@@ -328,11 +328,21 @@ function renderProducts() {
 
     c.innerHTML = f.map(p => {
         const cat = categories.find(x => x.id === p.category)?.name || p.category;
+        // --- MENSAJE BONITO Y COMPLETO PARA WHATSAPP ---
         const greeting = getGreeting();
+        const descripcion = p.description ? p.description : 'Sin descripción'; 
         
-        const waText = `${greeting}! 🌸✨\n\nHola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n🛍️ *Producto:* ${p.title}\n💰 *Precio:* ${p.price}\n📂 *Categoría:* ${cat}\n\n📝 *Descripción:*\n${descripcion}\n\n¿Podrías confirmarme si aún está disponible? 😊\n¡Muchas gracias de antemano! ✨`;
+        const waText = `${greeting}! 🌸✨\n\n` +
+                       `Hola Valen, me encantó este producto de tu catálogo y quería preguntarte por él: 💜\n\n` +
+                       `️ *Producto:* ${p.title}\n` +
+                       `💰 *Precio:* ${p.price}\n` +
+                       `📂 *Categoría:* ${cat}\n\n` +
+                       `📝 *Descripción:*\n${descripcion}\n\n` +
+                       `¿Podrías confirmarme si aún está disponible? 😊\n` +
+                       `¡Muchas gracias de antemano! ✨`;
+        
         const waLink = `https://wa.me/573229247605?text=${encodeURIComponent(waText)}`;
-
+        // -----------------------------------------------
         const safeTitle = p.title.replace(/'/g, "\\'");
         const safeDesc = (p.description || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
