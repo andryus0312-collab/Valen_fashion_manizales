@@ -234,3 +234,190 @@ body.dark-mode #products-container.collapsed::after {
     box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
     transform: translateY(-2px) scale(1.02);
 }
+
+
+/* ============ TESTIMONIOS (FASE CORONA) ============ */
+
+/* Botón flotante izquierdo (solo en homepage, desaparece con scroll) */
+.testimonials-float-btn {
+    position: absolute;
+    left: 1rem;
+    top: 28rem; /* Ajustar según altura del header */
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #F5D78E 0%, #D4AF37 45%, #A8842C 100%);
+    color: #1b0c1b;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.5);
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: bold;
+    overflow: hidden;
+}
+.testimonials-float-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.7);
+}
+
+/* Destello suave en el borde (animación corta) */
+.testimonials-float-btn .shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: shimmer-border 3s infinite;
+}
+@keyframes shimmer-border {
+    0% { left: -100%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+}
+
+/* Brillitos dorados en el borde (pseudo-elementos) */
+.testimonials-float-btn::before,
+.testimonials-float-btn::after {
+    content: '✨';
+    position: absolute;
+    font-size: 0.7rem;
+    opacity: 0;
+    animation: sparkle 2s infinite;
+}
+.testimonials-float-btn::before {
+    top: -5px;
+    right: 10px;
+    animation-delay: 0s;
+}
+.testimonials-float-btn::after {
+    bottom: -5px;
+    left: 10px;
+    animation-delay: 1s;
+}
+@keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Slider lateral */
+#testimonials-drawer { display: none; }
+#testimonials-drawer.active { display: block; }
+
+.testimonials-drawer-panel {
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.35, 1);
+}
+#testimonials-drawer.active .testimonials-drawer-panel {
+    transform: translateX(0);
+}
+
+/* Responsive: en celulares, 85% de ancho (Opción B) */
+@media (max-width: 640px) {
+    .testimonials-drawer-panel {
+        width: 85% !important;
+        max-width: 85% !important;
+    }
+}
+
+/* Grid de testimonios dentro del slider */
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+@media (min-width: 640px) {
+    .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1280px) {
+    .testimonials-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1536px) {
+    .testimonials-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Tarjeta de testimonio */
+.testimonial-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+body.dark-mode .testimonial-card {
+    background: rgba(27, 12, 27, 0.85);
+    border-color: rgba(212, 175, 55, 0.4);
+}
+.testimonial-card:hover {
+    transform: translateY(-2px);
+}
+
+.testimonial-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    cursor: pointer;
+    background: #000;
+}
+.testimonial-photo.contain { object-fit: contain; }
+.testimonial-photo.fill { object-fit: fill; }
+
+.testimonial-text {
+    padding: 1rem;
+    font-style: italic;
+    color: #4b5563;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+body.dark-mode .testimonial-text { color: #cbd5e1; }
+
+.testimonial-name {
+    padding: 0 1rem 1rem;
+    font-weight: bold;
+    color: #A8842C;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+body.dark-mode .testimonial-name { color: #E6C76A; }
+
+/* Separador dorado con coronita */
+.testimonial-divider {
+    text-align: center;
+    color: #D4AF37;
+    font-size: 0.8rem;
+    margin: 0.5rem 0;
+    opacity: 0.7;
+}
+
+/* Estado vacío */
+.testimonials-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #4b5563;
+}
+body.dark-mode .testimonials-empty { color: #cbd5e1; }
+.testimonials-empty .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.6; }
+.testimonials-empty .empty-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; }
+.testimonials-empty .empty-desc { font-size: 0.85rem; line-height: 1.5; }
+
+/* Admin: marco dorado para sección de testimonios */
+.admin-testimonials-section {
+    border: 1px solid #D4AF37;
+    border-radius: 1rem;
+    padding: 1rem;
+    background: rgba(249, 250, 251, 0.5);
+}
+body.dark-mode .admin-testimonials-section {
+    background: rgba(27, 12, 27, 0.5);
+}
