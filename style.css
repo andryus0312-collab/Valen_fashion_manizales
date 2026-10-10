@@ -242,7 +242,7 @@ body.dark-mode #products-container.collapsed::after {
 .testimonials-float-btn {
     position: absolute;
     left: 1rem;
-    top: 70rem; /* Ajustar según altura del header */
+    top: 68rem; /* Ajustar según altura del header */
     z-index: 30;
     display: flex;
     align-items: center;
