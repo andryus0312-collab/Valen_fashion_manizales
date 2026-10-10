@@ -1,1 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Estadísticas | Valen Fashion</title>
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    
+    <!-- Chart.js para gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="stats.css">
+    <link rel="icon" href="../logo.jpg">
+</head>
+<body class="font-sans antialiased theme-transition min-h-screen">
 
+    <!-- Pantalla de Login (si no hay sesión) -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-[#1b0c1b] to-black">
+        <div class="bg-white dark:bg-[#0d0310] p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border-2 border-[#D4AF37]/30">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#A8842C] flex items-center justify-center text-4xl">🔒</div>
+            <h2 class="text-2xl font-bold text-title mb-2">Acceso Restringido</h2>
+            <p class="text-sm text-desc mb-6">Solo la administradora puede ver las estadísticas</p>
+            <input type="email" id="stats-email" placeholder="Correo" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+            <input type="password" id="stats-password" placeholder="Contraseña" class="w-full admin-input rounded-xl px-4 py-2.5 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+            <button onclick="statsLogin()" class="w-full bg-gradient-to-r from-[#D4AF37] to-[#A8842C] text-[#1b0c1b] font-bold py-2.5 rounded-xl shadow-lg transition-all active:scale-95">
+                Ingresar 🔑
+            </button>
+            <p id="stats-login-error" class="hidden text-xs text-rose-500 mt-3 font-bold"></p>
+        </div>
+    </div>
+
+    <!-- Dashboard (oculto hasta login) -->
+    <div id="dashboard" class="hidden max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8 pb-4 border-b border-[#D4AF37]/30">
+            <div>
+                <h1 class="text-2xl font-extrabold text-title flex items-center gap-2">📊 Panel de Estadísticas</h1>
+                <p class="text-sm text-desc">Valen Fashion Manizales • Datos en tiempo real</p>
+            </div>
+            <button onclick="statsLogout()" class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 px-4 rounded-full border border-rose-500/30 transition-all active:scale-95">
+                🚪 Salir
+            </button>
+        </header>
+
+        <!-- Tarjetas de resumen -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="stat-card">
+                <div class="stat-icon">👀</div>
+                <div class="stat-value" id="total-visits">0</div>
+                <div class="stat-label">Visitas totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-value" id="total-products">0</div>
+                <div class="stat-label">Productos activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📲</div>
+                <div class="stat-value" id="total-whatsapp">0</div>
+                <div class="stat-label">Clics WhatsApp</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👑</div>
+                <div class="stat-value" id="total-testimonials">0</div>
+                <div class="stat-label">Testimonios</div>
+            </div>
+        </section>
+
+        <!-- Gráficas -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="chart-card">
+                <h3 class="chart-title">📱 Dispositivos</h3>
+                <canvas id="chart-devices"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">🏆 Categorías más vistas</h3>
+                <canvas id="chart-categories"></canvas>
+            </div>
+            <div class="chart-card md:col-span-2">
+                <h3 class="chart-title">📈 Visitas por día</h3>
+                <canvas id="chart-visits"></canvas>
+            </div>
+        </section>
+
+        <!-- Calendario comercial -->
+        <section class="chart-card mb-8">
+            <h3 class="chart-title">📅 Próximas fechas comerciales</h3>
+            <div id="commercial-calendar" class="space-y-3"></div>
+        </section>
+
+        <!-- Coach IA (bloque visual, sin lógica aún) -->
+        <section class="coach-card">
+            <div class="coach-header">
+                <span class="coach-avatar">👩💼</span>
+                <h3 class="coach-title">Tu Coach de Valen Fashion te dice:</h3>
+            </div>
+            <div class="coach-message">
+                <p class="text-desc italic">
+                    "Mija, esta sección está lista para recibir consejos personalizados basados en tus estadísticas reales. 
+                    Muy pronto aquí verás recomendaciones de ventas, campañas y fechas clave para tu tienda... 💜✨"
+                </p>
+                <p class="text-[10px] text-desc mt-3 opacity-60">
+                    🤖 Coach IA en construcción — próximamente con tono colombiano y emojis
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <script type="module" src="stats.js"></script>
+</body>
+</html>
