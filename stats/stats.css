@@ -89,3 +89,121 @@ body.dark-mode .coach-title { color: #E6C76A; }
 
 /* Transiciones */
 body, .theme-transition, .theme-transition * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+
+/* ============ GRÁFICAS MEJORADAS ============ */
+.chart-card-enhanced {
+    background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(253,251,247,0.95));
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(168, 85, 247, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+body.dark-mode .chart-card-enhanced {
+    background: linear-gradient(135deg, rgba(27,12,27,0.9), rgba(13,3,16,0.95));
+    border-color: rgba(168, 85, 247, 0.3);
+}
+.chart-card-enhanced:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(168, 85, 247, 0.2);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.chart-expand-btn {
+    background: linear-gradient(135deg, #D4AF37, #A8842C);
+    color: #1b0c1b;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.chart-expand-btn:hover { transform: scale(1.05); }
+
+.chart-container {
+    position: relative;
+    height: 250px;
+    margin-bottom: 1rem;
+}
+
+.chart-interpretation {
+    background: rgba(168, 85, 247, 0.05);
+    border-left: 3px solid #D4AF37;
+    padding: 1rem;
+    border-radius: 0 1rem 1rem 0;
+    margin-bottom: 1rem;
+}
+body.dark-mode .chart-interpretation {
+    background: rgba(168, 85, 247, 0.1);
+}
+.interp-text {
+    font-size: 0.9rem;
+    color: #2d1b36;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+body.dark-mode .interp-text { color: #f3f4f6; }
+.interp-action {
+    font-size: 0.85rem;
+    color: #9333ea;
+    font-weight: 600;
+}
+body.dark-mode .interp-action { color: #c084fc; }
+
+.download-chart-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+.download-chart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+}
+
+/* Calendario detallado */
+.calendar-item {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(168, 85, 247, 0.1));
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 1rem;
+    padding: 1rem;
+    transition: transform 0.2s;
+}
+.calendar-item:hover { transform: translateX(4px); }
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.calendar-name { font-weight: bold; color: #2d1b36; }
+body.dark-mode .calendar-name { color: #ffffff; }
+.calendar-days { 
+    background: linear-gradient(135deg, #D4AF37, #A8842C);
+    color: #1b0c1b;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+.calendar-strategy {
+    font-size: 0.85rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+body.dark-mode .calendar-strategy { color: #cbd5e1; }
