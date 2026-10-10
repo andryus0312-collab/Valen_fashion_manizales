@@ -405,6 +405,8 @@ onAuthStateChanged(auth, u => {
     const ls=document.getElementById('admin-login-section'), cs=document.getElementById('admin-content-section');
     if(isLoggedIn){ls.classList.add('hidden'); cs.classList.remove('hidden'); prefillProfileForm();}else{ls.classList.remove('hidden'); cs.classList.add('hidden');}
     updateDebugStatus();
+    // Dentro de onAuthStateChanged, después de updateDebugStatus();
+document.getElementById('btn-stats').classList.toggle('hidden', !isLoggedIn);
 });
 
 window.adminLogin = () => { const e=document.getElementById('admin-email').value, p=document.getElementById('admin-password').value; signInWithEmailAndPassword(auth,e,p).catch(()=>alert('Error login')); };
