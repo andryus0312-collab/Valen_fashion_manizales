@@ -421,3 +421,78 @@ body.dark-mode .testimonials-empty { color: #cbd5e1; }
 body.dark-mode .admin-testimonials-section {
     background: rgba(27, 12, 27, 0.5);
 }
+
+
+/* ============ ONDAS DEL BANNER (NUEVO) ============ */
+.banner-wave-container {
+    position: relative;
+    width: 100%;
+    max-width: 48rem; /* match con tu banner actual */
+    margin: 0 auto 1.5rem;
+    padding: 1.5rem; /* espacio para que las ondas queden FUERA del banner */
+    box-sizing: border-box;
+}
+
+/* Capa base de las ondas */
+.wave {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 60px;
+    pointer-events: none;
+    z-index: 1;
+    background-repeat: repeat-x;
+    background-size: 400px 100%;
+    opacity: 0.7;
+    filter: blur(0.5px);
+}
+
+/* Onda superior (arriba del banner) */
+.wave-1 {
+    top: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60'%3E%3Cpath d='M0,30 Q50,10 100,30 T200,30 T300,30 T400,30 L400,60 L0,60 Z' fill='%23a855f7'/%3E%3C/svg%3E");
+    animation: wave-move 12s linear infinite;
+}
+
+/* Onda media (más lenta, contraste) */
+.wave-2 {
+    top: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60'%3E%3Cpath d='M0,30 Q50,50 100,30 T200,30 T300,30 T400,30 L400,60 L0,60 Z' fill='%23000000'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    animation: wave-move-reverse 18s linear infinite;
+}
+
+/* Onda inferior (debajo del banner) */
+.wave-3 {
+    bottom: 0;
+    transform: scaleY(-1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60'%3E%3Cpath d='M0,30 Q50,10 100,30 T200,30 T300,30 T400,30 L400,60 L0,60 Z' fill='%23a855f7'/%3E%3C/svg%3E");
+    animation: wave-move 14s linear infinite;
+}
+
+/* Animaciones suaves tipo olas del mar */
+@keyframes wave-move {
+    0% { background-position-x: 0; }
+    100% { background-position-x: 400px; }
+}
+@keyframes wave-move-reverse {
+    0% { background-position-x: 400px; }
+    100% { background-position-x: 0; }
+}
+
+/* ====== MODO OSCURO: Morado + Blanco ====== */
+body.dark-mode .wave-1 {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60'%3E%3Cpath d='M0,30 Q50,10 100,30 T200,30 T300,30 T400,30 L400,60 L0,60 Z' fill='%23a855f7'/%3E%3C/svg%3E");
+}
+body.dark-mode .wave-2 {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60'%3E%3Cpath d='M0,30 Q50,50 100,30 T200,30 T300,30 T400,30 L400,60 L0,60 Z' fill='%23ffffff'/%3E%3C/svg%3E");
+    opacity: 0.4;
+}
+body.dark-mode .wave-3 {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60'%3E%3Cpath d='M0,30 Q50,10 100,30 T200,30 T300,30 T400,30 L400,60 L0,60 Z' fill='%23a855f7'/%3E%3C/svg%3E");
+}
+
+/* Respeta preferencia de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+    .wave { animation: none !important; }
+}
