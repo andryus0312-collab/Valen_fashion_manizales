@@ -41,13 +41,20 @@
         
         <!-- Header -->
         <header class="flex items-center justify-between mb-8 pb-4 border-b border-[#D4AF37]/30">
-            <div>
-                <h1 class="text-2xl font-extrabold text-title flex items-center gap-2">📊 Panel de Estadísticas</h1>
-                <p class="text-sm text-desc">Valen Fashion Manizales • Datos en tiempo real</p>
-            </div>
-            <button onclick="statsLogout()" class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 px-4 rounded-full border border-rose-500/30 transition-all active:scale-95">
-                🚪 Salir
-            </button>
+    <div>
+        <h1 class="text-2xl font-extrabold text-title flex items-center gap-2">📊 Panel de Estadísticas</h1>
+        <p class="text-sm text-desc">Valen Fashion Manizales • Datos en tiempo real</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <!-- Botón Modo Claro/Oscuro -->
+        <button id="stats-theme-toggle" onclick="toggleStatsTheme()" class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-center shadow-lg transition-all active:scale-90 border-2 border-white/30">
+            🌙
+        </button>
+        <!-- Botón Salir -->
+        <button onclick="statsLogout()" class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-xs font-bold py-2 px-4 rounded-full border border-rose-500/30 transition-all active:scale-95">
+            🚪 Salir
+        </button>
+    </div>
         </header>
 
         <!-- Tarjetas de resumen -->
