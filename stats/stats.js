@@ -188,89 +188,47 @@ function renderVisitsChart() {
     });
 }
 
-// ============ MODAL DE GRÁFICA AMPLIADA ============
-window.openChartModal = function(chartType) {
-    const modal = document.getElementById('chart-modal');
-    const title = document.getElementById('modal-chart-title');
-    const container = document.getElementById('modal-chart-container');
-    const interp = document.getElementById('modal-chart-interpretation');
+// ============ AMPLIAR GRÁFICA (IN-PLACE) ============
+window.toggleChartExpand = function(cardId) {
+    const card = document.getElementById(cardId);
+    if (!card) return;
     
-    if (!modal || !title || !container || !interp) return;
+    const isExpanded = card.classList.toggle('expanded');
+    document.body.classList.toggle('chart-expanded', isExpanded);
     
-    const chartData = {
-        devices: { 
-            title: '📱 ¿Desde dónde te visitan?', 
-            canvasId: 'chart-devices', 
-            cardId: 'card-devices' 
-        },
-        categories: { 
-            title: '🏆 ¿Qué categorías gustan más?', 
-            canvasId: 'chart-categories', 
-            cardId: 'card-categories' 
-        },
-        visits: { 
-            title: '📈 ¿Cuándo entra más gente?', 
-            canvasId: 'chart-visits', 
-            cardId: 'card-visits' 
-        }
-    };
-    
-    const data = chartData[chartType];
-    if (!data) return;
-    
-    title.innerText = data.title;
-    
-    // Copiar la interpretación del card original
-    const originalCard = document.getElementById(data.cardId);
-    if (originalCard) {
-        const originalInterp = originalCard.querySelector('.chart-interpretation');
-        interp.innerHTML = originalInterp ? originalInterp.innerHTML : '';
+    // Actualizar texto del botón
+    const btn = card.querySelector('.chart-expand-btn');
+    if (btn) {
+        btn.innerText = isExpanded ? '✕ Cerrar' : '🔍 Ampliar';
     }
     
-    // Clonar el canvas al modal
-    container.innerHTML = '<canvas id="modal-canvas" style="max-height: 400px; width: 100%;"></canvas>';
-    const originalCanvas = document.getElementById(data.canvasId);
-    const modalCanvas = document.getElementById('modal-canvas');
-    
-    if (originalCanvas && modalCanvas) {
-        const chartInstance = Chart.getChart(originalCanvas);
-        if (chartInstance) {
-            new Chart(modalCanvas.getContext('2d'), {
-                type: chartInstance.config.type,
-                data: JSON.parse(JSON.stringify(chartInstance.data)),
-                options: { 
-                    ...chartInstance.options, 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    animation: false
-                }
-            });
-        }
-    }
-    
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-};
-
-window.closeChartModal = function() {
-    const modal = document.getElementById('chart-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        // Destruir la gráfica del modal para evitar memoria
-        const modalCanvas = document.getElementById('modal-canvas');
-        if (modalCanvas) {
-            const chart = Chart.getChart(modalCanvas);
-            if (chart) chart.destroy();
+    // Redimensionar la gráfica para que se adapte al nuevo tamaño
+    const canvas = card.querySelector('canvas');
+    if (canvas) {
+        const chart = Chart.getChart(canvas);
+        if (chart) {
+            setTimeout(() => chart.resize(), 100);
         }
     }
 };
 
-window.closeChartModal = function() {
-    const modal = document.getElementById('chart-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-};
+// Cerrar con tecla Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.chart-card-enhanced.expanded').forEach(card => {
+            toggleChartExpand(card.id);
+        });
+    }
+});
+
+// Cerrar al hacer clic en el fondo oscuro
+document.addEventListener('click', (e) => {
+    if (e.target === document.body && document.body.classList.contains('chart-expanded')) {
+        document.querySelectorAll('.chart-card-enhanced.expanded').forEach(card => {
+            toggleChartExpand(card.id);
+        });
+    }
+});
 
 // ============ DESCARGAR GRÁFICA COMO IMAGEN ============
 window.downloadChart = function(cardId, title) {
