@@ -153,7 +153,7 @@ function withTimeout(p, ms, msg) {
 })();
 
 // ============ DATOS ============
-const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'️ Tendidos'}];
+const categories = [{id:'all',name:'✨ Todo'},{id:'hogar',name:'🏠 Hogar'},{id:'ninos',name:'🧸 Niños'},{id:'ropa',name:'👗 Ropa'},{id:'tendidos',name:'️ Tendidos'},{id:'relojes',name:'⌚ Reloj'},{id:'zapatos',name:'👟 Zapato'},{id:'gafas',name:'🕶️ Gafa'}];
 const ringPresets = [{name:'Morado',mode:'solid',color:'#a855f7'},{name:'Negro',mode:'solid',color:'#000000'},{name:'Blanco',mode:'solid',color:'#ffffff'},{name:'Rosa',mode:'solid',color:'#ec4899'}];
 const defaultProfile = {
     photo: 'https://andryus0312-collab.github.io/Valen_fashion_manizales/logo.jpg',
