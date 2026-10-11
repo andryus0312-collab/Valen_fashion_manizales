@@ -225,3 +225,51 @@ body.dark-mode .calendar-name { color: #ffffff; }
     line-height: 1.7;
 }
 body.dark-mode .calendar-strategy { color: #cbd5e1; }
+
+/* ============ EXPANSIÓN DE GRÁFICAS ============ */
+.chart-card-enhanced.expanded {
+    position: fixed;
+    top: 5%;
+    left: 5%;
+    right: 5%;
+    bottom: 5%;
+    z-index: 100;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: expandChart 0.3s ease-out;
+}
+@keyframes expandChart {
+    from { transform: scale(0.9); opacity: 0.8; }
+    to { transform: scale(1); opacity: 1; }
+}
+.chart-card-enhanced.expanded .chart-container {
+    height: 400px;
+}
+.chart-card-enhanced.expanded .chart-interpretation {
+    font-size: 1.1rem;
+}
+.chart-card-enhanced.expanded .interp-text {
+    font-size: 1.1rem;
+}
+.chart-card-enhanced.expanded .interp-action {
+    font-size: 1.05rem;
+}
+
+/* Botón cambiar texto cuando está expandido */
+.chart-card-enhanced.expanded .chart-expand-btn::after {
+    content: ' ✕ Cerrar';
+}
+.chart-card-enhanced:not(.expanded) .chart-expand-btn::after {
+    content: '';
+}
+
+/* Fondo oscuro detrás cuando está expandido */
+body.chart-expanded::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 99;
+    backdrop-filter: blur(4px);
+}
