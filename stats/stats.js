@@ -174,31 +174,75 @@ window.openChartModal = function(chartType) {
     const container = document.getElementById('modal-chart-container');
     const interp = document.getElementById('modal-chart-interpretation');
     
+    if (!modal || !title || !container || !interp) return;
+    
     const chartData = {
-        devices: { title: '📱 Dispositivos', canvas: 'chart-devices', interp: document.querySelector('#card-devices .chart-interpretation').innerHTML },
-        categories: { title: '🏆 Categorías', canvas: 'chart-categories', interp: document.querySelector('#card-categories .chart-interpretation').innerHTML },
-        visits: { title: '📈 Visitas', canvas: 'chart-visits', interp: document.querySelector('#card-visits .chart-interpretation').innerHTML }
+        devices: { 
+            title: '📱 ¿Desde dónde te visitan?', 
+            canvasId: 'chart-devices', 
+            cardId: 'card-devices' 
+        },
+        categories: { 
+            title: '🏆 ¿Qué categorías gustan más?', 
+            canvasId: 'chart-categories', 
+            cardId: 'card-categories' 
+        },
+        visits: { 
+            title: '📈 ¿Cuándo entra más gente?', 
+            canvasId: 'chart-visits', 
+            cardId: 'card-visits' 
+        }
     };
     
     const data = chartData[chartType];
-    title.innerText = data.title;
-    container.innerHTML = `<canvas id="modal-canvas" style="max-height: 400px;"></canvas>`;
-    interp.innerHTML = data.interp;
+    if (!data) return;
     
-    // Clonar la gráfica al modal
-    const originalCanvas = document.getElementById(data.canvas);
+    title.innerText = data.title;
+    
+    // Copiar la interpretación del card original
+    const originalCard = document.getElementById(data.cardId);
+    if (originalCard) {
+        const originalInterp = originalCard.querySelector('.chart-interpretation');
+        interp.innerHTML = originalInterp ? originalInterp.innerHTML : '';
+    }
+    
+    // Clonar el canvas al modal
+    container.innerHTML = '<canvas id="modal-canvas" style="max-height: 400px; width: 100%;"></canvas>';
+    const originalCanvas = document.getElementById(data.canvasId);
     const modalCanvas = document.getElementById('modal-canvas');
-    const chartInstance = Chart.getChart(originalCanvas);
-    if (chartInstance) {
-        new Chart(modalCanvas, {
-            type: chartInstance.config.type,
-            data: JSON.parse(JSON.stringify(chartInstance.data)),
-            options: { ...chartInstance.options, responsive: true, maintainAspectRatio: false }
-        });
+    
+    if (originalCanvas && modalCanvas) {
+        const chartInstance = Chart.getChart(originalCanvas);
+        if (chartInstance) {
+            new Chart(modalCanvas.getContext('2d'), {
+                type: chartInstance.config.type,
+                data: JSON.parse(JSON.stringify(chartInstance.data)),
+                options: { 
+                    ...chartInstance.options, 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: false
+                }
+            });
+        }
     }
     
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+};
+
+window.closeChartModal = function() {
+    const modal = document.getElementById('chart-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        // Destruir la gráfica del modal para evitar memoria
+        const modalCanvas = document.getElementById('modal-canvas');
+        if (modalCanvas) {
+            const chart = Chart.getChart(modalCanvas);
+            if (chart) chart.destroy();
+        }
+    }
 };
 
 window.closeChartModal = function() {
