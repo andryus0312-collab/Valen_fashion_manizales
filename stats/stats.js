@@ -346,3 +346,54 @@ function getDaysLeft(dateStr) {
     const now = new Date();
     return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
 }
+
+// ============ MODO CLARO/OSCURO EN STATS ============
+function initStatsTheme() {
+    const savedTheme = localStorage.getItem('valen_theme') || 'light';
+    const btn = document.getElementById('stats-theme-toggle');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark');
+        if (btn) btn.innerText = '☀️';
+    } else {
+        document.documentElement.classList.remove('dark');
+        if (btn) btn.innerText = '🌙';
+    }
+}
+
+window.toggleStatsTheme = function() {
+    const btn = document.getElementById('stats-theme-toggle');
+    const isDark = document.body.classList.toggle('dark-mode');
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('valen_theme', isDark ? 'dark' : 'light');
+    if (btn) btn.innerText = isDark ? '☀️' : '🌙';
+    
+    // Actualizar colores de las gráficas
+    updateChartsTheme(isDark);
+};
+
+function updateChartsTheme(isDark) {
+    const textColor = isDark ? '#f3f4f6' : '#2d1b36';
+    const gridColor = isDark ? 'rgba(168, 85, 247, 0.2)' : 'rgba(168, 85, 247, 0.1)';
+    
+    Chart.helpers.each(Chart.instances, function(instance) {
+        if (instance.options.scales) {
+            if (instance.options.scales.x) {
+                instance.options.scales.x.ticks.color = textColor;
+                instance.options.scales.x.grid.color = gridColor;
+            }
+            if (instance.options.scales.y) {
+                instance.options.scales.y.ticks.color = textColor;
+                instance.options.scales.y.grid.color = gridColor;
+            }
+        }
+        if (instance.options.plugins && instance.options.plugins.legend) {
+            instance.options.plugins.legend.labels.color = textColor;
+        }
+        instance.update();
+    });
+}
+
+// Inicializar tema al cargar
+initStatsTheme();
