@@ -104,6 +104,21 @@ function renderCategoriesChart(products) {
     const counts = { hogar: 0, ninos: 0, ropa: 0, tendidos: 0 };
     products.forEach(p => { if (counts[p.category] !== undefined) counts[p.category]++; });
     
+    // Encontrar la categoría líder
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const leader = sorted[0];
+    const second = sorted[1];
+    const leaderName = { hogar: 'Hogar', ninos: 'Niños', ropa: 'Ropa', tendidos: 'Tendidos' }[leader[0]];
+    const secondName = { hogar: 'Hogar', ninos: 'Niños', ropa: 'Ropa', tendidos: 'Tendidos' }[second[0]];
+    
+    // Generar tip dinámico
+    let dynamicTip = '';
+    if (leader[1] > second[1] * 1.5) {
+        dynamicTip = `🔥 <strong>${leaderName} domina tu catálogo</strong> con ${leader[1]} productos. Es tu categoría estrella.`;
+    } else {
+        dynamicTip = `⚖️ <strong>${leaderName} y ${secondName} están parejos</strong> (${leader[1]} vs ${second[1]}). Tienes un catálogo equilibrado.`;
+    }
+    
     const ctx = document.getElementById('chart-categories').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
@@ -128,6 +143,12 @@ function renderCategoriesChart(products) {
             animation: { duration: 1500, easing: 'easeOutQuart' }
         }
     });
+    
+    // Actualizar interpretación dinámica
+    const interpEl = document.querySelector('#card-categories .interp-text');
+    if (interpEl) {
+        interpEl.innerHTML = `${dynamicTip} Tienes ${products.length} productos activos en total.`;
+    }
 }
 
 function renderVisitsChart() {
