@@ -422,73 +422,9 @@ body.dark-mode .admin-testimonials-section {
     background: rgba(27, 12, 27, 0.5);
 }
 
-/* ============ SHIMMER / BRILLO ANIMADO ============ */
+/* ============ SHIMMER PARA BOTONES PRINCIPALES (USA LA MISMA ANIMACIÓN DE TESTIMONIOS) ============ */
 
-/* Base común del brillo deslizante */
-.shimmer {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-    animation: shimmer-border 3s infinite;
-    pointer-events: none;
-    z-index: 1;
-}
-
-@keyframes shimmer-border {
-    0% { left: -100%; }
-    20% { left: 100%; }
-    100% { left: 100%; }
-}
-
-/* ====== BOTÓN DORADO DE TESTIMONIOS ====== */
-.testimonials-float-btn .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-}
-
-/* Brillitos dorados en el borde (pseudo-elementos) */
-.testimonials-float-btn::before,
-.testimonials-float-btn::after {
-    content: '✨';
-    position: absolute;
-    font-size: 0.7rem;
-    opacity: 0;
-    animation: sparkle 2s infinite;
-}
-.testimonials-float-btn::before {
-    top: -5px;
-    right: 10px;
-    animation-delay: 0s;
-}
-.testimonials-float-btn::after {
-    bottom: -5px;
-    left: 10px;
-    animation-delay: 1s;
-}
-@keyframes sparkle {
-    0%, 100% { opacity: 0; transform: scale(0.5); }
-    50% { opacity: 1; transform: scale(1.2); }
-}
-
-/* ====== WHATSAPP: Destello verde ====== */
-[href*="wa.me"] .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
-}
-
-/* ====== INSTAGRAM: Destello fucsia/rosa ====== */
-[href*="instagram.com"] .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.6), transparent);
-}
-
-/* ====== QR: Destello blanco suave ====== */
-.qr-btn-fixed .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-}
-
-/* Asegurar que los botones tengan posicionamiento relativo para que el shimmer funcione */
-.testimonials-float-btn,
+/* Asegurar posicionamiento relativo solo en estos 3 botones */
 [href*="wa.me"],
 [href*="instagram.com"],
 .qr-btn-fixed {
@@ -496,12 +432,23 @@ body.dark-mode .admin-testimonials-section {
     overflow: hidden;
 }
 
-/* Accesibilidad: desactivar si prefiere menos movimiento */
-@media (prefers-reduced-motion: reduce) {
-    .shimmer,
-    .testimonials-float-btn::before,
-    .testimonials-float-btn::after { 
-        animation: none !important; 
-        display: none; 
-    }
+/* WhatsApp: destello verde */
+[href*="wa.me"] .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.7), transparent);
 }
+
+/* Instagram: destello fucsia/rosa */
+[href*="instagram.com"] .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.7), transparent);
+}
+
+/* QR: destello blanco suave */
+.qr-btn-fixed .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+}
+
+body.dark-mode [href*="wa.me"] .shimmer { opacity: 0.8; }
+body.dark-mode [href*="instagram.com"] .shimmer { opacity: 0.8; }
+body.dark-mode .qr-btn-fixed .shimmer { 
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                                         }
