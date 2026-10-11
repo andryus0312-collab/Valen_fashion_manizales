@@ -423,66 +423,62 @@ body.dark-mode .admin-testimonials-section {
 }
 
 
-/* ============ ONDAS ELEGANTES ALREDEDOR DEL BANNER ============ */
-.banner-waves-wrapper {
+/* ============ MARCO DE ONDAS ANIMADAS (NUEVO) ============ */
+.banner-wave-frame {
     position: relative;
     width: 100%;
     max-width: 48rem; /* match con tu banner actual */
-    margin: 0 auto;
-    padding: 0.5rem 0; /* Espacio mínimo para que las ondas queden FUERA pero cerca */
+    margin: 0 auto 1.5rem;
+    padding: 0;
     box-sizing: border-box;
 }
 
-/* Capa base de las ondas (sutiles, tipo sonido musical) */
-.wave-top, .wave-bottom {
+/* Los SVG de onda se posicionan ABSOLUTOS sobre los bordes del banner */
+.wave-svg {
     position: absolute;
-    left: 0;
-    right: 0;
-    height: 20px; /* Altura mínima, no ocupa espacio vertical */
+    left: -4px;
+    right: -4px;
+    width: calc(100% + 8px);
+    height: 30px;
     pointer-events: none;
-    z-index: 1;
-    background-repeat: repeat-x;
-    background-size: 200px 100%;
-    opacity: 0.6;
-    filter: blur(0.3px);
+    z-index: 2;
+    overflow: visible;
 }
 
-/* Onda superior (arriba del banner) */
-.wave-top {
-    top: -5px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E%3Cpath d='M0,10 Q25,5 50,10 T100,10 T150,10 T200,10 L200,20 L0,20 Z' fill='%23a855f7'/%3E%3C/svg%3E");
-    animation: wave-move 8s linear infinite;
+/* Posición superior e inferior pegada al borde del banner */
+.wave-top { top: -28px; }
+.wave-bottom { bottom: -28px; }
+
+/* Colores de las capas de onda */
+.wave-purple { fill: #a855f7; opacity: 0.9; }
+.wave-accent { fill: #000000; opacity: 0.6; } /* Modo claro: negro */
+
+/* ====== MODO OSCURO: Morado + Blanco difuminado ====== */
+body.dark-mode .wave-purple { 
+    fill: #a855f7; 
+    opacity: 0.9;
+}
+body.dark-mode .wave-accent { 
+    fill: #ffffff; 
+    opacity: 0.5; /* Blanco suave/difuminado */
 }
 
-/* Onda inferior (debajo del banner) */
-.wave-bottom {
-    bottom: -5px;
-    transform: scaleY(-1);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E%3Cpath d='M0,10 Q25,15 50,10 T100,10 T150,10 T200,10 L200,20 L0,20 Z' fill='%23a855f7'/%3E%3C/svg%3E");
-    animation: wave-move-reverse 10s linear infinite;
-}
+/* ANIMACIÓN REAL usando transform (se mueve garantizado) */
+.wave-top path:nth-child(1) { animation: wave-flow-right 8s linear infinite; }
+.wave-top path:nth-child(2) { animation: wave-flow-left 10s linear infinite; }
+.wave-bottom path:nth-child(1) { animation: wave-flow-left 9s linear infinite; }
+.wave-bottom path:nth-child(2) { animation: wave-flow-right 11s linear infinite; }
 
-/* Animaciones suaves tipo olas del mar / sonido musical */
-@keyframes wave-move {
-    0% { background-position-x: 0; }
-    100% { background-position-x: 200px; }
+@keyframes wave-flow-right {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-300px); }
 }
-@keyframes wave-move-reverse {
-    0% { background-position-x: 200px; }
-    100% { background-position-x: 0; }
-}
-
-/* ====== MODO OSCURO: Morado + Blanco ====== */
-body.dark-mode .wave-top {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E%3Cpath d='M0,10 Q25,5 50,10 T100,10 T150,10 T200,10 L200,20 L0,20 Z' fill='%23ffffff'/%3E%3C/svg%3E");
-    opacity: 0.4;
-}
-body.dark-mode .wave-bottom {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E%3Cpath d='M0,10 Q25,15 50,10 T100,10 T150,10 T200,10 L200,20 L0,20 Z' fill='%23a855f7'/%3E%3C/svg%3E");
-    opacity: 0.5;
+@keyframes wave-flow-left {
+    0%   { transform: translateX(-300px); }
+    100% { transform: translateX(0); }
 }
 
 /* Respeta preferencia de reducir movimiento */
 @media (prefers-reduced-motion: reduce) {
-    .wave-top, .wave-bottom { animation: none !important; }
+    .wave-top path, .wave-bottom path { animation: none !important; }
 }
