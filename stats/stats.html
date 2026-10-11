@@ -88,7 +88,7 @@
     <div class="chart-card-enhanced" id="card-devices">
         <div class="chart-header">
             <h3 class="chart-title">📱 ¿Desde dónde te visitan?</h3>
-            <button onclick="openChartModal('devices')" class="chart-expand-btn">🔍 Ampliar</button>
+            <button onclick="toggleChartExpand('card-devices')" class="chart-expand-btn">🔍 Ampliar</button>
         </div>
         <div class="chart-container">
             <canvas id="chart-devices"></canvas>
@@ -104,7 +104,7 @@
     <div class="chart-card-enhanced" id="card-categories">
         <div class="chart-header">
             <h3 class="chart-title">🏆 ¿Qué categorías gustan más?</h3>
-            <button onclick="openChartModal('categories')" class="chart-expand-btn">🔍 Ampliar</button>
+            <button onclick="toggleChartExpand('card-categories')" class="chart-expand-btn">🔍 Ampliar</button>
         </div>
         <div class="chart-container">
             <canvas id="chart-categories"></canvas>
@@ -120,7 +120,7 @@
     <div class="chart-card-enhanced md:col-span-2" id="card-visits">
         <div class="chart-header">
             <h3 class="chart-title">📈 ¿Cuándo entra más gente?</h3>
-            <button onclick="openChartModal('visits')" class="chart-expand-btn">🔍 Ampliar</button>
+            <button onclick="toggleChartExpand('card-visits')" class="chart-expand-btn">🔍 Ampliar</button>
         </div>
         <div class="chart-container">
             <canvas id="chart-visits"></canvas>
@@ -132,18 +132,6 @@
         <button onclick="downloadChart('card-visits', 'Visitas')" class="download-chart-btn">📥 Descargar Gráfica</button>
     </div>
 </section>
-
-<!-- Modal para gráfica ampliada -->
-<div id="chart-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
-    <div class="bg-white dark:bg-[#0d0310] rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 border-2 border-[#D4AF37]/30">
-        <div class="flex justify-between items-center mb-4">
-            <h3 id="modal-chart-title" class="text-xl font-bold text-title"></h3>
-            <button onclick="closeChartModal()" class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 flex items-center justify-center">✕</button>
-        </div>
-        <div id="modal-chart-container" class="mb-4"></div>
-        <div id="modal-chart-interpretation" class="chart-interpretation"></div>
-    </div>
-</div>
 
         <!-- Calendario Comercial Detallado -->
 <section class="chart-card-enhanced mb-8">
