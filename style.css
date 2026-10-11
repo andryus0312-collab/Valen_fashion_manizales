@@ -421,3 +421,57 @@ body.dark-mode .testimonials-empty { color: #cbd5e1; }
 body.dark-mode .admin-testimonials-section {
     background: rgba(27, 12, 27, 0.5);
 }
+
+/* ============ SHIMMER EN BOTONES PRINCIPALES (WHATSAPP, INSTAGRAM, QR) ============ */
+
+/* Base común del shimmer (igual que testimonios) */
+.shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: shimmer-border 3s infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes shimmer-border {
+    0% { left: -100%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+}
+
+/* Asegurar que los botones tengan position:relative para que el shimmer se posicione bien */
+.flex.items-center.gap-2, .qr-btn-fixed {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ====== WHATSAPP: Destello con tono verde ====== */
+[href*="wa.me"] .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
+}
+
+/* ====== INSTAGRAM: Destello con tono fucsia/rosa ====== */
+[href*="instagram.com"] .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.6), transparent);
+}
+
+/* ====== QR: Destello en blanco suave ====== */
+.qr-btn-fixed .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+}
+
+/* Modo oscuro: ajustar opacidad si es necesario */
+body.dark-mode [href*="wa.me"] .shimmer { opacity: 0.8; }
+body.dark-mode [href*="instagram.com"] .shimmer { opacity: 0.8; }
+body.dark-mode .qr-btn-fixed .shimmer { 
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+}
+
+/* Accesibilidad: desactivar si prefiere menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+    .shimmer { animation: none !important; display: none; }
+}
