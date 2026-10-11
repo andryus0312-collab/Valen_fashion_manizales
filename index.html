@@ -65,10 +65,19 @@
     <div class="max-w-6xl mx-auto px-4 py-8 pb-24">
 
 
-        <!-- NUEVO: Ondas elegantes alrededor del Banner -->
-    <div class="banner-waves-wrapper">
-        <div class="wave-top"></div>
-        <div class="wave-bottom"></div>
+        <!-- NUEVO: Marco de ondas animadas alrededor del Banner -->
+    <div class="banner-wave-frame">
+        <!-- Onda Superior -->
+        <svg class="wave-svg wave-top" viewBox="0 0 1200 30" preserveAspectRatio="none">
+            <path d="M0,15 Q75,0 150,15 T300,15 T450,15 T600,15 T750,15 T900,15 T1050,15 T1200,15 L1200,30 L0,30 Z" class="wave-purple"/>
+            <path d="M0,18 Q75,3 150,18 T300,18 T450,18 T600,18 T750,18 T900,18 T1050,18 T1200,18 L1200,30 L0,30 Z" class="wave-accent"/>
+        </svg>
+        
+        <!-- Onda Inferior -->
+        <svg class="wave-svg wave-bottom" viewBox="0 0 1200 30" preserveAspectRatio="none">
+            <path d="M0,15 Q75,30 150,15 T300,15 T450,15 T600,15 T750,15 T900,15 T1050,15 T1200,15 L1200,0 L0,0 Z" class="wave-purple"/>
+            <path d="M0,12 Q75,27 150,12 T300,12 T450,12 T600,12 T750,12 T900,12 T1050,12 T1200,12 L1200,0 L0,0 Z" class="wave-accent"/>
+        </svg>
         
         <!-- Banner Carrusel -->
         <div id="banner-carousel" class="hidden relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 border border-purple-500/20 bg-black mt-2"></div>
