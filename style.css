@@ -423,62 +423,65 @@ body.dark-mode .admin-testimonials-section {
 }
 
 
-/* ============ MARCO DE ONDAS ANIMADAS (NUEVO) ============ */
-.banner-wave-frame {
+/* ============ ONDAS EN 4 LADOS DEL BANNER (ANIMADAS) ============ */
+.banner-waves-4sides {
     position: relative;
     width: 100%;
     max-width: 48rem; /* match con tu banner actual */
     margin: 0 auto 1.5rem;
-    padding: 0;
+    padding: 0.75rem; /* espacio para que las ondas queden FUERA del banner */
     box-sizing: border-box;
 }
 
-/* Los SVG de onda se posicionan ABSOLUTOS sobre los bordes del banner */
+/* Base común de todas las ondas */
 .wave-svg {
     position: absolute;
-    left: -4px;
-    right: -4px;
-    width: calc(100% + 8px);
-    height: 30px;
     pointer-events: none;
     z-index: 2;
-    overflow: visible;
+    overflow: hidden;
 }
 
-/* Posición superior e inferior pegada al borde del banner */
-.wave-top { top: -28px; }
-.wave-bottom { bottom: -28px; }
+/* Posicionamiento en los 4 lados pegados al borde del banner */
+.wave-top { top: 0; left: 0; right: 0; height: 25px; }
+.wave-bottom { bottom: 0; left: 0; right: 0; height: 25px; }
+.wave-left { top: 0; bottom: 0; left: 0; width: 25px; }
+.wave-right { top: 0; bottom: 0; right: 0; width: 25px; }
 
-/* Colores de las capas de onda */
-.wave-purple { fill: #a855f7; opacity: 0.9; }
-.wave-accent { fill: #000000; opacity: 0.6; } /* Modo claro: negro */
+/* ====== MOVIMIENTO REAL usando transform sobre el grupo <g> ====== */
+.wave-top g { animation: wave-scroll-h 8s linear infinite; }
+.wave-bottom g { animation: wave-scroll-h-rev 10s linear infinite; }
+.wave-left g { animation: wave-scroll-v 9s linear infinite; }
+.wave-right g { animation: wave-scroll-v-rev 11s linear infinite; }
+
+@keyframes wave-scroll-h {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-200px); }
+}
+@keyframes wave-scroll-h-rev {
+    0%   { transform: translateX(-200px); }
+    100% { transform: translateX(0); }
+}
+@keyframes wave-scroll-v {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-200px); }
+}
+@keyframes wave-scroll-v-rev {
+    0%   { transform: translateY(-200px); }
+    100% { transform: translateY(0); }
+}
 
 /* ====== MODO OSCURO: Morado + Blanco difuminado ====== */
-body.dark-mode .wave-purple { 
-    fill: #a855f7; 
-    opacity: 0.9;
-}
-body.dark-mode .wave-accent { 
-    fill: #ffffff; 
-    opacity: 0.5; /* Blanco suave/difuminado */
-}
-
-/* ANIMACIÓN REAL usando transform (se mueve garantizado) */
-.wave-top path:nth-child(1) { animation: wave-flow-right 8s linear infinite; }
-.wave-top path:nth-child(2) { animation: wave-flow-left 10s linear infinite; }
-.wave-bottom path:nth-child(1) { animation: wave-flow-left 9s linear infinite; }
-.wave-bottom path:nth-child(2) { animation: wave-flow-right 11s linear infinite; }
-
-@keyframes wave-flow-right {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-300px); }
-}
-@keyframes wave-flow-left {
-    0%   { transform: translateX(-300px); }
-    100% { transform: translateX(0); }
+body.dark-mode .wave-top path:nth-child(2),
+body.dark-mode .wave-bottom path:nth-child(2),
+body.dark-mode .wave-left path:nth-child(2),
+body.dark-mode .wave-right path:nth-child(2) {
+    fill: #ffffff;
+    opacity: 0.4;
 }
 
 /* Respeta preferencia de reducir movimiento */
 @media (prefers-reduced-motion: reduce) {
-    .wave-top path, .wave-bottom path { animation: none !important; }
-}
+    .wave-top g, .wave-bottom g, .wave-left g, .wave-right g { 
+        animation: none !important; 
+    }
+               }
