@@ -45,27 +45,41 @@ onAuthStateChanged(auth, user => {
 
 // ============ DATOS DEL DASHBOARD ============
 function loadDashboardData() {
-    // Productos
+    // 1. Cargar Productos Reales (ya lo tenías bien)
     onValue(ref(db, 'valen_products'), snap => {
         const products = snap.val() ? Object.values(snap.val()) : [];
         document.getElementById('total-products').innerText = products.length;
-        renderCategoriesChart(products);
+        renderCategoriesChart(products); 
     });
 
-    // Testimonios
+    // 2. Cargar Testimonios Reales (ya lo tenías bien)
     onValue(ref(db, 'valen_profile'), snap => {
         const profile = snap.val() || {};
-        const testimonials = profile.testimonials || [];
-        document.getElementById('total-testimonials').innerText = testimonials.length;
+        document.getElementById('total-testimonials').innerText = (profile.testimonials || []).length;
     });
 
-    // Visitas e interacciones (simuladas por ahora — luego las registramos)
-    document.getElementById('total-visits').innerText = '—';
-    document.getElementById('total-whatsapp').innerText = '—';
-    
-    renderDevicesChart();
-    renderVisitsChart();
-    renderCommercialCalendar();
+    // 3. NUEVO: Contar Visitas y Clicks desde valen_events (Tiempo Real)
+    onValue(ref(db, 'valen_events'), (snapshot) => {
+        const events = snapshot.val() ? Object.values(snapshot.val()) : [];
+        
+        let totalVisits = 0;
+        let totalWaClicks = 0;
+        
+        events.forEach(ev => {
+            if (ev.event === 'page_view') totalVisits++;
+            if (ev.event === 'click_whatsapp_direct' || ev.event === 'product_whatsapp_requested') totalWaClicks++;
+        });
+
+        // Actualizar tarjetas superiores
+        document.getElementById('total-visits').innerText = totalVisits.toLocaleString('es-CO');
+        document.getElementById('total-whatsapp').innerText = totalWaClicks.toLocaleString('es-CO');
+        
+        // Generar gráficas dinámicas basadas en estos contejos
+        generateRealCharts(events); 
+        
+        // Renderizar la tabla visual mejorada
+        renderLiveEventsTable(events);
+    });
 }
 
 // ============ GRÁFICAS MEJORADAS ============
