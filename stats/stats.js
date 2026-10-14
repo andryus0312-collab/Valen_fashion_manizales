@@ -175,32 +175,117 @@ function renderDevicesDynamic(deviceMap, totalVisits) {
     });
 }
 
-function renderVisitsDynamic(labels, data) {
+function renderVisitsDynamic(eventsList) {
     const ctx = document.getElementById('chart-visits');
     if(!ctx) return;
     
+    // Destruir instancia previa
     if(chartInstances.visits) chartInstances.visits.destroy();
+
+    // 1. Preparar estructura de datos Matricial (7 Días x 24 Horas)
+    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const matrixData = Array(7).fill().map(() => Array(24).fill(0));
     
-    const gradient = ctx.getContext('2d').createLinearGradient(0,0,0,300);
-    gradient.addColorStop(0,'rgba(168,85,247,0.4)');
-    gradient.addColorStop(1,'rgba(168,85,247,0.0)');
+    // 2. Rellenar matriz con eventos reales
+    eventsList.forEach(ev => {
+        if (ev.event === 'page_view' && ev.timestamp) {
+            const dateObj = new Date(ev.timestamp);
+            const dayIndex = dateObj.getDay(); // 0=Domingo ... 6=Sábado
+            const hour = dateObj.getHours();   // 0-23
+            
+            // Incrementar contador en esa celda específica
+            if(matrixData[dayIndex]) {
+                matrixData[dayIndex][hour]++;
+            }
+        }
+    });
+
+    // 3. Configurar Chart.js como Scatter Plot (Puntos dispersos)
+    // Usamos scatter porque nos permite controlar X (hora) e Y (día) manualmente
+    const datasets = [];
+    
+    days.forEach((dayName, dayIdx) => {
+        const pointsForDay = [];
+        
+        for(let h=0; h<24; h++) {
+            const count = matrixData[dayIdx][h];
+            if(count > 0) {
+                // Solo creamos punto si hubo actividad (>0)
+                pointsForDay.push({
+                    x: h,          // Eje Horizontal: Hora Militar (0-23)
+                    y: dayIdx,     // Eje Vertical: Índice del Día (0-6)
+                    r: Math.min(count * 2 + 3, 15), // Radio proporcional a visitas (mín 3, máx 15)
+                    label: `${count} visitas`,
+                    tooltipLabel: `${dayName} ${String(h).padStart(2,'0')}:00 hrs - ${count} entradas`
+                });
+            }
+        }
+        
+        if(pointsForDay.length > 0) {
+            datasets.push({
+                label: dayName,
+                data: pointsForDay,
+                backgroundColor: getColorByIntensity(dayIdx), // Color según día
+                borderColor: '#fff',
+                borderWidth: 1
+            });
+        }
+    });
+
+    // Función auxiliar para colores atractivos por día
+    function getColorByIntensity(idx) {
+        const palette = [
+            'rgba(236, 72, 153, 0.8)', // Dom (Rosa)
+            'rgba(168, 85, 247, 0.8)', // Lun (Morado)
+            'rgba(99, 102, 241, 0.8)', // Mar (Indigo)
+            'rgba(59, 130, 246, 0.8)', // Mié (Azul)
+            'rgba(14, 165, 233, 0.8)', // Jue (Celeste)
+            'rgba(20, 184, 166, 0.8)', // Vie (Turquesa)
+            'rgba(245, 158, 11, 0.8)'  // Sáb (Ámbar/Dorado)
+        ];
+        return palette[idx % palette.length];
+    }
 
     chartInstances.visits = new Chart(ctx.getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Visitas Diarias',
-                data: data,
-                borderColor: '#a855f7',
-                backgroundColor: gradient,
-                tension: 0.4, fill: true,
-                pointBackgroundColor: '#D4AF37', pointRadius: 5
-            }]
-        },
-        options: { 
-            responsive:true, maintainAspectRatio:false,
-            scales: { y: { beginAtZero:true, ticks:{stepSize:1} } } 
+        type: 'bubble', // Bubble permite radios variables fácilmente
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }, // Ocultamos leyenda tradicional
+                tooltip: {
+                    callbacks: {
+                        title: () => '', // Sin título en tooltip
+                        label: (context) => context.raw.tooltipLabel
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    min: -0.5, max: 23.5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: value => String(value).padStart(2,'0') + ':00', // Formato HH:MM
+                        font: { size: 10, weight: 'bold' },
+                        color: '#a855f7'
+                    },
+                    grid: { color: 'rgba(168, 85, 247, 0.1)' }
+                },
+                y: {
+                    reverse: true, // Sábado arriba, Domingo abajo (o viceversa según prefieras)
+                    min: -0.5, max: 6.5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: value => days[value] || '', // Mostrar nombres completos
+                        font: { size: 12, weight: 'bold' },
+                        color: '#ec4899'
+                    },
+                    grid: { color: 'rgba(236, 72, 153, 0.1)' }
+                }
+            }
         }
     });
 }
