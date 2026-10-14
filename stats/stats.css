@@ -273,3 +273,88 @@ body.chart-expanded::before {
     z-index: 99;
     backdrop-filter: blur(4px);
 }
+
+/* ============ CONSOLA DE ACTIVIDAD PREMIUM ============ */
+.live-console-wrapper {
+    background: linear-gradient(135deg, #1b0c1b 0%, #0d0310 100%); /* Fondo oscuro boutique */
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Borde dorado sutil */
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow-x: auto;
+}
+
+body:not(.dark-mode) .live-console-wrapper {
+    background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%); /* Claro si no es dark mode global */
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+.console-header-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px 100px 80px 1fr 40px; /* Ajuste de columnas */
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #D4AF37; /* Línea dorada separadora */
+    margin-bottom: 0.5rem;
+}
+
+.console-th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #D4AF37; /* Títulos en dorado */
+    font-weight: bold;
+    text-align: left;
+}
+
+.console-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px 100px 80px 1fr 40px;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+    align-items: center;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.console-row:hover {
+    background: rgba(168, 85, 247, 0.1); /* Resaltado morado al pasar mouse */
+    transform: translateX(4px);
+}
+
+.console-td {
+    font-size: 0.85rem;
+    color: #e2e8f0; /* Texto claro sobre fondo oscuro */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body:not(.dark-mode) .console-td { color: #2d1b36; }
+
+/* Badge de Acción Colorido */
+.action-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    background: rgba(236, 72, 153, 0.2);
+    color: #ec4899;
+    border: 1px solid rgba(236, 72, 153, 0.4);
+}
+
+/* Indicador Online Pulsante */
+.status-dot {
+    width: 8px; height: 8px;
+    background-color: #10b981; /* Verde neón */
+    border-radius: 50%;
+    animation: pulse-green 2s infinite;
+    box-shadow: 0 0 10px #10b981;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
