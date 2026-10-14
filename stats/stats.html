@@ -139,33 +139,33 @@
     <div id="commercial-calendar" class="space-y-4"></div>
 </section>
 
-        <!-- NUEVO: Tabla de Actividad en Tiempo Real -->
-<section class="chart-card-enhanced mt-8 overflow-hidden">
-    <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#D4AF37]/30">
-        <h3 class="chart-title flex items-center gap-2">📡 Actividad en Vivo <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span></h3>
-        <button onclick="document.getElementById('live-events-modal').classList.remove('hidden')" class="bg-gradient-to-r from-[#D4AF37] to-[#A8842C] text-[#1b0c1b] text-[10px] font-bold px-3 py-1 rounded-full shadow-lg active:scale-95 transition-all">
-            🔍 Ver Historial Completo
+        <!-- NUEVO: Consola de Actividad en Tiempo Real -->
+<section class="chart-card-enhanced mt-8 p-0 overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 bg-black/20 backdrop-blur-sm border-b border-[#D4AF37]/30">
+        <h3 class="text-lg font-bold text-title flex items-center gap-3">
+            <span class="status-dot"></span> 📡 Monitor de Vida Silvestre Digital
+        </h3>
+        <button onclick="downloadFullReportPDF()" class="bg-gradient-to-r from-[#D4AF37] to-[#A8842C] text-[#1b0c1b] text-xs font-bold px-4 py-2 rounded-full shadow-lg active:scale-95 transition-all hover:shadow-xl">
+            📄 Exportar Reporte Completo
         </button>
     </div>
     
-    <!-- Vista previa rápida (últimos 10) -->
-    <div class="overflow-x-auto scrollbar-none">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="text-[10px] uppercase tracking-wider text-desc border-b border-purple-500/20">
-                    <th class="py-2 px-4">Hora</th>
-                    <th class="py-2 px-4">Acción</th>
-                    <th class="py-2 px-4">Dispositivo</th>
-                    <th class="py-2 px-4">Navegador</th>
-                    <th class="py-2 px-4">Idioma</th>
-                    <th class="py-2 px-4">Detalle</th>
-                    <th class="py-2 px-4">Estado</th>
-                </tr>
-            </thead>
-            <tbody id="live-events-table-body">
-                <!-- Se llena dinámicamente -->
-            </tbody>
-        </table>
+    <div class="live-console-wrapper m-4">
+        <!-- Cabecera Fija -->
+        <div class="console-header-row sticky top-0 z-10 bg-inherit">
+            <div class="console-th">Hora</div>
+            <div class="console-th">Acción Detectada</div>
+            <div class="console-th">Dispositivo</div>
+            <div class="console-th">Navegador</div>
+            <div class="console-th">Idioma</div>
+            <div class="console-th">Detalle / Contexto</div>
+            <div class="console-th">Estado</div>
+        </div>
+        
+        <!-- Cuerpo Dinámico -->
+        <div id="live-events-body">
+            <!-- Se llena vía JS -->
+        </div>
     </div>
 </section>
 
