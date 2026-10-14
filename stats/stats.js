@@ -388,6 +388,41 @@ function getDaysLeft(dateStr) {
     }).join('');
  }
 
+window.openHistoryModal = function() {
+    const modal = document.getElementById('history-modal');
+    if(!modal) return;
+    
+    // Obtener todos los eventos actuales almacenados en memoria o volver a leer
+    onValue(ref(db, 'valen_events'), (snap) => {
+        const events = snap.val() ? Object.values(snap.val()).sort((a,b)=>b.timestamp-a.timestamp) : [];
+        const listContainer = document.getElementById('history-list-container');
+        
+        listContainer.innerHTML = events.slice(0, 50).map(ev => {
+             const d = new Date(ev.timestamp);
+             return `<div class="p-3 border-b border-white/10 text-xs flex justify-between items-start gap-2">
+                <div>
+                    <span class="font-bold text-[#D4AF37] block mb-1">${ev.event.replace('_',' ').toUpperCase()}</span>
+                    <span class="text-gray-400">${ev.device} • ${ev.browser}</span><br/>
+                    <span class="italic text-purple-300">${ev.query || ev.product_title || '-'}</span>
+                </div>
+                <span class="text-gray-500 whitespace-nowrap">${d.toLocaleDateString()} ${d.toLocaleTimeString()}</span>
+             </div>`;
+        }).join('') || '<p class="text-center py-4 text-desc">Sin historial reciente.</p>';
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }, { onlyOnce: true });
+};
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('history-modal');
+    if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+});
+
 // Llamarla cuando cargue el dashboard
 const originalLoadDashboard = loadDashboardData;
 loadDashboardData = function() {
