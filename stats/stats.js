@@ -480,3 +480,99 @@ function updateChartsTheme(isDark) {
 
 // Inicializar tema al cargar
 initStatsTheme();
+
+
+window.downloadFullReportPDF = async function() {
+    showToast('⏳ Generando reporte experto...');
+    
+    try {
+        // 1. Leer todos los eventos
+        const snapshot = await get(ref(db, 'valen_events'));
+        const rawEvents = snapshot.exists() ? Object.values(snapshot.val()) : [];
+        
+        if(rawEvents.length === 0) { alert('No hay datos aún.'); return; }
+
+        // 2. Agrupar por Dispositivo (Device ID simulado por UserAgent+Screen)
+        const groupedByDevice = {};
+        rawEvents.forEach(ev => {
+            const key = `${ev.device}|${ev.browser}`;
+            if(!groupedByDevice[key]) groupedByDevice[key] = [];
+            groupedByDevice[key].push(ev);
+        });
+
+        // 3. Construir HTML Temporal para captura
+        let htmlContent = `
+        <div style="padding: 40px; font-family: sans-serif; background: #fff; color: #000;">
+            <div style="display:flex; align-items:center; gap:20px; margin-bottom:30px; border-bottom:3px solid #a855f7; padding-bottom:20px;">
+                <img src="../logo.jpg" style="width:80px; height:80px; border-radius:50%; object-fit:cover;" />
+                <div>
+                    <h1 style="margin:0; color:#2e1065;">Valen Fashion Manizales</h1>
+                    <p style="margin:5px 0 0; color:#666;">Reporte Forense de Actividad Web</p>
+                    <small style="color:#999;">Generado: ${new Date().toLocaleString('es-CO')}</small>
+                </div>
+            </div>
+            
+            <div style="background:#f3e8ff; padding:15px; border-radius:8px; margin-bottom:20px; border-left:5px solid #a855f7;">
+                <strong>Resumen Ejecutivo:</strong> Este documento detalla cada interacción registrada en tiempo real, organizada por perfil de dispositivo para facilitar el análisis de comportamiento del cliente.
+            </div>
+        `;
+
+        Object.entries(groupedByDevice).forEach(([deviceKey, events], index) => {
+            const [deviceName, browserName] = deviceKey.split('|');
+            const firstEvent = events[events.length-1]; // El más viejo
+            
+            htmlContent += `
+            <div style="margin-top:30px; page-break-inside: avoid;">
+                <h3 style="background:#eee; padding:10px; border-radius:5px; display:inline-block; font-size:14px;">
+                    👤 Perfil: ${deviceName} (${browserName})
+                </h3>
+                <p style="font-size:12px; color:#666; margin-top:5px;">Total acciones detectadas: ${events.length}</p>
+                
+                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:11px;">
+                    <thead>
+                        <tr style="background:#2e1065; color:white;">
+                            <th style="padding:8px; text-align:left;">Hora</th>
+                            <th style="padding:8px; text-align:left;">Evento</th>
+                            <th style="padding:8px; text-align:left;">Contexto/Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${events.sort((a,b)=>b.timestamp-a.timestamp).slice(0,20).map(ev => `
+                        <tr style="border-bottom:1px solid #ddd;">
+                            <td style="padding:6px;">${new Date(ev.timestamp).toLocaleTimeString()}</td>
+                            <td style="padding:6px; font-weight:bold; color:${ev.event.includes('whatsapp')?'green':'purple'};">${ev.event}</td>
+                            <td style="padding:6px;">${ev.query || ev.product_title || '-'}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        });
+
+        htmlContent += `</div>`;
+
+        // 4. Renderizar y Convertir a PDF
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        document.body.appendChild(tempDiv);
+
+        const canvas = await html2canvas(tempDiv, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Valen_Reporte_Actividad_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        document.body.removeChild(tempDiv);
+        showToast('✅ Reporte descargado exitosamente');
+        
+    } catch (err) {
+        console.error(err);
+        alert('Error generando PDF: ' + err.message);
+    }
+};
