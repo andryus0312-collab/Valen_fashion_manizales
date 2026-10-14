@@ -99,8 +99,9 @@
     <p class="interp-text">📱 <strong>¿Desde dónde te visitan?</strong><br/>Este gráfico muestra el porcentaje de clientes entrando desde celular vs PC/Tablet.</p>
     <p class="interp-action">👆 <strong>Toca los segmentos</strong> para ver detalles exactos de cada dispositivo.</p>
         </div>
-        <button onclick="downloadChart('card-devices', 'Dispositivos')" class="download-chart-btn">📥 Descargar Gráfica</button>
-    </div>
+<button onclick="captureAndDownloadGraph('chart-devices', '¿Desde dónde te visitan?')" class="download-chart-btn">
+    📥 Descargar Gráfica
+</button>    </div>
 
     <!-- Gráfica 2: Categorías -->
     <div class="chart-card-enhanced" id="card-categories">
@@ -115,8 +116,9 @@
     <p class="interp-text">🏆 <strong>Catálogo Visualizado</strong><br/>Representa cuántos productos activos tienes en cada categoría (Hogar, Niños, Ropa, etc.).</p>
     <p class="interp-action">👆 <strong>Presiona las barras</strong> para identificar cuál es tu fuerte o dónde falta stock.</p>
         </div>
-        <button onclick="downloadChart('card-categories', 'Categorías')" class="download-chart-btn">📥 Descargar Gráfica</button>
-    </div>
+<button onclick="captureAndDownloadGraph('chart-categories', '¿Qué categorías gustan más?')" class="download-chart-btn">
+    📥 Descargar Gráfica
+</button>    </div>
 
     <!-- Gráfica 3: Visitas (ocupa todo el ancho) -->
     <div class="chart-card-enhanced md:col-span-2" id="card-visits">
@@ -127,8 +129,9 @@
     <p class="interp-text">🕸️ <strong>La Telaraña Semanal</strong><br/>Imagina esto como una estrella o telaraña. Cada punta representa un día de la semana. Si la punta está estirada lejos del centro, ¡hubo MUCHAS visitas ese día! Si está pegadita al centro, casi nadie entró.</p>
     <p class="interp-action">👆 <strong>Toca cualquier punto dorado</strong> para descubrir cuántas clientas visitaron tu tienda ese día específico.</p>
         </div>
-        <button onclick="downloadChart('card-visits', 'Visitas')" class="download-chart-btn">📥 Descargar Gráfica</button>
-    </div>
+<button onclick="captureAndDownloadGraph('chart-visits', 'La Telaraña Semanal')" class="download-chart-btn">
+    📥 Descargar Gráfica
+</button>    </div>
 </section>
 
         <!-- Calendario Comercial Detallado -->
