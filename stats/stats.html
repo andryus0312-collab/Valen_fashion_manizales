@@ -139,6 +139,46 @@
     <div id="commercial-calendar" class="space-y-4"></div>
 </section>
 
+        <!-- NUEVO: Tabla de Actividad en Tiempo Real -->
+<section class="chart-card-enhanced mt-8 overflow-hidden">
+    <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#D4AF37]/30">
+        <h3 class="chart-title flex items-center gap-2">📡 Actividad en Vivo <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span></h3>
+        <button onclick="document.getElementById('live-events-modal').classList.remove('hidden')" class="bg-gradient-to-r from-[#D4AF37] to-[#A8842C] text-[#1b0c1b] text-[10px] font-bold px-3 py-1 rounded-full shadow-lg active:scale-95 transition-all">
+            🔍 Ver Historial Completo
+        </button>
+    </div>
+    
+    <!-- Vista previa rápida (últimos 10) -->
+    <div class="overflow-x-auto scrollbar-none">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-[10px] uppercase tracking-wider text-desc border-b border-purple-500/20">
+                    <th class="py-2 px-4">Hora</th>
+                    <th class="py-2 px-4">Acción</th>
+                    <th class="py-2 px-4">Dispositivo</th>
+                    <th class="py-2 px-4">Navegador</th>
+                    <th class="py-2 px-4">Idioma</th>
+                    <th class="py-2 px-4">Detalle</th>
+                    <th class="py-2 px-4">Estado</th>
+                </tr>
+            </thead>
+            <tbody id="live-events-table-body">
+                <!-- Se llena dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- MODAL HISTORIA COMPLETA (Opcional para ver todos los registros) -->
+<div id="live-events-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#0d0310] rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 border-2 border-[#D4AF37]/30 relative">
+        <button onclick="this.parentElement.classList.add('hidden')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 flex items-center justify-center font-bold">✕</button>
+        <h2 class="text-xl font-bold text-title mb-4 flex items-center gap-2">📜 Historial Detallado de Visitantes</h2>
+        <p class="text-xs text-desc mb-4">Registro cronológico inverso de todas las interacciones capturadas.</p>
+        <div id="full-history-container"><!-- Aquí iría la lista completa --></div>
+    </div>
+            </div>
+        
         <!-- Coach IA (bloque visual, sin lógica aún) -->
         <section class="coach-card">
             <div class="coach-header">
