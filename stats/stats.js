@@ -326,6 +326,58 @@ function getDaysLeft(dateStr) {
     return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
 }
 
+// ============ TABLA DE EVENTOS EN TIEMPO REAL ============
+function renderLiveEventsTable() {
+    onValue(ref(db, 'valen_events'), (snapshot) => {
+        const container = document.getElementById('live-events-table-body');
+        if (!container) return;
+
+        const events = snapshot.val() ? Object.keys(snapshot.val()).map(k => ({ id: k, ...snapshot.val()[k] })) : [];
+        
+        // Ordenar más recientes primero
+        events.sort((a, b) => b.timestamp - a.timestamp);
+
+        if (events.length === 0) {
+            container.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-desc">Esperando primeros visitantes...</td></tr>';
+            return;
+        }
+
+        // Mapear nombres amigables
+        const friendlyNames = {
+            page_view: '👀 Visita Página',
+            click_whatsapp_direct: '💬 Clic WhatsApp Principal',
+            click_instagram_link: '📸 Clic Instagram',
+            click_qr_button: '🔳 Abrir QR Code',
+            click_testimonials_btn: '👑 Ver Testimonios',
+            click_search_btn: '🔍 Abrir Buscador',
+            filter_category_selected: '🏷️ Filtrar Categoría',
+            search_text_typed: '⌨️ Escribió en Búsqueda',
+            product_image_zoomed: '🖼️ Ampliar Foto Producto',
+            product_whatsapp_requested: '🛒 Pedir Producto por WA',
+            product_shared: '🔗 Compartir Producto'
+        };
+
+        container.innerHTML = events.slice(0, 50).map(ev => `
+            <tr class="border-b border-purple-500/20 hover:bg-purple-900/10 transition-colors">
+                <td class="py-3 px-4 text-xs font-mono text-[#D4AF37]">${ev.readableTime.split(',')[1]}</td>
+                <td class="py-3 px-4 text-sm font-bold text-title">${friendlyNames[ev.event] || ev.event}</td>
+                <td class="py-3 px-4 text-xs text-desc">${ev.device}</td>
+                <td class="py-3 px-4 text-xs text-desc">${ev.browser}</td>
+                <td class="py-3 px-4 text-xs text-desc">${ev.language}</td>
+                <td class="py-3 px-4 text-xs text-desc truncate max-w-[150px]" title="${ev.query || ev.product_title || ''}">${ev.query || ev.product_title || '-'}</td>
+                <td class="py-3 px-4"><span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span></td>
+            </tr>
+        `).join('');
+    });
+}
+
+// Llamarla cuando cargue el dashboard
+const originalLoadDashboard = loadDashboardData;
+loadDashboardData = function() {
+    originalLoadDashboard.call(this);
+    renderLiveEventsTable();
+};
+
 // ============ MODO CLARO/OSCURO EN STATS ============
 function initStatsTheme() {
     const savedTheme = localStorage.getItem('valen_theme') || 'light';
