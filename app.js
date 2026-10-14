@@ -287,77 +287,56 @@ function getGreeting() {
     return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches';
 }
 
-// ============ REGISTRO DE ESTADÍSTICAS EN TIEMPO REAL ============
+// ============ REGISTRO DE ESTADÍSTICAS EN TIEMPO REAL (CORREGIDO) ============
 (function initStatsTracking() {
-    // Helper para obtener fecha YYYY-MM-DD
-    function getTodayKey() {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
-    
-    // Registrar VISITA al cargar la página (solo 1 vez por sesión)
-let visitRecorded = sessionStorage.getItem('valen_visit_recorded');
-if (!visitRecorded) {
-    const today = getTodayKey();
-    
-    // Leer perfil actual para no sobrescribir otros datos
-    onValue(ref(db, 'valen_profile'), (snap) => {
-        const profile = snap.val() || {};
-        const stats = profile.stats || { visits: {}, whatsappClicks: {}, shareClicks: {} };
+    // Importar runTransaction dinámicamente desde firebase-database
+    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js").then(module => {
+        const { ref, runTransaction, getDatabase } = module;
         
-        // Sumar +1 a las visitas de hoy
-        stats.visits[today] = (stats.visits[today] || 0) + 1;
+        function getTodayKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
         
-        // Guardar de vuelta en valen_profile
-        set(ref(db, 'valen_profile/stats'), stats).catch(err => 
-            console.warn('Error registrando visita:', err)
-        );
-    }, { onlyOnce: true });
-    
-    // Marcar que ya se registró esta visita en esta sesión
-    sessionStorage.setItem('valen_visit_recorded', 'true');
-}
-
-// Registrar CLIC en botón principal "WhatsApp Directo"
-const btnWaMain = document.querySelector('a[href*="wa.me"]');
-if (btnWaMain) {
-    btnWaMain.addEventListener('click', () => {
-        const today = getTodayKey();
+        // Función auxiliar segura para incrementar contadores
+        function incrementStat(statPath, counterName) {
+            const today = getTodayKey();
+            const fullRef = ref(getDatabase(), statPath);
+            
+            runTransaction(fullRef, (currentData) => {
+                const data = currentData || {};
+                if (!data[counterName]) data[counterName] = {};
+                data[counterName][today] = (data[counterName][today] || 0) + 1;
+                return data;
+            }).catch(err => console.warn(`Error registrando ${counterName}:`, err));
+        }
         
-        onValue(ref(db, 'valen_profile'), (snap) => {
-            const profile = snap.val() || {};
-            const stats = profile.stats || { visits: {}, whatsappClicks: {}, shareClicks: {} };
-            
-            stats.whatsappClicks[today] = (stats.whatsappClicks[today] || 0) + 1;
-            
-            set(ref(db, 'valen_profile/stats'), stats).catch(err => 
-                console.warn('Error registrando click WA:', err)
-            );
-        }, { onlyOnce: true });
-    });
-}
-
-// Registrar CLIC en botones "Compartir" de productos
-document.addEventListener('click', (e) => {
-    const shareBtn = e.target.closest('.share-product-btn');
-    if (shareBtn) {
-        const today = getTodayKey();
+        // Registrar VISITA (solo 1 vez por sesión/tab)
+        let visitRecorded = sessionStorage.getItem('valen_visit_recorded_v2');
+        if (!visitRecorded) {
+            incrementStat('valen_profile/stats', 'visits');
+            sessionStorage.setItem('valen_visit_recorded_v2', 'true');
+        }
         
-        onValue(ref(db, 'valen_profile'), (snap) => {
-            const profile = snap.val() || {};
-            const stats = profile.stats || { visits: {}, whatsappClicks: {}, shareClicks: {} };
-            
-            stats.shareClicks[today] = (stats.shareClicks[today] || 0) + 1;
-            
-            set(ref(db, 'valen_profile/stats'), stats).catch(err => 
-                console.warn('Error registrando compartido:', err)
-            );
-        }, { onlyOnce: true });
-    }
-});
-
+        // Registrar CLIC WhatsApp Directo (botón principal)
+        const btnWaMain = document.querySelector('a[href*="wa.me"]');
+        if (btnWaMain) {
+            btnWaMain.addEventListener('click', () => {
+                incrementStat('valen_profile/stats', 'whatsappClicks');
+            });
+        }
+        
+        // Registrar CLIC Compartir Producto
+        document.addEventListener('click', (e) => {
+            const shareBtn = e.target.closest('.share-product-btn');
+            if (shareBtn) {
+                incrementStat('valen_profile/stats', 'shareClicks');
+            }
+        });
+        
+    }).catch(importErr => console.error('Error cargando módulo transaction:', importErr));
 })();
-// ================================================================
+// =============================================================================
 
 window.shareProduct = async function(product) {
     const greeting = getGreeting();
