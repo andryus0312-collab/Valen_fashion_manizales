@@ -96,8 +96,8 @@
             <canvas id="chart-devices"></canvas>
         </div>
         <div class="chart-interpretation">
-            <p class="interp-text">✨ <strong>El 65% de tus clientas entran desde celular</strong> 📱. Esto significa que tu tienda se ve principalmente en pantallas pequeñas.</p>
-            <p class="interp-action">👉 <strong>Acción:</strong> Asegúrate de que todas las fotos de productos se vean bien en móvil. Publica historias de Instagram a las 8pm (hora pico).</p>
+    <p class="interp-text">📱 <strong>¿Desde dónde te visitan?</strong><br/>Este gráfico muestra el porcentaje de clientes entrando desde celular vs PC/Tablet.</p>
+    <p class="interp-action">👆 <strong>Toca los segmentos</strong> para ver detalles exactos de cada dispositivo.</p>
         </div>
         <button onclick="downloadChart('card-devices', 'Dispositivos')" class="download-chart-btn">📥 Descargar Gráfica</button>
     </div>
@@ -112,17 +112,17 @@
             <canvas id="chart-categories"></canvas>
         </div>
         <div class="chart-interpretation">
-            <p class="interp-text">🧸 <strong>Niños y Hogar lideran tu catálogo</strong>. Tienes 24 productos en Niños y 22 en Hogar.</p>
-            <p class="interp-action">👉 <strong>Acción:</strong> Sube más peluches y cobijas (son tus estrellas ⭐). Considera una promo "Combo Hogar + Niños".</p>
+    <p class="interp-text">🏆 <strong>Catálogo Visualizado</strong><br/>Representa cuántos productos activos tienes en cada categoría (Hogar, Niños, Ropa, etc.).</p>
+    <p class="interp-action">👆 <strong>Presiona las barras</strong> para identificar cuál es tu fuerte o dónde falta stock.</p>
         </div>
         <button onclick="downloadChart('card-categories', 'Categorías')" class="download-chart-btn">📥 Descargar Gráfica</button>
     </div>
 
     <!-- Gráfica 3: Visitas (ocupa todo el ancho) -->
     <div class="chart-card-enhanced md:col-span-2" id="card-visits">
-        <div class="chart-header">
-            <h3 class="chart-title">📈 ¿Cuándo entra más gente?</h3>
-            <button onclick="toggleChartExpand('card-visits')" class="chart-expand-btn">🔍 Ampliar</button>
+        <div class="chart-interpretation">
+    <p class="interp-text">📈 <strong>Ritmo Semanal</strong><br/>Traza el flujo de visitantes día tras día durante la última semana completa.</p>
+    <p class="interp-action">👆 <strong>Haz clic en los puntos dorados</strong> para descubrir qué días tuviste más tráfico.</p>
         </div>
         <div class="chart-container">
             <canvas id="chart-visits"></canvas>
