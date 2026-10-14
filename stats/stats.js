@@ -341,49 +341,52 @@ function getDaysLeft(dateStr) {
 }
 
 // ============ TABLA DE EVENTOS EN TIEMPO REAL ============
-function renderLiveEventsTable() {
-    onValue(ref(db, 'valen_events'), (snapshot) => {
-        const container = document.getElementById('live-events-table-body');
-        if (!container) return;
+ function renderLiveEventsTable(allEvents) {
+    const container = document.getElementById('live-events-body');
+    if (!container) return;
 
-        const events = snapshot.val() ? Object.keys(snapshot.val()).map(k => ({ id: k, ...snapshot.val()[k] })) : [];
+    // Ordenar descendente (más recientes arriba)
+    const sortedEvents = [...allEvents].sort((a, b) => b.timestamp - a.timestamp);
+    
+    // Mostrar solo los últimos 15 en la vista rápida
+    const recentEvents = sortedEvents.slice(0, 15);
+
+    if (recentEvents.length === 0) {
+        container.innerHTML = '<div class="py-8 text-center text-desc italic">🌵 Esperando señales vitales...</div>';
+        return;
+    }
+
+    const friendlyNames = {
+        page_view: '👀 Entrada',
+        click_whatsapp_direct: '💬 WA Principal',
+        click_instagram_link: '📸 Insta Link',
+        click_qr_button: '🔳 QR Code',
+        click_testimonials_btn: '👑 Testimonios',
+        click_search_btn: '🔍 Búsqueda',
+        filter_category_selected: '🏷️ Filtro Cat.',
+        search_text_typed: '⌨️ Typed Query',
+        product_image_zoomed: '🖼️ Zoom Img',
+        product_whatsapp_requested: '🛒 Pedido Producto',
+        product_shared: '🔗 Compartir Prod.'
+    };
+
+    container.innerHTML = recentEvents.map(ev => {
+        const timeStr = new Date(ev.timestamp).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const actionLabel = friendlyNames[ev.event] || ev.event;
+        const detail = ev.query ? `"${ev.query}"` : (ev.product_title || '-');
         
-        // Ordenar más recientes primero
-        events.sort((a, b) => b.timestamp - a.timestamp);
-
-        if (events.length === 0) {
-            container.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-desc">Esperando primeros visitantes...</td></tr>';
-            return;
-        }
-
-        // Mapear nombres amigables
-        const friendlyNames = {
-            page_view: '👀 Visita Página',
-            click_whatsapp_direct: '💬 Clic WhatsApp Principal',
-            click_instagram_link: '📸 Clic Instagram',
-            click_qr_button: '🔳 Abrir QR Code',
-            click_testimonials_btn: '👑 Ver Testimonios',
-            click_search_btn: '🔍 Abrir Buscador',
-            filter_category_selected: '🏷️ Filtrar Categoría',
-            search_text_typed: '⌨️ Escribió en Búsqueda',
-            product_image_zoomed: '🖼️ Ampliar Foto Producto',
-            product_whatsapp_requested: '🛒 Pedir Producto por WA',
-            product_shared: '🔗 Compartir Producto'
-        };
-
-        container.innerHTML = events.slice(0, 50).map(ev => `
-            <tr class="border-b border-purple-500/20 hover:bg-purple-900/10 transition-colors">
-                <td class="py-3 px-4 text-xs font-mono text-[#D4AF37]">${ev.readableTime.split(',')[1]}</td>
-                <td class="py-3 px-4 text-sm font-bold text-title">${friendlyNames[ev.event] || ev.event}</td>
-                <td class="py-3 px-4 text-xs text-desc">${ev.device}</td>
-                <td class="py-3 px-4 text-xs text-desc">${ev.browser}</td>
-                <td class="py-3 px-4 text-xs text-desc">${ev.language}</td>
-                <td class="py-3 px-4 text-xs text-desc truncate max-w-[150px]" title="${ev.query || ev.product_title || ''}">${ev.query || ev.product_title || '-'}</td>
-                <td class="py-3 px-4"><span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span></td>
-            </tr>
-        `).join('');
-    });
-}
+        return `
+        <div class="console-row">
+            <div class="console-td font-mono text-[#D4AF37]">${timeStr}</div>
+            <div class="console-td"><span class="action-badge">${actionLabel}</span></div>
+            <div class="console-td text-purple-300">${ev.device}</div>
+            <div class="console-td text-gray-400">${ev.browser}</div>
+            <div class="console-td text-xs opacity-70">${ev.language}</div>
+            <div class="console-td truncate max-w-[150px]" title="${detail}">${detail}</div>
+            <div class="console-td"><span class="status-dot" style="width:6px;height:6px;"></span></div>
+        </div>`;
+    }).join('');
+ }
 
 // Llamarla cuando cargue el dashboard
 const originalLoadDashboard = loadDashboardData;
