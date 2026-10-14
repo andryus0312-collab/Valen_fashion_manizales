@@ -139,8 +139,9 @@ function updateAllMetricsAndVisuals(events) {
 
     // Renderizar Gráficas Dinámicas
     renderDevicesDynamic(deviceMap, totalVisits);
-    const dailyCounts = getLast7DaysData(events);
-    renderVisitsDynamic(dailyCounts.labels, dailyCounts.data);
+    // Pasamos TODOS los eventos filtrados por page_view directamente
+const visitEvents = events.filter(e => e.event === 'page_view');
+renderVisitsDynamic(visitEvents);
     
     // Renderizar Tabla Monitor
     renderLiveConsoleTable(events);
