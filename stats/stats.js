@@ -173,23 +173,6 @@ function renderDevicesDynamic(deviceMap, totalVisits) {
         },
         options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}} }
     });
-
-    // Texto dinámico según datos reales
-    const mobileCount = deviceMap['📱 Celular'] || 0;
-    const pctMobile = totalVisits > 0 ? Math.round((mobileCount/totalVisits)*100) : 0;
-    
-    const interpEl = document.querySelector('#card-devices .interp-text');
-    const actionEl = document.querySelector('#card-devices .interp-action');
-    
-    if(interpEl && actionEl) {
-        if(pctMobile >= 60) {
-            interpEl.innerHTML = `✨ <strong>${pctMobile}% de tus clientas entran desde celular</strong> 📱.`;
-            actionEl.innerHTML = `👉 Prioriza fotos verticales y publica historias entre 7pm-9pm.`;
-        } else {
-            interpEl.innerHTML = `⚖️ Mix equilibrado de dispositivos detectado.`;
-            actionEl.innerHTML = `👉 Mantén diseño responsive impecable.`;
-        }
-    }
 }
 
 function renderVisitsDynamic(labels, data) {
@@ -220,24 +203,6 @@ function renderVisitsDynamic(labels, data) {
             scales: { y: { beginAtZero:true, ticks:{stepSize:1} } } 
         }
     });
-
-    // Texto dinámico basado en tendencia real
-    const todayVal = data[data.length-1];
-    const yesterdayVal = data[data.length-2] || 0;
-    const weekAvg = data.reduce((a,b)=>a+b,0)/data.length;
-    
-    const interpEl = document.querySelector('#card-visits .interp-text');
-    const actionEl = document.querySelector('#card-visits .interp-action');
-    
-    if(interpEl && actionEl) {
-        if(todayVal > yesterdayVal * 1.3) {
-            interpEl.innerHTML = `📈 Pico de visitas hoy (+${Math.round(((todayVal-yesterdayVal)/(yesterdayVal||1))*100)}%).`;
-            actionEl.innerHTML = `👉 Identifica qué publicaste hoy y repítelo mañana.`;
-        } else {
-            interpEl.innerHTML = `➡️ Flujo estable (~${Math.round(weekAvg)} visitas/día).`;
-            actionEl.innerHTML = `👉 Experimenta con nuevos horarios para superar ese techo.`;
-        }
-    }
 }
 
 function renderCategoriesChart(products) {
@@ -267,20 +232,6 @@ function renderCategoriesChart(products) {
         },
         options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
     });
-
-    // Texto dinámico real
-    const interpEl = document.querySelector('#card-categories .interp-text');
-    const actionEl = document.querySelector('#card-categories .interp-action');
-    
-    if(interpEl && actionEl && leader) {
-        if(second && leader[1] > second[1]*1.5) {
-            interpEl.innerHTML = `🔥 ${catNames[leader[0]]} domina con ${leader[1]} productos.`;
-            actionEl.innerHTML = `👉 Refuerza esta línea con combos temáticos.`;
-        } else if(second) {
-            interpEl.innerHTML = `⚖️ Catálogo balanceado: ${catNames[leader[0]]} (${leader[1]}) vs ${catNames[second[0]]} (${second[1]}).`;
-            actionEl.innerHTML = `👉 Cruza categorías en promos cruzadas.`;
-        }
-    }
 }
 
 // ============ CALENDARIO COMERCIAL TEMATIZADO ============
