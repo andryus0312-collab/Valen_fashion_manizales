@@ -317,7 +317,45 @@ if (!visitRecorded) {
     // Marcar que ya se registró esta visita en esta sesión
     sessionStorage.setItem('valen_visit_recorded', 'true');
 }
+
+// Registrar CLIC en botón principal "WhatsApp Directo"
+const btnWaMain = document.querySelector('a[href*="wa.me"]');
+if (btnWaMain) {
+    btnWaMain.addEventListener('click', () => {
+        const today = getTodayKey();
+        
+        onValue(ref(db, 'valen_profile'), (snap) => {
+            const profile = snap.val() || {};
+            const stats = profile.stats || { visits: {}, whatsappClicks: {}, shareClicks: {} };
+            
+            stats.whatsappClicks[today] = (stats.whatsappClicks[today] || 0) + 1;
+            
+            set(ref(db, 'valen_profile/stats'), stats).catch(err => 
+                console.warn('Error registrando click WA:', err)
+            );
+        }, { onlyOnce: true });
     });
+}
+
+// Registrar CLIC en botones "Compartir" de productos
+document.addEventListener('click', (e) => {
+    const shareBtn = e.target.closest('.share-product-btn');
+    if (shareBtn) {
+        const today = getTodayKey();
+        
+        onValue(ref(db, 'valen_profile'), (snap) => {
+            const profile = snap.val() || {};
+            const stats = profile.stats || { visits: {}, whatsappClicks: {}, shareClicks: {} };
+            
+            stats.shareClicks[today] = (stats.shareClicks[today] || 0) + 1;
+            
+            set(ref(db, 'valen_profile/stats'), stats).catch(err => 
+                console.warn('Error registrando compartido:', err)
+            );
+        }, { onlyOnce: true });
+    }
+});
+
 })();
 // ================================================================
 
