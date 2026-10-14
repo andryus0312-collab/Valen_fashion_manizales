@@ -481,14 +481,25 @@ window.downloadFullReportPDF = async function() {
                     <tbody>
                         ${events.sort((a,b)=>b.timestamp-a.timestamp).slice(0,30).map(ev => {
                             const time = new Date(ev.timestamp).toLocaleTimeString('es-CO');
-                            const action = ev.event.replace('_',' ').toUpperCase();
-                            const context = ev.query ? `"${ev.query}"` : (ev.product_title || '-');
-                            return `
-                            <tr style="border-bottom:1px solid #f3f4f6;">
-                                <td style="padding:8px; font-family:monospace; color:#666;">${time}</td>
-                                <td style="padding:8px; font-weight:bold; color:#ec4899;">${action}</td>
-                                <td style="padding:8px; color:#333;">${context}</td>
-                            </tr>`;
+                            // Mapeo de acciones técnicas a lenguaje humano (igual que en la web)
+const humanDescriptions = {
+    page_view: '👀 Ingreso al catálogo',
+    click_whatsapp_direct: '💬 Contacto principal WA',
+    product_whatsapp_requested: '🛒 Pedido específico enviado',
+    filter_category_selected: '🏷️ Navegación por categoría',
+    search_text_typed: '⌨️ Búsqueda textual realizada',
+    product_shared: '🔗 Producto compartido externamente'
+};
+
+const readableAction = humanDescriptions[ev.event] || ev.event.replace('_',' ');
+const detailInfo = ev.query ? `"${ev.query}"` : (ev.product_title !== 'Sin título' ? ev.product_title : '');
+
+return `
+<tr style="border-bottom:1px solid #f3f4f6;">
+    <td style="padding:8px; font-family:monospace; color:#666;">${time}</td>
+    <td style="padding:8px; font-weight:bold; color:${readableAction.includes('Pedido')?'#10b981':'#ec4899'};">${readableAction}</td>
+    <td style="padding:8px; color:#333;">${detailInfo || '-'}</td>
+</tr>`;
                         }).join('')}
                     </tbody>
                 </table>
