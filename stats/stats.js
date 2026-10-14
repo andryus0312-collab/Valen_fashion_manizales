@@ -43,350 +43,188 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// ============ DATOS DEL DASHBOARD ============
+// ============ MOTOR DE DATOS UNIFICADO (v3 - SIN ERRORES DE SCOPE) ============
+
+let cachedEvents = []; // Cache global para evitar múltiples lecturas pesadas
+
 function loadDashboardData() {
-    // 1. Cargar Productos Reales (ya lo tenías bien)
+    // 1. Productos (Inmediato)
     onValue(ref(db, 'valen_products'), snap => {
         const products = snap.val() ? Object.values(snap.val()) : [];
         document.getElementById('total-products').innerText = products.length;
         renderCategoriesChart(products); 
     });
 
-    // 2. Cargar Testimonios Reales (ya lo tenías bien)
+    // 2. Perfil + Testimonios (Inmediato)
     onValue(ref(db, 'valen_profile'), snap => {
         const profile = snap.val() || {};
         document.getElementById('total-testimonials').innerText = (profile.testimonials || []).length;
     });
 
-    // 3. NUEVO: Contar Visitas y Clicks desde valen_events (Tiempo Real)
+    // 3. EVENTOS EN TIEMPO REAL (Fuente única de verdad)
     onValue(ref(db, 'valen_events'), (snapshot) => {
-        const events = snapshot.val() ? Object.values(snapshot.val()) : [];
+        const rawData = snapshot.val();
+        cachedEvents = rawData ? Object.keys(rawData).map(k => ({ id: k, ...rawData[k] })) : [];
         
-        let totalVisits = 0;
-        let totalWaClicks = 0;
-        
-        events.forEach(ev => {
-            if (ev.event === 'page_view') totalVisits++;
-            if (ev.event === 'click_whatsapp_direct' || ev.event === 'product_whatsapp_requested') totalWaClicks++;
-        });
+        // Ordenar descendente siempre
+        cachedEvents.sort((a, b) => b.timestamp - a.timestamp);
 
-        // Actualizar tarjetas superiores
-        document.getElementById('total-visits').innerText = totalVisits.toLocaleString('es-CO');
-        document.getElementById('total-whatsapp').innerText = totalWaClicks.toLocaleString('es-CO');
-        
-        // Generar gráficas dinámicas basadas en estos contejos
-        generateRealCharts(events); 
-        
-        // Renderizar la tabla visual mejorada
-        renderLiveEventsTable(events);
+        updateAllMetricsAndVisuals(cachedEvents);
     });
 }
 
-// ============ GRÁFICAS MEJORADAS ============
-function renderDevicesChart() {
-    const ctx = document.getElementById('chart-devices').getContext('2d');
-    new Chart(ctx, {
+// Función maestra que actualiza TARJETAS + GRÁFICAS + TABLA + CALENDARIO
+function updateAllMetricsAndVisuals(events) {
+    if (!events) return;
+
+    // --- A. CALCULAR MÉTRICOS GLOBALES ---
+    let totalVisits = 0;
+    let waClicks = 0;
+    const deviceMap = {}; // Conteo por tipo de dispositivo
+    
+    events.forEach(ev => {
+        if (ev.event === 'page_view') totalVisits++;
+        if (ev.event.includes('whatsapp')) waClicks++;
+        
+        // Agrupar dispositivos
+        const devType = ev.device?.includes('Celular') ? '📱 Celular' : 
+                        ev.device?.includes('PC') ? '💻 PC' : '📟 Tablet/Otros';
+        deviceMap[devType] = (deviceMap[devType] || 0) + 1;
+    });
+
+    // Actualizar Tarjetas Superiores
+    document.getElementById('total-visits').innerText = totalVisits.toLocaleString('es-CO');
+    document.getElementById('total-whatsapp').innerText = waClicks.toLocaleString('es-CO');
+
+    // --- B. REDIBUJAR GRÁFICAS ---
+    
+    // Gráfica Dispositivos (Doughnut dinámico)
+    const labelsDev = Object.keys(deviceMap);
+    const dataDev = Object.values(deviceMap);
+    renderDevicesDynamic(labelsDev, dataDev);
+
+    // Gráfica Visitas Últimos 7 Días (Line chart real)
+    const dailyCounts = getLast7DaysData(events);
+    renderVisitsDynamic(dailyCounts.labels, dailyCounts.data);
+
+    // --- C. ACTUALIZAR TABLA MONITOR ---
+    renderLiveConsoleTable(events);
+
+    // --- D. RENDERIZAR CALENDARIO COMERCIAL ---
+    renderCommercialCalendar(); // Esta función ya existe arriba, solo la llamamos aquí si se perdió
+}
+
+// Utilitario: Datos últimos 7 días reales
+function getLast7DaysData(events) {
+    const today = new Date();
+    const labels = [];
+    const data = [];
+    
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const keyStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const dayName = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()];
+        
+        labels.push(dayName);
+        // Contar cuántos page_view hubo ese día exacto
+        const count = events.filter(ev => ev.event === 'page_view' && ev.isoDate.startsWith(keyStr)).length;
+        data.push(count);
+    }
+    return { labels, data };
+}
+
+// --- NUEVAS FUNCIONES DE GRÁFICA ROBUSTAS ---
+function renderDevicesDynamic(labels, data) {
+    const ctx = document.getElementById('chart-devices');
+    if(!ctx) return;
+    
+    // Destruir instancia previa si existe
+    if(window.myDeviceChart) window.myDeviceChart.destroy();
+    
+    window.myDeviceChart = new Chart(ctx.getContext('2d'), {
         type: 'doughnut',
         data: {
-            labels: ['📱 Celular', '💻 PC', '📟 Tablet'],
+            labels: labels.length ? labels : ['Sin datos'],
             datasets: [{
-                data: [65, 25, 10],
-                backgroundColor: ['#ec4899', '#a855f7', '#D4AF37'],
-                borderWidth: 0,
-                hoverOffset: 15
+                data: data.length ? data : [1],
+                backgroundColor: ['#ec4899', '#a855f7', '#D4AF37', '#9333ea'],
+                borderWidth: 0, hoverOffset: 15
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } },
-                tooltip: {
-                    backgroundColor: 'rgba(27, 12, 27, 0.9)',
-                    titleColor: '#D4AF37',
-                    bodyColor: '#fff',
-                    borderColor: '#D4AF37',
-                    borderWidth: 1
-                }
-            },
-            animation: { animateRotate: true, animateScale: true }
-        }
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}} }
     });
 }
 
-function renderCategoriesChart(products) {
-    const counts = { hogar: 0, ninos: 0, ropa: 0, tendidos: 0 };
-    products.forEach(p => { if (counts[p.category] !== undefined) counts[p.category]++; });
+function renderVisitsDynamic(labels, data) {
+    const ctx = document.getElementById('chart-visits');
+    if(!ctx) return;
     
-    // Encontrar la categoría líder
-    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-    const leader = sorted[0];
-    const second = sorted[1];
-    const leaderName = { hogar: 'Hogar', ninos: 'Niños', ropa: 'Ropa', tendidos: 'Tendidos' }[leader[0]];
-    const secondName = { hogar: 'Hogar', ninos: 'Niños', ropa: 'Ropa', tendidos: 'Tendidos' }[second[0]];
+    if(window.myVisitsChart) window.myVisitsChart.destroy();
     
-    // Generar tip dinámico
-    let dynamicTip = '';
-    if (leader[1] > second[1] * 1.5) {
-        dynamicTip = `🔥 <strong>${leaderName} domina tu catálogo</strong> con ${leader[1]} productos. Es tu categoría estrella.`;
-    } else {
-        dynamicTip = `⚖️ <strong>${leaderName} y ${secondName} están parejos</strong> (${leader[1]} vs ${second[1]}). Tienes un catálogo equilibrado.`;
-    }
-    
-    const ctx = document.getElementById('chart-categories').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['🏠 Hogar', '🧸 Niños', '👗 Ropa', '🛏️ Tendidos'],
-            datasets: [{
-                label: 'Productos',
-                data: [counts.hogar, counts.ninos, counts.ropa, counts.tendidos],
-                backgroundColor: ['#a855f7', '#ec4899', '#D4AF37', '#9333ea'],
-                borderRadius: 8,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(168, 85, 247, 0.1)' } },
-                x: { grid: { display: false } }
-            },
-            animation: { duration: 1500, easing: 'easeOutQuart' }
-        }
-    });
-    
-    // Actualizar interpretación dinámica
-    const interpEl = document.querySelector('#card-categories .interp-text');
-    if (interpEl) {
-        interpEl.innerHTML = `${dynamicTip} Tienes ${products.length} productos activos en total.`;
-    }
-}
+    const gradient = ctx.getContext('2d').createLinearGradient(0,0,0,300);
+    gradient.addColorStop(0,'rgba(168,85,247,0.4)');
+    gradient.addColorStop(1,'rgba(168,85,247,0.0)');
 
-function renderVisitsChart() {
-    const ctx = document.getElementById('chart-visits').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(168, 85, 247, 0.4)');
-    gradient.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
-    
-    new Chart(ctx, {
+    window.myVisitsChart = new Chart(ctx.getContext('2d'), {
         type: 'line',
         data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            labels: labels,
             datasets: [{
-                label: 'Visitas',
-                data: [12, 19, 15, 25, 22, 30, 28],
+                label: 'Visitas Diarias',
+                data: data,
                 borderColor: '#a855f7',
                 backgroundColor: gradient,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#D4AF37',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 8
+                tension: 0.4, fill: true,
+                pointBackgroundColor: '#D4AF37', pointRadius: 5
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(168, 85, 247, 0.1)' } },
-                x: { grid: { display: false } }
-            },
-            animation: { duration: 2000, easing: 'easeInOutQuart' }
+        options: { 
+            responsive:true, maintainAspectRatio:false,
+            scales: { y: { beginAtZero:true, ticks:{stepSize:1} } } 
         }
     });
 }
 
-// ============ AMPLIAR GRÁFICA (IN-PLACE) ============
-window.toggleChartExpand = function(cardId) {
-    const card = document.getElementById(cardId);
-    if (!card) return;
-    
-    const isExpanded = card.classList.toggle('expanded');
-    document.body.classList.toggle('chart-expanded', isExpanded);
-    
-    // Actualizar texto del botón
-    const btn = card.querySelector('.chart-expand-btn');
-    if (btn) {
-        btn.innerText = isExpanded ? '✕ Cerrar' : '🔍 Ampliar';
-    }
-    
-    // Redimensionar la gráfica para que se adapte al nuevo tamaño
-    const canvas = card.querySelector('canvas');
-    if (canvas) {
-        const chart = Chart.getChart(canvas);
-        if (chart) {
-            setTimeout(() => chart.resize(), 100);
-        }
-    }
-};
-
-// Cerrar con tecla Escape
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.chart-card-enhanced.expanded').forEach(card => {
-            toggleChartExpand(card.id);
-        });
-    }
-});
-
-// Cerrar al hacer clic en el fondo oscuro
-document.addEventListener('click', (e) => {
-    if (e.target === document.body && document.body.classList.contains('chart-expanded')) {
-        document.querySelectorAll('.chart-card-enhanced.expanded').forEach(card => {
-            toggleChartExpand(card.id);
-        });
-    }
-});
-
-// ============ DESCARGAR GRÁFICA COMO IMAGEN ============
-window.downloadChart = function(cardId, title) {
-    const card = document.getElementById(cardId);
-    html2canvas(card, {
-        backgroundColor: '#fdfbf7',
-        scale: 2,
-        useCORS: true
-    }).then(canvas => {
-        // Crear canvas final con logo + texto
-        const finalCanvas = document.createElement('canvas');
-        const ctx = finalCanvas.getContext('2d');
-        const W = 800, H = canvas.height + 200;
-        finalCanvas.width = W;
-        finalCanvas.height = H;
-        
-        // Fondo degradado
-        const gradient = ctx.createLinearGradient(0, 0, W, H);
-        gradient.addColorStop(0, '#fdfbf7');
-        gradient.addColorStop(1, '#f3e8ff');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, W, H);
-        
-        // Logo
-        const logo = new Image();
-        logo.onload = () => {
-            ctx.drawImage(logo, 20, 20, 80, 80);
-            ctx.fillStyle = '#2e1065';
-            ctx.font = 'bold 24px Arial';
-            ctx.fillText('Valen Fashion 📊', 120, 60);
-            ctx.font = '16px Arial';
-            ctx.fillStyle = '#4b5563';
-            ctx.fillText(title + ' • ' + new Date().toLocaleDateString('es-CO'), 120, 85);
-            
-            // Gráfica
-            ctx.drawImage(canvas, 50, 120, W - 100, canvas.height);
-            
-            // Descargar
-            const link = document.createElement('a');
-            link.download = `valen-stats-${title.toLowerCase()}.png`;
-            link.href = finalCanvas.toDataURL('image/png');
-            link.click();
-        };
-        logo.src = '../logo.jpg';
-    });
-};
-
-// ============ CALENDARIO COMERCIAL DETALLADO (COLOMBIA) ============
-function renderCommercialCalendar() {
-    const dates = [
-        { 
-            name: '🎃 Halloween', 
-            date: '2026-10-31', 
-            strategy: '👻 Sube disfraces de niños, peluches de monstruositos y cobijas con temática oscura. Haz promo "2x1 en peluches" por WhatsApp. Publica historias de Instagram con maquillaje de Halloween.' 
-        },
-        { 
-            name: '🛍️ Black Friday', 
-            date: '2026-11-27', 
-            strategy: '💰 Ofertas flash solo por 24h. Crea combos "Hogar + Niños" con descuento. Envía mensaje masivo por WhatsApp a clientas anteriores. Usa etiqueta "🔥 OFERTA" en productos.' 
-        },
-        { 
-            name: '🎄 Navidad', 
-            date: '2026-12-25', 
-            strategy: '🎁 Empieza a subir regalos desde noviembre. Peluches, cobijas y maletas son ideales. Haz promo "Envío gratis en Manizales". Publica reels de "ideas de regalo".' 
-        },
-        { 
-            name: '💐 Día de la Madre', 
-            date: '2027-05-09', 
-            strategy: '💝 Cobijas suaves, peluches grandes y sets de tocador son perfectos. Crea combo "Mamá merece lo mejor". Publica testimonios de clientas felices.' 
-        },
-        { 
-            name: '💘 Amor y Amistad', 
-            date: '2026-09-19', 
-            strategy: '💌 Peluches rosados, cobijas para pareja. Promo "2x1 para compartir". Publica en Instagram con hashtag #AmorYAmistadManizales.' 
-        }
-    ].map(d => ({ ...d, daysLeft: getDaysLeft(d.date) }))
-      .filter(d => d.daysLeft > 0)
-      .sort((a, b) => a.daysLeft - b.daysLeft);
-
-    const container = document.getElementById('commercial-calendar');
-    container.innerHTML = dates.map(d => `
-        <div class="calendar-item">
-            <div class="calendar-header">
-                <span class="calendar-name">${d.name}</span>
-                <span class="calendar-days">⏳ ${d.daysLeft} días</span>
-            </div>
-            <p class="calendar-strategy">${d.strategy}</p>
-        </div>
-    `).join('') || '<p class="text-desc text-center">No hay fechas próximas</p>';
-}
-
-function getDaysLeft(dateStr) {
-    const target = new Date(dateStr);
-    const now = new Date();
-    return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-}
-
-// ============ TABLA DE EVENTOS EN TIEMPO REAL ============
- function renderLiveEventsTable(allEvents) {
+// --- TABLA MONITOR PREMIUM (Renderizado directo) ---
+function renderLiveConsoleTable(allEvents) {
     const container = document.getElementById('live-events-body');
     if (!container) return;
 
-    // Ordenar descendente (más recientes arriba)
-    const sortedEvents = [...allEvents].sort((a, b) => b.timestamp - a.timestamp);
-    
-    // Mostrar solo los últimos 15 en la vista rápida
-    const recentEvents = sortedEvents.slice(0, 15);
+    const recent = allEvents.slice(0, 15); // Solo últimos 15 visibles
 
-    if (recentEvents.length === 0) {
+    if (recent.length === 0) {
         container.innerHTML = '<div class="py-8 text-center text-desc italic">🌵 Esperando señales vitales...</div>';
         return;
     }
 
-    const friendlyNames = {
-        page_view: '👀 Entrada',
-        click_whatsapp_direct: '💬 WA Principal',
-        click_instagram_link: '📸 Insta Link',
-        click_qr_button: '🔳 QR Code',
-        click_testimonials_btn: '👑 Testimonios',
-        click_search_btn: '🔍 Búsqueda',
-        filter_category_selected: '🏷️ Filtro Cat.',
-        search_text_typed: '⌨️ Typed Query',
-        product_image_zoomed: '🖼️ Zoom Img',
-        product_whatsapp_requested: '🛒 Pedido Producto',
-        product_shared: '🔗 Compartir Prod.'
+    const names = {
+        page_view: '👀 Entrada', click_whatsapp_direct: '💬 WA Main',
+        click_instagram_link: '📸 Insta', click_qr_button: '🔳 QR',
+        click_testimonials_btn: '👑 Testi', click_search_btn: '🔍 Search',
+        filter_category_selected: '🏷️ Filter', search_text_typed: '⌨️ Typing',
+        product_image_zoomed: '🖼️ Zoom', product_whatsapp_requested: '🛒 Order',
+        product_shared: '🔗 Share'
     };
 
-    container.innerHTML = recentEvents.map(ev => {
-        const timeStr = new Date(ev.timestamp).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const actionLabel = friendlyNames[ev.event] || ev.event;
-        const detail = ev.query ? `"${ev.query}"` : (ev.product_title || '-');
+    container.innerHTML = recent.map(ev => {
+        const time = new Date(ev.timestamp).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+        const act = names[ev.event] || ev.event.replace('_',' ');
+        const det = ev.query ? `"${ev.query}"` : (ev.product_title || '-');
         
         return `
         <div class="console-row">
-            <div class="console-td font-mono text-[#D4AF37]">${timeStr}</div>
-            <div class="console-td"><span class="action-badge">${actionLabel}</span></div>
-            <div class="console-td text-purple-300">${ev.device}</div>
-            <div class="console-td text-gray-400">${ev.browser}</div>
-            <div class="console-td text-xs opacity-70">${ev.language}</div>
-            <div class="console-td truncate max-w-[150px]" title="${detail}">${detail}</div>
+            <div class="console-td font-mono text-[#D4AF37]">${time}</div>
+            <div class="console-td"><span class="action-badge">${act}</span></div>
+            <div class="console-td text-purple-300">${ev.device||'?'}</div>
+            <div class="console-td text-gray-400">${ev.browser||'?'}</div>
+            <div class="console-td text-xs opacity-70">${ev.language||'-'}</div>
+            <div class="console-td truncate max-w-[150px]" title="${det}">${det}</div>
             <div class="console-td"><span class="status-dot" style="width:6px;height:6px;"></span></div>
         </div>`;
     }).join('');
- }
+}
+        
 
 window.openHistoryModal = function() {
     const modal = document.getElementById('history-modal');
