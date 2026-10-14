@@ -201,5 +201,49 @@
     </div>
 
     <script type="module" src="stats.js"></script>
+
+    <!-- NUEVO: MODAL HISTORIAL DETALLADO (Se activa con la lupa) -->
+<div id="history-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="bg-white dark:bg-[#0d0310] rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 border-2 border-[#D4AF37]/30 relative animate-popIn">
+        
+        <!-- Botón Cerrar -->
+        <button onclick="document.getElementById('history-modal').classList.add('hidden')" 
+                class="absolute top-4 right-4 w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center font-bold hover:scale-110 transition-all">
+            ✕
+        </button>
+
+        <!-- Header del Modal -->
+        <div class="mb-6 pb-4 border-b border-purple-500/20">
+            <h2 class="text-xl font-bold text-title flex items-center gap-2">📜 Historial Detallado de Visitantes</h2>
+            <p class="text-xs text-desc mt-1">Últimos 50 registros cronológicos inversos (más recientes primero).</p>
+        </div>
+
+        <!-- Contenedor de la Lista (Se llena vía JS) -->
+        <div id="history-list-container" class="space-y-2">
+            <!-- Placeholder inicial -->
+            <div class="py-8 text-center text-desc italic">Cargando historial...</div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Script para cerrar al hacer clic fuera -->
+<script>
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('history-modal');
+        if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+    
+    // Cerrar con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('history-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+    });
+</script>
+    
 </body>
 </html>
