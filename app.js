@@ -287,42 +287,33 @@ function getGreeting() {
     return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches';
 }
 
-// ============ REGISTRO DE ESTADÍSTICAS EN TIEMPO REAL (CORREGIDO) ============
+// ============ REGISTRO DE ESTADÍSTICAS ATÓMICAS (FINAL) ============
 (function initStatsTracking() {
-    // Importar runTransaction dinámicamente desde firebase-database
+    // Importar increment dinámicamente
     import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js").then(module => {
-        const { ref, runTransaction, getDatabase } = module;
+        const { ref, increment, getDatabase } = module;
         
         function getTodayKey() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
         
-        // Función auxiliar segura para incrementar contadores
-        function incrementStat(statPath, counterName) {
-            const today = getTodayKey();
-            const fullRef = ref(getDatabase(), statPath);
-            
-            runTransaction(fullRef, (currentData) => {
-                const data = currentData || {};
-                if (!data[counterName]) data[counterName] = {};
-                data[counterName][today] = (data[counterName][today] || 0) + 1;
-                return data;
-            }).catch(err => console.warn(`Error registrando ${counterName}:`, err));
-        }
-        
         // Registrar VISITA (solo 1 vez por sesión/tab)
-        let visitRecorded = sessionStorage.getItem('valen_visit_recorded_v2');
+        let visitRecorded = sessionStorage.getItem('valen_visit_recorded_v3');
         if (!visitRecorded) {
-            incrementStat('valen_profile/stats', 'visits');
-            sessionStorage.setItem('valen_visit_recorded_v2', 'true');
+            const today = getTodayKey();
+            set(ref(getDatabase(), `valen_profile/stats/visits/${today}`), increment(1))
+                .catch(err => console.warn('Error registrando visita:', err));
+            sessionStorage.setItem('valen_visit_recorded_v3', 'true');
         }
         
         // Registrar CLIC WhatsApp Directo (botón principal)
         const btnWaMain = document.querySelector('a[href*="wa.me"]');
         if (btnWaMain) {
             btnWaMain.addEventListener('click', () => {
-                incrementStat('valen_profile/stats', 'whatsappClicks');
+                const today = getTodayKey();
+                set(ref(getDatabase(), `valen_profile/stats/whatsappClicks/${today}`), increment(1))
+                    .catch(err => console.warn('Error registrando click WA:', err));
             });
         }
         
@@ -330,13 +321,15 @@ function getGreeting() {
         document.addEventListener('click', (e) => {
             const shareBtn = e.target.closest('.share-product-btn');
             if (shareBtn) {
-                incrementStat('valen_profile/stats', 'shareClicks');
+                const today = getTodayKey();
+                set(ref(getDatabase(), `valen_profile/stats/shareClicks/${today}`), increment(1))
+                    .catch(err => console.warn('Error registrando compartido:', err));
             }
         });
         
-    }).catch(importErr => console.error('Error cargando módulo transaction:', importErr));
+    }).catch(importErr => console.error('Error cargando módulo increment:', importErr));
 })();
-// =============================================================================
+// =====================================================================
 
 window.shareProduct = async function(product) {
     const greeting = getGreeting();
