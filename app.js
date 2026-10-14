@@ -287,151 +287,86 @@ function getGreeting() {
     return (h >= 5 && h < 12) ? '¡Buenos días' : (h >= 12 && h < 19) ? '¡Buenas tardes' : '¡Buenas noches';
 }
 
-// ============ SISTEMA DE EVENTOS DETALLADOS (NUEVO) ============
-(function initEventTracking() {
-    // Helper para obtener info del dispositivo/navegador
+// ============ SISTEMA DE EVENTOS DETALLADOS v2 (FINAL) ============
+(function initDetailedEvents() {
     function getDeviceInfo() {
         const ua = navigator.userAgent;
-        let device = 'Otros';
+        let device = 'Desconocido';
         if (/Android/i.test(ua)) device = 'Celular Android';
-        else if (/iPhone|iPad|iPod/i.test(ua)) device = 'iOS';
-        else if (/Windows/i.test(ua)) device = 'PC Windows';
-        else if (/Macintosh|Mac OS X/i.test(ua)) device = 'PC Mac';
+        else if (/iPhone|iPad|iPod/i.test(ua)) device = 'iOS Apple';
+        else if (/Windows NT/i.test(ua)) device = 'PC Windows';
+        else if (/Macintosh/i.test(ua)) device = 'PC Mac';
         else if (/Linux/i.test(ua)) device = 'PC Linux';
         
         return {
             device: device,
+            browser: ua.includes('Chrome') ? 'Chrome' : ua.includes('Firefox') ? 'Firefox' : ua.includes('Safari') ? 'Safari' : 'Otros',
             language: navigator.language || 'es-CO',
+            screen: `${window.screen.width}x${window.screen.height}`,
             timestamp: Date.now(),
-            dateString: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-            timeString: new Date().toLocaleTimeString('es-CO')   // HH:mm:ss
+            isoDate: new Date().toISOString(),
+            readableTime: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })
         };
     }
 
-    // Función central para registrar UN evento específico
-    function trackEvent(eventName, details = {}) {
+    function saveEvent(eventName, details = {}) {
         const info = getDeviceInfo();
-        const eventData = {
-            event: eventName,
-            ...info,
-            ...details
-        };
-
-        // Guardar en Firebase bajo valen_profile/events/[timestamp]
-        // Usamos push() para crear IDs únicos automáticos
-        push(ref(db, 'valen_profile/events'), eventData)
-            .catch(err => console.warn('Error registrando evento:', err));
+        const payload = { event: eventName, ...info, ...details };
+        
+        push(ref(db, 'valen_events'), payload)
+            .then(() => console.log('✅ Evento guardado:', eventName))
+            .catch(err => console.error('❌ Error guardando evento:', err));
     }
 
-    // --- REGISTRAR VISITAS (cada carga de página) ---
-    // Sin sessionStorage: cada recarga cuenta como nueva visita
-    window.addEventListener('load', () => {
-        trackEvent('page_view');
-    });
+    // --- VISITAS (cada carga completa) ---
+    window.addEventListener('load', () => saveEvent('page_view'));
 
-    // --- REGISTRAR CLICKS EN BOTONES PRINCIPALES ---
-    
-    // WhatsApp Directo (botón superior)
-    const btnWaMain = document.querySelector('a[href*="wa.me"]');
-    if (btnWaMain) {
-        btnWaMain.addEventListener('click', () => {
-            trackEvent('click_whatsapp_main');
-        });
-    }
+    // --- BOTONES PRINCIPALES SUPERIORES ---
+    document.querySelector('a[href*="wa.me"]')?.addEventListener('click', () => saveEvent('click_whatsapp_direct'));
+    document.querySelector('a[href*="instagram.com"]')?.addEventListener('click', () => saveEvent('click_instagram_link'));
+    document.getElementById('btn-qr-open')?.addEventListener('click', () => saveEvent('click_qr_button'));
+    document.getElementById('btn-testimonials')?.addEventListener('click', () => saveEvent('click_testimonials_btn'));
+    document.getElementById('btn-search')?.addEventListener('click', () => saveEvent('click_search_btn'));
 
-    // Instagram
-    const btnInsta = document.querySelector('a[href*="instagram.com"]');
-    if (btnInsta) {
-        btnInsta.addEventListener('click', () => {
-            trackEvent('click_instagram');
-        });
-    }
-
-    // Código QR
-    const btnQr = document.getElementById('btn-qr-open');
-    if (btnQr) {
-        btnQr.addEventListener('click', () => {
-            trackEvent('click_qr_open');
-        });
-    }
-
-    // Testimonios
-    const btnTestimonials = document.getElementById('btn-testimonials');
-    if (btnTestimonials) {
-        btnTestimonials.addEventListener('click', () => {
-            trackEvent('click_testimonials_open');
-        });
-    }
-
-    // Buscar (drawer)
-    const btnSearch = document.getElementById('btn-search');
-    if (btnSearch) {
-        btnSearch.addEventListener('click', () => {
-            trackEvent('click_search_open');
-        });
-    }
-
-    // --- REGISTRAR FILTROS DE CATEGORÍA ---
-    // Interceptamos setCategory para saber qué categoría eligieron
-    const originalSetCategory = window.setCategory;
+    // --- FILTROS DE CATEGORÍA ---
+    const origSetCat = window.setCategory;
     window.setCategory = (id) => {
-        trackEvent('filter_category_change', { category_id: id });
-        originalSetCategory(id);
+        const catName = categories.find(c => c.id === id)?.name || id;
+        saveEvent('filter_category_selected', { category_name: catName });
+        origSetCat(id);
     };
 
-    // --- REGISTRAR BUSQUEDAS (texto escrito) ---
+    // --- BÚSQUEDA TEXTUAL ---
     const searchInput = document.getElementById('search-text');
-    if (searchInput) {
-        let debounceTimer;
+    if(searchInput) {
+        let timer;
         searchInput.addEventListener('input', (e) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                const query = e.target.value.trim();
-                if (query.length > 2) { // Solo registrar búsquedas reales (>2 caracteres)
-                    trackEvent('search_query_typed', { query: query });
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                if(e.target.value.length > 2) {
+                    saveEvent('search_text_typed', { query: e.target.value });
                 }
-            }, 800); // Esperar 800ms después de que deje de escribir
+            }, 1000);
         });
     }
 
-    // --- REGISTRAR INTERACCIONES CON PRODUCTOS ---
-    // Delegación de eventos para botones dinámicos (Pedir WA y Compartir)
-    document.addEventListener('click', (e) => {
-        // Botón "Pedir por WhatsApp" de productos
-        const waProductBtn = e.target.closest('a[href^="https://wa.me/"][target="_blank"]');
-        if (waProductBtn && !waProductBtn.matches('a[href*="573229247605"]:not([href*="?text="])')) {
-            // Extraer título del producto del texto del enlace si es posible, o usar data-atributo futuro
-            trackEvent('click_product_whatsapp');
+    // --- INTERACCIONES CON PRODUCTOS (Delegación global) ---
+    document.body.addEventListener('click', (e) => {
+        // Click en imagen producto (Zoom/Lightbox)
+        if(e.target.closest('[onclick^="openLightbox"]')) {
+            saveEvent('product_image_zoomed');
         }
-
-        // Botón "Compartir" de productos
-        const shareBtn = e.target.closest('.share-product-btn');
-        if (shareBtn) {
-            trackEvent('click_product_share');
+        // Botón Pedir WhatsApp Producto
+        if(e.target.matches('a.bg-emerald-500[target="_blank"]')) {
+             const title = e.target.closest('.card-bg')?.querySelector('h3')?.innerText || 'Sin título';
+             saveEvent('product_whatsapp_requested', { product_title: title });
         }
-        
-        // Click en imagen de producto (para ampliar/lightbox)
-        const productImgContainer = e.target.closest('[onclick^="openLightbox"]');
-        if (productImgContainer) {
-             trackEvent('click_product_image_zoom');
+        // Botón Compartir Producto
+        if(e.target.matches('.share-product-btn')) {
+             const title = e.target.closest('.card-bg')?.querySelector('h3')?.innerText || 'Sin título';
+             saveEvent('product_shared', { product_title: title });
         }
     });
-
-    // --- REGISTRAR MODAL QR ACCIONES ---
-    const qrShareBtn = document.getElementById('btn-qr-share-action');
-    if (qrShareBtn) {
-        qrShareBtn.addEventListener('click', () => {
-            trackEvent('click_qr_share_action');
-        });
-    }
-    
-    const qrDownloadBtn = document.getElementById('btn-qr-download');
-    if (qrDownloadBtn) {
-        qrDownloadBtn.addEventListener('click', () => {
-            trackEvent('click_qr_download');
-        });
-    }
-
 })();
 // ===================================================================
 
