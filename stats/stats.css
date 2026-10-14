@@ -358,3 +358,47 @@ body:not(.dark-mode) .console-td { color: #2d1b36; }
     70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
     100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
+
+/* ============ ESTILOS TABLA MONITOR MEJORADA ============ */
+.console-row-enhanced {
+    display: grid;
+    grid-template-columns: 140px 1fr 180px 1fr 40px;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    align-items: start;
+}
+.console-cell { font-size: 0.85rem; line-height: 1.5; word-wrap: break-word; }
+.console-date { color: #D4AF37; font-family: monospace; font-weight: bold; }
+.action-badge-modern {
+    background: linear-gradient(135deg, #ec4899, #a855f7);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+.console-context small { display: block; margin-top: 0.3rem; font-style: italic; }
+.pulse-dot {
+    width: 8px; height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse-green 2s infinite;
+    box-shadow: 0 0 10px #10b981;
+}
+
+/* Modo claro ajustes */
+body:not(.dark-mode) .console-date { color: #9333ea; }
+body:not(.dark-mode) .action-badge-modern { background: linear-gradient(135deg, #db2777, #7c3aed); }
+body:not(.dark-mode) .console-context { color: #2d1b36; }
+
+/* ============ TARJETAS CALENDARIO TEMÁTICO ============ */
+.calendar-themed-card {
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+}
+.calendar-themed-card:hover { transform: translateY(-4px); }
