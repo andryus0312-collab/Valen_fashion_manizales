@@ -431,6 +431,148 @@ window.openHistoryModal = function() {
     }, { onlyOnce: true });
 };
 
+// ============ CAPTURADOR DE GRÁFICAS PREMIUM (PNG ALTA CALIDAD) ============
+
+/**
+ * Genera una imagen PNG profesional combinando Logo + Título + Gráfica + Texto Explicativo
+ * @param {string} chartId - ID del canvas ('chart-devices', 'chart-categories', 'chart-visits')
+ * @param {string} titleText - Título visible de la tarjeta (ej: "¿Desde dónde te visitan?")
+ */
+window.captureAndDownloadGraph = async function(chartId, titleText) {
+    showToast('📸 Preparando captura premium...');
+    
+    try {
+        // 1. Obtener referencias DOM necesarias
+        const canvasElement = document.getElementById(chartId);
+        if (!canvasElement) throw new Error("Canvas no encontrado");
+        
+        // Encontrar el contenedor padre (.chart-card-enhanced) para sacar el texto interpretativo
+        const cardContainer = canvasElement.closest('.chart-card-enhanced');
+        const interpBlock = cardContainer?.querySelector('.chart-interpretation');
+        
+        if (!interpBlock) throw new Error("Bloque de texto no encontrado");
+
+        // 2. Crear lienzo temporal gigante (para composición perfecta)
+        // Usamos escala x2 para asegurar nitidez retina/HD
+        const scale = 2; 
+        const width = 800 * scale;
+        const height = 1200 * scale; // Altura suficiente para logo+titulo+grafica+texto
+        
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const ctx = tempCanvas.getContext('2d');
+
+        // --- A. FONDO BLANCO LIMPIO ---
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+
+        // --- B. LOGO CENTRADO ARRIBA ---
+        const logoImg = new Image();
+        logoImg.src = '../logo.jpg'; // Ruta relativa desde stats/
+        
+        await new Promise((resolve, reject) => {
+            logoImg.onload = resolve;
+            logoImg.onerror = () => resolve(); // Continuar aunque falle el logo
+        });
+
+        const logoSize = 150 * scale;
+        const logoX = (width - logoSize) / 2;
+        const logoY = 50 * scale;
+        
+        if (logoImg.complete && logoImg.naturalWidth > 0) {
+            ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+        } else {
+            // Fallback si no carga el logo: Dibujar círculo decorativo
+            ctx.beginPath();
+            ctx.arc(width/2, logoY + logoSize/2, logoSize/2, 0, Math.PI*2);
+            ctx.fillStyle = '#f3e8ff';
+            ctx.fill();
+            ctx.strokeStyle = '#a855f7';
+            ctx.lineWidth = 5 * scale;
+            ctx.stroke();
+            ctx.fillStyle = '#a855f7';
+            ctx.font = `bold ${20*scale}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('VF', width/2, logoY + logoSize/2 + 10*scale);
+        }
+
+        // --- C. TÍTULO ESPECÍFICO EN MORADO/FUCSIA ---
+        ctx.fillStyle = '#9333ea'; // Morado vibrante
+        ctx.font = `bold ${28*scale}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(titleText.toUpperCase(), width / 2, logoY + logoSize + (60 * scale));
+
+        // Línea divisoria sutil bajo el título
+        ctx.beginPath();
+        ctx.moveTo(width * 0.2, logoY + logoSize + (80 * scale));
+        ctx.lineTo(width * 0.8, logoY + logoSize + (80 * scale));
+        ctx.strokeStyle = '#e9d5ff';
+        ctx.lineWidth = 2 * scale;
+        ctx.stroke();
+
+        // --- D. INSERTAR LA GRÁFICA REAL (CANVAS ORIGINAL) ---
+        // Copiamos los píxeles exactos del gráfico actual sin re-renderizar
+        const graphHeight = 500 * scale; // Altura reservada para la gráfica
+        const graphY = logoY + logoSize + (100 * scale);
+        
+        // Centrar horizontalmente
+        const drawX = (width - canvasElement.width) / 2;
+        const drawY = graphY + ((graphHeight - canvasElement.height) / 2);
+        
+        ctx.drawImage(canvasElement, drawX, drawY, canvasElement.width, canvasElement.height);
+
+        // --- E. TEXTO EXPLICATIVO FIJO (HTML -> Canvas) ---
+        // Extraemos el texto plano del bloque HTML
+        const explanationText = interpBlock.innerText || "";
+        
+        ctx.fillStyle = '#4b5563'; // Gris oscuro legible
+        ctx.font = `${16*scale}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = 'left';
+        
+        // Word wrap manual para el texto largo
+        const maxWidth = width * 0.8;
+        const lineHeight = 24 * scale;
+        const startX = (width - maxWidth) / 2;
+        let currentY = graphY + graphHeight + (40 * scale);
+        
+        const words = explanationText.split(/\s+/);
+        let line = '';
+        
+        for(let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = ctx.measureText(testLine);
+            
+            if (metrics.width > maxWidth && n > 0) {
+                ctx.fillText(line.trim(), startX, currentY);
+                line = words[n] + ' ';
+                currentY += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line.trim(), startX, currentY);
+
+        // --- F. PIE DE PÁGINA SUTIL ---
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = `italic ${12*scale}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`Valen Fashion Manizales • Reporte Automático • ${new Date().toLocaleDateString('es-CO')}`, width/2, height - (30*scale));
+
+        // --- G. DESCARGAR COMO PNG ---
+        const link = document.createElement('a');
+        link.download = `Valen_${titleText.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.png`;
+        link.href = tempCanvas.toDataURL('image/png', 1.0); // Calidad máxima
+        link.click();
+
+        showToast('✅ Imagen descargada exitosamente');
+
+    } catch (err) {
+        console.error("Error capturando gráfica:", err);
+        alert('Hubo un problema generando la imagen: ' + err.message);
+    }
+};
+
 // DESCARGA PDF FORENSE INTELIGENTE
 window.downloadFullReportPDF = async function() {
     showToast('⏳ Procesando evidencia digital...');
