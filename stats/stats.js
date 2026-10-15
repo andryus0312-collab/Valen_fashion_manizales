@@ -694,19 +694,30 @@ async function loadInitialCoachContext() {
     const chatArea = document.getElementById('coach-chat-area');
     if(!chatArea) return;
 
-    // Mostrar indicador de carga elegante
-    chatArea.innerHTML += `<div id="loading-coach-msg" class="text-center py-4 opacity-60 animate-pulse text-xs text-gray-400">🔄 Analizando tus métricas en tiempo real...</div>`;
+    // 1. LIMPIEZA INMEDIATA: Borrar cualquier resumen ejecutivo previo o mensaje de carga duplicado
+    // Esto evita que se apilen las tarjetas cada vez que abres/cierras
+    const existingCards = chatArea.querySelectorAll('.coach-summary-card');
+    existingCards.forEach(card => card.remove()); 
+    
+    // También eliminamos loaders viejos si quedaron pegados
+    const oldLoader = document.getElementById('loading-coach-msg');
+    if(oldLoader) oldLoader.remove();
+
+    // 2. MOSTRAR INDICADOR DE CARGA NUEVO
+    const loaderHtml = `<div id="loading-coach-msg" class="text-center py-4 opacity-60 animate-pulse text-xs text-gray-400">🔄 Analizando tus métricas en tiempo real...</div>`;
+    chatArea.insertAdjacentHTML('afterbegin', loaderHtml);
 
     try {
         const context = await getCoachContext();
         
-        // Eliminar mensaje de carga
-        const loader = document.getElementById('loading-coach-msg');
-        if(loader) loader.remove();
+        // Eliminar el loader específico que acabamos de poner
+        const currentLoader = document.getElementById('loading-coach-msg');
+        if(currentLoader) currentLoader.remove();
 
-        // Construir tarjeta informativa bonita usando HTML puro (sin librerías extra aún)
+        // 3. CONSTRUIR TARJETA ÚNICA Y REFRESCANTE
+        // Añadimos clase 'coach-summary-card' para poder identificarla y borrarla luego
         const infoCardHtml = `
-        <div class="bg-gradient-to-br from-purple-900/40 to-black/40 border-l-4 border-[#D4AF37] rounded-xl p-4 shadow-lg mb-4 backdrop-blur-sm">
+        <div class="coach-summary-card bg-gradient-to-br from-purple-900/40 to-black/40 border-l-4 border-[#D4AF37] rounded-xl p-4 shadow-lg mb-4 backdrop-blur-sm animate-fade-in-up">
             <h3 class="font-bold text-[#D4AF37] flex items-center gap-2 mb-3">
                 📊 Resumen Ejecutivo Automático
             </h3>
@@ -731,12 +742,12 @@ async function loadInitialCoachContext() {
             </div>
         </div>`;
 
-        // Insertar al principio del área de chat
+        // Insertar al principio del área de chat (siempre arriba de todo)
         chatArea.insertAdjacentHTML('afterbegin', infoCardHtml);
 
     } catch (err) {
         console.error(err);
-        const errorMsg = `<div class="text-red-400 text-xs bg-red-900/20 p-2 rounded">Error cargando contexto: ${err.message}</div>`;
+        const errorMsg = `<div class="text-red-400 text-xs bg-red-900/20 p-2 rounded coach-summary-card">Error cargando contexto: ${err.message}</div>`;
         const loader = document.getElementById('loading-coach-msg');
         if(loader) loader.outerHTML = errorMsg;
     }
