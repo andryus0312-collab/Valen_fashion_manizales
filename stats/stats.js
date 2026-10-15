@@ -671,27 +671,79 @@ window.captureAndDownloadGraph = async function(chartId, titleText) {
 
 
 // ============ CONTROLADOR VISUAL DEL COACH IA ============
-window.toggleCoachModal = function(show) {
+window.toggleCoachModal = async function(show) {
     const modal = document.getElementById('coach-modal');
     if (!modal) return;
 
     if (show) {
         modal.classList.remove('hidden');
-        // Forzar repaint para activar animación CSS
         void modal.offsetWidth; 
-        document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
+        document.body.style.overflow = 'hidden'; 
+        
+        // NUEVO: Cargar contexto real automáticamente al abrir
+        loadInitialCoachContext(); 
+
     } else {
         modal.classList.add('hidden');
-        document.body.style.overflow = ''; // Restaurar scroll
+        document.body.style.overflow = ''; 
     }
 };
 
-// Cerrar con tecla ESC
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        toggleCoachModal(false);
+// Helper para renderizar el contexto inicial dentro del chat area
+async function loadInitialCoachContext() {
+    const chatArea = document.getElementById('coach-chat-area');
+    if(!chatArea) return;
+
+    // Mostrar indicador de carga elegante
+    chatArea.innerHTML += `<div id="loading-coach-msg" class="text-center py-4 opacity-60 animate-pulse text-xs text-gray-400">🔄 Analizando tus métricas en tiempo real...</div>`;
+
+    try {
+        const context = await getCoachContext();
+        
+        // Eliminar mensaje de carga
+        const loader = document.getElementById('loading-coach-msg');
+        if(loader) loader.remove();
+
+        // Construir tarjeta informativa bonita usando HTML puro (sin librerías extra aún)
+        const infoCardHtml = `
+        <div class="bg-gradient-to-br from-purple-900/40 to-black/40 border-l-4 border-[#D4AF37] rounded-xl p-4 shadow-lg mb-4 backdrop-blur-sm">
+            <h3 class="font-bold text-[#D4AF37] flex items-center gap-2 mb-3">
+                📊 Resumen Ejecutivo Automático
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm text-gray-300">
+                <div><strong>👀 Visitas:</strong> ${context.traffic_metrics.total_registered_visits_lifetime}</div>
+                <div><strong>💬 Clics WA (7d):</strong> ${context.traffic_metrics.whatsapp_interactions_last_7_days}</div>
+                <div><strong>🏆 Top Cat:</strong> ${context.catalog_insights.leading_category}</div>
+                <div><strong>📦 Productos:</strong> ${context.catalog_insights.total_active_products}</div>
+            </div>
+
+            <div class="mt-3 pt-3 border-t border-white/10">
+                <p class="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Alertas Estratégicas:</p>
+                <p class="text-emerald-400 font-medium italic">${context.strategic_alerts}</p>
+            </div>
+            
+            <div class="mt-4 flex justify-between items-end">
+                 <span class="text-[9px] text-gray-600">Generado: ${new Date(context.meta_info.generated_at).toLocaleString('es-CO')}</span>
+                 <button onclick="requestDeepAnalysis()" class="bg-[#D4AF37] hover:bg-yellow-600 text-black text-[10px] font-bold px-3 py-1 rounded-full transition-colors shadow-md active:scale-95">
+                    🤖 Pedir Consejo Profundo (Próx. Fase)
+                 </button>
+            </div>
+        </div>`;
+
+        // Insertar al principio del área de chat
+        chatArea.insertAdjacentHTML('afterbegin', infoCardHtml);
+
+    } catch (err) {
+        console.error(err);
+        const errorMsg = `<div class="text-red-400 text-xs bg-red-900/20 p-2 rounded">Error cargando contexto: ${err.message}</div>`;
+        const loader = document.getElementById('loading-coach-msg');
+        if(loader) loader.outerHTML = errorMsg;
     }
-});
+}
+
+// Placeholder para futura conexión API Deep Analysis
+window.requestDeepAnalysis = () => alert("Fase 3 Pendiente: Aquí conectaremos Groq/Gemini para generar narrativa inteligente.");
 
 
 // DESCARGA PDF FORENSE INTELIGENTE
