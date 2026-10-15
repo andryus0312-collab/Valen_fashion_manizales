@@ -753,9 +753,6 @@ async function loadInitialCoachContext() {
     }
 }
 
-// Placeholder para futura conexión API Deep Analysis
-window.requestDeepAnalysis = () => alert("Fase 3 Pendiente: Aquí conectaremos Groq/Gemini para generar narrativa inteligente.");
-
 
 // DESCARGA PDF FORENSE INTELIGENTE
 window.downloadFullReportPDF = async function() {
@@ -879,3 +876,253 @@ function showToast(msg) {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+
+
+// ========================================================================
+// ================== MOTOR COACH IA DUAL ENGINE v2.0 ====================
+// ========================================================================
+
+// CONFIGURACIÓN DE CLAVES (EDITA AQUÍ CUANDO LAS TENGAS)
+const AI_CONFIG = {
+    groq: {
+        name: "Groq", icon: "⚡", colorClass: "purple",
+        apiKey: "CLAVE DE GOQ", // <-- CAMBIA ESTO POR TU CLAVE REAL gsk_...
+        model: "llama-3.3-70b-versatile",
+        endpoint: "https://api.groq.com/openai/v1/chat/completions",
+        description: "Velocidad extrema • Análisis Texto"
+    },
+    gemini: {
+        name: "Gemini", icon: "💎", colorClass: "blue",
+        apiKey: "CLAVE DE GEMINI", // <-- CAMBIA ESTO POR TU CLAVE REAL AIza...
+        model: "gemini-1.5-flash", 
+        endpoint: "https://generativelanguage.googleapis.com/v1beta/models/",
+        description: "Multimodal • Reasoning Profundo"
+    }
+};
+
+let currentEngine = 'groq'; // Por defecto inicia con Groq
+let sessionHistory = []; // Guarda el chat actual para exportar PDF
+
+// --- FUNCIÓN MAESTRA DE INTERRUPCIÓN VISUAL ---
+window.switchEngine = function(engineKey) {
+    if(currentEngine === engineKey) return;
+    
+    currentEngine = engineKey;
+    const config = AI_CONFIG[engineKey];
+    
+    // 1. Actualizar Header Visual
+    document.getElementById('engine-icon').innerText = config.icon;
+    document.getElementById('engine-title').innerHTML = `Valen Coach • ${config.name} Engine`;
+    document.getElementById('engine-subtitle').innerText = config.description;
+    
+    // 2. Cambiar Colores Globales del Container
+    const container = document.getElementById('coach-engine-container');
+    const headerIcon = document.getElementById('engine-icon');
+    const sendBtn = document.getElementById('btn-send-msg');
+    
+    // Resetear clases previas dinámicamente
+    container.className = container.className.replace(/from-\[#.*?\]|to-\[#.*?\]|border-.*/g, '');
+    
+    if(engineKey === 'groq') {
+        container.classList.add('bg-gradient-to-b', 'from-[#1a0b2e]', 'to-[#0f0518]', 'border-purple-500/40');
+        headerIcon.className = "w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-lg bg-purple-600 text-white shadow-purple-500/50";
+        sendBtn.className = "bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-purple-900/50";
+        document.getElementById('btn-groq').className = "px-3 py-1.5 rounded-full text-xs font-bold bg-purple-600 text-white shadow-lg";
+        document.getElementById('btn-gemini').className = "px-3 py-1.5 rounded-full text-xs font-bold text-gray-400 hover:text-white";
+    } else {
+        container.classList.add('bg-gradient-to-b', 'from-[#0c1e3a]', 'to-[#050d1a]', 'border-blue-500/40');
+        headerIcon.className = "w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-lg bg-blue-600 text-white shadow-blue-500/50";
+        sendBtn.className = "bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-900/50";
+        document.getElementById('btn-gemini').className = "px-3 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white shadow-lg";
+        document.getElementById('btn-groq').className = "px-3 py-1.5 rounded-full text-xs font-bold text-gray-400 hover:text-white";
+    }
+
+    addSystemMessage(`🔄 Cerebro cambiado a ${config.name}. Listo para nuevos desafíos.`);
+};
+
+// --- ENVIAR MENSAJE USUARIO ---
+window.sendUserMessage = async function() {
+    const input = document.getElementById('user-query-input');
+    const text = input.value.trim();
+    if(!text) return;
+
+    addUserBubble(text);
+    input.value = '';
+    input.focus();
+
+    const loaderId = showAILoading();
+
+    try {
+        const contextData = await getCoachContext();
+        
+        const systemPrompt = `Eres la asistente estratégica de "Valen Fashion Manizales". 
+Tu dueña es una mujer emprendedora, cariñosa pero exigente con sus números.
+Habla español neutro-coloquial (usa "mija", "parce" si aplica, pero mantén profesionalismo boutique).
+Usa emojis estratégicos 💜✨📈.
+OBJETIVO: Dar informes DETALLADOS, accionables y motivadores basados en los datos JSON provistos.
+FORMATO RESPUESTA: Usa Markdown (**negritas**, listas) para facilitar lectura rápida.`;
+
+        const fullContextString = JSON.stringify(contextData);
+        
+        let aiResponseText = "";
+
+        if(currentEngine === 'groq') {
+            aiResponseText = await callGroq(systemPrompt, `${fullContextString}\n\nConsulta Usuario: "${text}"`);
+        } else {
+            aiResponseText = await callGemini(systemPrompt, `${fullContextString}\n\nConsulta Usuario: "${text}"`);
+        }
+
+        removeLoading(loaderId);
+        addAiBubble(aiResponseText);
+        
+        sessionHistory.push({ role: 'user', content: text });
+        sessionHistory.push({ role: 'assistant', content: aiResponseText });
+
+    } catch (err) {
+        removeLoading(loaderId);
+        addErrorMessage("Ups, se me fue la señal mental. Revisa conexión o clave API.");
+        console.error(err);
+    }
+};
+
+// --- LLAMADAS API REALES ---
+async function callGroq(sys, userMsg) {
+    const res = await fetch(AI_CONFIG.groq.endpoint, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${AI_CONFIG.groq.apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+            model: AI_CONFIG.groq.model,
+            messages: [{role:"system",content:sys},{role:"user",content:userMsg}],
+            temperature: 0.7, max_tokens: 1000
+        })
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    return data.choices[0].message.content;
+}
+
+async function callGemini(sys, userMsg) {
+    const url = `${AI_CONFIG.gemini.endpoint}${AI_CONFIG.gemini.model}:generate?key=${AI_CONFIG.gemini.apiKey}`;
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: sys + "\n\n" + userMsg }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+        })
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    return data.candidates[0].content.parts[0].text;
+}
+
+// --- HELPERS VISUALES CHAT ---
+function addUserBubble(txt) {
+    const area = document.getElementById('coach-chat-area');
+    area.insertAdjacentHTML('beforeend', `
+    <div class="flex justify-end animate-fade-in-up mb-2">
+        <div class="bg-white/10 border border-white/20 rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%] text-sm text-white shadow-sm">
+            ${txt}
+        </div>
+    </div>`);
+    scrollToBottom();
+}
+
+function addAiBubble(htmlTxt) {
+    const area = document.getElementById('coach-chat-area');
+    // Parseo básico markdown a HTML simple
+    const parsed = htmlTxt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/^[-*]\s+(.*)$/gm, '<li>$1</li>')
+                          .replace(/(<li>.*<\/li>\n?)+/gs, match => `<ul class="list-disc pl-5 my-2">${match}</ul>`);
+    
+    area.insertAdjacentHTML('beforeend', `
+    <div class="flex gap-3 animate-fade-in-up mb-4">
+        <div class="w-8 h-8 rounded-full ${currentEngine==='groq'?'bg-purple-600':'bg-blue-600'} flex items-center justify-center text-white text-xs shrink-0 shadow-lg">
+            ${AI_CONFIG[currentEngine].icon}
+        </div>
+        <div class="flex-1 bg-black/40 border border-white/10 rounded-2xl rounded-tl-sm p-4 text-sm text-gray-200 leading-relaxed shadow-inner backdrop-blur-sm">
+            ${parsed}
+        </div>
+    </div>`);
+    scrollToBottom();
+}
+
+function addSystemMessage(txt) {
+    const area = document.getElementById('coach-chat-area');
+    area.insertAdjacentHTML('beforeend', `
+    <div class="text-center text-[10px] text-gray-500 italic py-2 border-y border-white/5 my-2">
+        ${txt}
+    </div>`);
+    scrollToBottom();
+}
+
+function showAILoading() {
+    const id = 'loader-'+Date.now();
+    const area = document.getElementById('coach-chat-area');
+    area.insertAdjacentHTML('beforeend', `
+    <div id="${id}" class="flex gap-3 mb-4 opacity-70">
+        <div class="w-8 h-8 rounded-full bg-gray-700 animate-pulse"></div>
+        <div class="flex-1 bg-black/20 rounded-2xl p-4 h-12 animate-pulse"></div>
+    </div>`);
+    scrollToBottom();
+    return id;
+}
+
+function removeLoading(id) {
+    const el = document.getElementById(id);
+    if(el) el.remove();
+}
+
+function addErrorMsg(msg) {
+    const area = document.getElementById('coach-chat-area');
+    area.insertAdjacentHTML('beforeend', `
+    <div class="bg-red-900/30 border-l-4 border-red-500 p-3 rounded text-red-200 text-xs mb-4">
+        ❌ ${msg}
+    </div>`);
+}
+
+function scrollToBottom() {
+    const area = document.getElementById('coach-chat-area');
+    setTimeout(() => area.scrollTop = area.scrollHeight, 50);
+}
+
+// --- INICIALIZACIÓN AUTOMÁTICA AL ABRIR ---
+// Sobreescribimos temporalmente toggleCoachModal para lanzar reporte inicial
+const originalToggle = window.toggleCoachModal;
+window.toggleCoachModal = async function(show) {
+    originalToggle(show);
+    if(show) {
+        setTimeout(async () => {
+            if(sessionHistory.length === 0) {
+                await autoGenerateInitialReport();
+            }
+        }, 800);
+    }
+};
+
+async function autoGenerateInitialReport() {
+    const loaderId = showAILoading();
+    try {
+        const ctx = await getCoachContext();
+        const promptSys = `Genera un INFORME DIARIO COMPLETO para Valen Fashion. 
+Datos: ${JSON.stringify(ctx)}.
+Estructura obligatoria:
+1. 📊 Resumen Vital (Visitas/Conversiones).
+2. 🔥 Top Ventas & Alertas Stock.
+3. 💡 Recomendación Accionable HOY.
+Sé detallada pero concisa. Usa emojis.`;
+        
+        let resp = "";
+        if(currentEngine === 'groq') resp = await callGroq(promptSys, "");
+        else resp = await callGemini(promptSys, "");
+        
+        removeLoading(loaderId);
+        addAiBubble(resp);
+        sessionHistory.push({role:'system_init', content:resp});
+        
+    } catch(e) {
+        removeLoading(loaderId);
+        addErrorMsg("No pude generar el informe inicial. Verifica claves API.");
+    }
+}
+// ========================================================================
