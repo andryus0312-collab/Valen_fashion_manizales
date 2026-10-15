@@ -259,42 +259,74 @@
     </button>
 </section>
 
-<!-- ============ MODAL EMERGENTE DEL COACH ============ -->
-<div id="coach-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 lg:p-8 backdrop-blur-md bg-black/80 transition-opacity duration-300">
+<!-- ============ MODAL COACH IA DUAL ENGINE v2 ============ -->
+<div id="coach-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 lg:p-8 backdrop-blur-md bg-black/90 transition-all duration-500">
     
-    <!-- Contenedor Principal del Modal -->
-    <div class="relative w-full max-w-4xl h-[90vh] sm:h-[85vh] bg-gradient-to-b from-[#0f0518] to-[#1a0b2e] rounded-3xl border border-[#D4AF37]/30 shadow-2xl overflow-hidden flex flex-col animate-fade-in-up">
+    <!-- Contenedor Principal con ID dinámico para cambiar estilos vía JS -->
+    <div id="coach-engine-container" class="relative w-full max-w-5xl h-[92vh] rounded-3xl border shadow-2xl overflow-hidden flex flex-col transition-colors duration-700 ease-out
+        /* Estilos iniciales Groq (Morado Neón) */
+        bg-gradient-to-b from-[#1a0b2e] to-[#0f0518] border-purple-500/40">
         
-        <!-- Header Dorado/Negro -->
-        <header class="flex-none p-4 sm:p-6 border-b border-[#D4AF37]/20 bg-black/40 backdrop-blur-sm flex justify-between items-center">
-            <h2 class="text-xl sm:text-2xl font-bold text-[#D4AF37] flex items-center gap-2 tracking-wide">
-                👑 Tu Coach de Inteligencia Artificial Personal
-            </h2>
-            <button onclick="toggleCoachModal(false)" 
-                    class="w-10 h-10 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400 hover:text-white flex items-center justify-center transition-colors font-bold text-lg">
+        <!-- HEADER DINÁMICO -->
+        <header id="coach-header" class="flex-none p-4 sm:p-5 border-b border-white/10 bg-black/40 backdrop-blur-sm flex justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <!-- Icono Engine -->
+                <div id="engine-icon" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-lg transition-all duration-500
+                    bg-purple-600 text-white shadow-purple-500/50">
+                    ⚡
+                </div>
+                <div>
+                    <h2 id="engine-title" class="text-lg font-bold tracking-wide transition-colors duration-500 text-purple-300">
+                        Valen Coach • Groq Engine
+                    </h2>
+                    <p id="engine-subtitle" class="text-[10px] uppercase tracking-widest opacity-70 text-gray-400">
+                        Velocidad Extrema • Análisis Texto
+                    </p>
+                </div>
+            </div>
+
+            <!-- SWITCH DE MOTORIA -->
+            <div class="flex items-center gap-2 bg-black/50 p-1 rounded-full border border-white/10">
+                <button onclick="switchEngine('groq')" id="btn-groq" class="px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 bg-purple-600 text-white shadow-lg">
+                    ⚡ Groq
+                </button>
+                <button onclick="switchEngine('gemini')" id="btn-gemini" class="px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 text-gray-400 hover:text-white">
+                    💎 Gemini
+                </button>
+            </div>
+            
+            <button onclick="toggleCoachModal(false)" class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400 flex items-center justify-center transition-colors ml-auto">
                 ✕
             </button>
         </header>
 
-        <!-- Cuerpo del Chat / Información -->
-        <main id="coach-chat-area" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar">
-            
-            <!-- Mensaje de Bienvenida Estático (Placeholder) -->
-            <div class="bg-[#2e1065]/30 border border-purple-500/20 rounded-2xl p-4 text-gray-300 text-sm sm:text-base leading-relaxed shadow-inner">
-                <p class="mb-2">👋 ¡Hola Valen! Soy tu asistente estratégico.</p>
-                <p>Aquí es donde pronto recibirás consejos personalizados basados en tus estadísticas reales. Mientras tanto, observa cómo respiran los datos en tiempo real arriba. 😉</p>
-                <div class="mt-4 pt-4 border-t border-white/10 text-xs opacity-70 italic">
-                    ⚙️ Sistema listo para conectar APIs (Groq/Gemini) próximamente...
-                </div>
+        <!-- ÁREA DE CHAT / REPORTES -->
+        <main id="coach-chat-area" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative">
+            <!-- Los mensajes se inyectan aquí vía JS -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                <span class="text-6xl grayscale blur-sm select-none">🤖</span>
             </div>
-
         </main>
 
-        <!-- Footer Informativo (Opcional por ahora) -->
-        <footer class="flex-none p-3 bg-black/60 text-center text-[10px] text-gray-500 border-t border-white/5">
-            Powered by Valen Fashion Analytics Engine v1.0 💜
+        <!-- INPUT ZONA INTERACTIVA -->
+        <footer class="flex-none p-4 bg-black/60 border-t border-white/10 backdrop-blur-md">
+            <div class="flex gap-2 items-end max-w-4xl mx-auto">
+                <!-- Campo Texto -->
+                <textarea id="user-query-input" rows="1" placeholder="Pregunta algo estratégico sobre tus ventas..." 
+                    class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 resize-none transition-all"></textarea>
+                
+                <!-- Botones Acción -->
+                <button onclick="sendUserMessage()" id="btn-send-msg" class="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-purple-900/50">
+                    ➤
+                </button>
+                <button onclick="downloadCoachSessionPDF()" title="Guardar Sesión Actual" class="bg-gray-800 hover:bg-gray-700 text-gray-300 p-3 rounded-xl transition-all border border-gray-600">
+                    📄
+                </button>
+            </div>
+            <div class="mt-2 text-center text-[9px] text-gray-600 italic">
+                Consejo: Sé específica. Ej: "Analiza mi top vendedor" o "Dame ideas para Halloween".
+            </div>
         </footer>
-
     </div>
 </div>
     
