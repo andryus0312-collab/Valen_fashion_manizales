@@ -463,9 +463,18 @@ window.captureAndDownloadGraph = async function(chartId, titleText) {
         tempCanvas.height = height;
         const ctx = tempCanvas.getContext('2d');
 
-        // --- A. FONDO BLANCO LIMPIO ---
-        ctx.fillStyle = '#ffffff';
+        // --- A. FONDO OSCURO BOUTIQUE (Igual al Panel Admin) ---
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+        bgGradient.addColorStop(0, '#1b0c1b');   // Negro profundo arriba
+        bgGradient.addColorStop(1, '#2e1065');   // Morado muy oscuro abajo
+        
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, width, height);
+
+        // Añadir un borde dorado sutil alrededor de todo el lienzo
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)'; // Dorado translúcido
+        ctx.lineWidth = 4 * scale;
+        ctx.strokeRect(10*scale, 10*scale, width - 20*scale, height - 20*scale);
 
         // --- B. LOGO CENTRADO ARRIBA ---
         const logoImg = new Image();
@@ -497,8 +506,8 @@ window.captureAndDownloadGraph = async function(chartId, titleText) {
             ctx.fillText('VF', width/2, logoY + logoSize/2 + 10*scale);
         }
 
-        // --- C. TÍTULO ESPECÍFICO EN MORADO/FUCSIA ---
-        ctx.fillStyle = '#9333ea'; // Morado vibrante
+        // --- C. TÍTULO EN DORADO BRILLANTE (Contraste alto sobre oscuro) ---
+        ctx.fillStyle = '#D4AF37'; // Tu color dorado insignia
         ctx.font = `bold ${28*scale}px 'Segoe UI', sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillText(titleText.toUpperCase(), width / 2, logoY + logoSize + (60 * scale));
@@ -522,11 +531,11 @@ window.captureAndDownloadGraph = async function(chartId, titleText) {
         
         ctx.drawImage(canvasElement, drawX, drawY, canvasElement.width, canvasElement.height);
 
-        // --- E. TEXTO EXPLICATIVO FIJO (HTML -> Canvas) ---
+        // --- E. TEXTO EXPLICATIVO EN BLANCO SUAVE ---
         // Extraemos el texto plano del bloque HTML
         const explanationText = interpBlock.innerText || "";
         
-        ctx.fillStyle = '#4b5563'; // Gris oscuro legible
+        ctx.fillStyle = '#f3f4f6'; // Blanco hueso casi puro
         ctx.font = `${16*scale}px 'Segoe UI', sans-serif`;
         ctx.textAlign = 'left';
         
