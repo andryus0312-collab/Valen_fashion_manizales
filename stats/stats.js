@@ -582,6 +582,31 @@ window.captureAndDownloadGraph = async function(chartId, titleText) {
     }
 };
 
+
+// ============ CONTROLADOR VISUAL DEL COACH IA ============
+window.toggleCoachModal = function(show) {
+    const modal = document.getElementById('coach-modal');
+    if (!modal) return;
+
+    if (show) {
+        modal.classList.remove('hidden');
+        // Forzar repaint para activar animación CSS
+        void modal.offsetWidth; 
+        document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
+    } else {
+        modal.classList.add('hidden');
+        document.body.style.overflow = ''; // Restaurar scroll
+    }
+};
+
+// Cerrar con tecla ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        toggleCoachModal(false);
+    }
+});
+
+
 // DESCARGA PDF FORENSE INTELIGENTE
 window.downloadFullReportPDF = async function() {
     showToast('⏳ Procesando evidencia digital...');
