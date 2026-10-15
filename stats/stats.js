@@ -21,6 +21,93 @@ const auth = getAuth(app);
 let cachedEvents = [];
 let chartInstances = {}; // Para guardar referencias de Chart.js y destruirlos antes de recrear
 
+// ============ GENERADOR DE CONTEXTO PARA EL COACH IA ============
+async function getCoachContext() {
+    // 1. Obtener Referencias Básicas desde Firebase Directamente (para asegurar frescura total)
+    const [productsSnap, profileSnap] = await Promise.all([
+        get(ref(db, 'valen_products')),
+        get(ref(db, 'valen_profile'))
+    ]);
+
+    const productsRaw = productsSnap.exists() ? Object.values(productsSnap.val()) : [];
+    const profileData = profileSnap.exists() ? profileSnap.val() : {};
+    
+    // Usar eventos cacheados si existen, o leerlos directamente si es primera carga rápida
+    const eventsToAnalyze = cachedEvents.length > 0 
+        ? cachedEvents 
+        : ((await get(ref(db, 'valen_events'))).exists() 
+            ? Object.values((await get(ref(db, 'valen_events')).val())) 
+            : []);
+
+    // --- CÁLCULO DE MÉTRICAS CLAVE ---
+    
+    // A. Visitas Totales Históricas
+    const totalVisits = eventsToAnalyze.filter(e => e.event === 'page_view').length;
+    
+    // B. Clicks WhatsApp Recientes (últimos 7 días aprox por timestamp)
+    const sevenDaysAgoTs = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const recentWaClicks = eventsToAnalyze.filter(e => 
+        e.timestamp > sevenDaysAgoTs && 
+        (e.event.includes('whatsapp') || e.event === 'product_whatsapp_requested')
+    ).length;
+
+    // C. Categorías Top (Basado en productos activos)
+    const categoryCounts = {};
+    productsRaw.forEach(p => {
+        if(p.category) categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+    });
+    const sortedCategories = Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]);
+    const topCategoryName = sortedCategories.length > 0 ? sortedCategories[0][0].toUpperCase() : 'Sin Datos';
+    const secondBestCatName = sortedCategories.length > 1 ? sortedCategories[1][0].toUpperCase() : null;
+
+    // D. Alertas Inteligentes Simples (Reglas básicas antes de usar LLM pesada)
+    let alerts = [];
+    if(totalVisits < 5 && new Date().getHours() > 18) {
+        alerts.push("⚠️ Pocas visitas hoy comparado con promedios habituales nocturnos.");
+    }
+    if(recentWaClicks > 0 && totalVisits > 0 && (recentWaClicks/totalVisits) > 0.3) {
+        alerts.push("🔥 Alta conversión WA detectada recientemente (>30% ratio).");
+    }
+    if(!secondBestCatName && sortedCategories.length <= 1) {
+         alerts.push("💡 Tu catálogo está muy concentrado en una sola categoría. Diversifica riesgos.");
+    }
+
+    // E. Fecha Actual Formateada para Colombia
+    const todayStr = new Intl.DateTimeFormat('es-CO', { dateStyle: 'full' }).format(new Date());
+
+    return {
+        meta_info: {
+            generated_at: new Date().toISOString(),
+            business_name: "Valen Fashion Manizales",
+            current_date_human_readable: todayStr
+        },
+        traffic_metrics: {
+            total_registered_visits_lifetime: totalVisits,
+            whatsapp_interactions_last_7_days: recentWaClicks,
+            primary_device_type: (() => {
+                 const devices = {};
+                 eventsToAnalyze.forEach(ev => {
+                     if(ev.device?.includes('Celular')) devices.mobile = (devices.mobile||0)+1;
+                     else if(ev.device?.includes('PC')) devices.desktop = (devices.desktop||0)+1;
+                 });
+                 return devices.mobile > devices.desktop ? "Móvil Dominante" : "Equilibrado/Escritorio";
+            })()
+        },
+        catalog_insights: {
+            total_active_products: productsRaw.length,
+            leading_category: topCategoryName,
+            runner_up_category: secondBestCatName || "N/A",
+            testimonials_count: (profileData.testimonials || []).length
+        },
+        strategic_alerts: alerts.length > 0 ? alerts.join(" | ") : "✅ Sin anomalías críticas detectadas.",
+        raw_sample_recent_activity: eventsToAnalyze.slice(0, 5).map(ev => ({
+             time: new Date(ev.timestamp).toLocaleTimeString('es-CO'),
+             action_desc: ev.event.replace('_',' '),
+             device: ev.device
+        }))
+    };
+}
+
 // ============ AUTENTICACIÓN ============
 window.statsLogin = () => {
     const email = document.getElementById('stats-email').value;
