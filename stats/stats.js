@@ -882,20 +882,19 @@ function showToast(msg) {
 // ================== MOTOR COACH IA DUAL ENGINE v2.0 ====================
 // ========================================================================
 
-// CONFIGURACIÓN DE CLAVES (EDITA AQUÍ CUANDO LAS TENGAS)
+// URL DEL PUENTE SEGURO (CLOUDFLARE WORKER)
+const AI_PROXY_URL = "https://broken-frog-3909.andryus0312.workers.dev";
+
+// Configuración visual del motor (sin claves expuestas)
 const AI_CONFIG = {
     groq: {
         name: "Groq", icon: "⚡", colorClass: "purple",
-        apiKey: "CLAVE DE GOQ", // <-- CAMBIA ESTO POR TU CLAVE REAL gsk_...
         model: "llama-3.3-70b-versatile",
-        endpoint: "https://api.groq.com/openai/v1/chat/completions",
         description: "Velocidad extrema • Análisis Texto"
     },
     gemini: {
         name: "Gemini", icon: "💎", colorClass: "blue",
-        apiKey: "CLAVE DE GEMINI", // <-- CAMBIA ESTO POR TU CLAVE REAL AIza...
         model: "gemini-1.5-flash", 
-        endpoint: "https://generativelanguage.googleapis.com/v1beta/models/",
         description: "Multimodal • Reasoning Profundo"
     }
 };
@@ -985,11 +984,12 @@ FORMATO RESPUESTA: Usa Markdown (**negritas**, listas) para facilitar lectura r�
     }
 };
 
-// --- LLAMADAS API REALES ---
+// --- LLAMADAS API VIA PUENTE SEGURO CLOUDFLARE ---
+
 async function callGroq(sys, userMsg) {
-    const res = await fetch(AI_CONFIG.groq.endpoint, {
+    const res = await fetch(`${AI_PROXY_URL}/groq`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${AI_CONFIG.groq.apiKey}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             model: AI_CONFIG.groq.model,
             messages: [{role:"system",content:sys},{role:"user",content:userMsg}],
@@ -1002,8 +1002,7 @@ async function callGroq(sys, userMsg) {
 }
 
 async function callGemini(sys, userMsg) {
-    const url = `${AI_CONFIG.gemini.endpoint}${AI_CONFIG.gemini.model}:generate?key=${AI_CONFIG.gemini.apiKey}`;
-    const res = await fetch(url, {
+    const res = await fetch(`${AI_PROXY_URL}/gemini/${AI_CONFIG.gemini.model}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1015,6 +1014,7 @@ async function callGemini(sys, userMsg) {
     const data = await res.json();
     return data.candidates[0].content.parts[0].text;
 }
+
 
 // --- HELPERS VISUALES CHAT ---
 function addUserBubble(txt) {
