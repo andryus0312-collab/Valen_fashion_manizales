@@ -402,3 +402,39 @@ body:not(.dark-mode) .console-context { color: #2d1b36; }
     transition: transform 0.2s ease;
 }
 .calendar-themed-card:hover { transform: translateY(-4px); }
+
+
+/* ============ ESTILOS COACH IA ============ */
+
+/* Animación de entrada suave para el modal */
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+    animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scrollbar personalizado dentro del chat */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #D4AF37;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #fff;
+}
+
+/* Efecto Shimmer sutil para el botón si quieres reutilizarlo */
+@keyframes shimmer-slow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+.group-hover\:animate-shimmer-slow:hover span.absolute {
+    animation: shimmer-slow 2s infinite linear;
+}
