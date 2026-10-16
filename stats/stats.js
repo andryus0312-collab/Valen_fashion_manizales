@@ -1007,18 +1007,36 @@ async function callGroq(sys, userMsg) {
 }
 
 async function callGemini(sys, userMsg) {
+    // Construimos el payload exacto que exige la API v1alpha/v1beta moderna
+    const payload = {
+        contents: [{ 
+            parts: [{ text: sys + "\n\n" + userMsg }] 
+        }],
+        generationConfig: { 
+            temperature: 0.7, 
+            maxOutputTokens: 1000 
+        }
+    };
+
     const res = await fetch(`${AI_PROXY_URL}/gemini/auto-update-mode`, {
-        // La ruta '/auto-update-mode' activa la lógica iterativa del Worker explicada arriba
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: sys + "\n\n" + userMsg }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
-            // Tampoco enviamos modelo explícito; el Worker prueba 'latest', luego backups...
-        })
+        body: JSON.stringify(payload)
     });
-    if(!res.ok) throw new Error(await res.text());
+
+    if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Error Gemini (${res.status}): ${errText}`);
+    }
+    
     const data = await res.json();
+    
+    // Validación robusta para evitar fallos silenciosos si cambia estructura futura
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+         console.warn("Estructura inesperada:", data);
+         throw new Error("Respuesta vacía o malformada de Google.");
+    }
+
     return data.candidates[0].content.parts[0].text;
 }
 
