@@ -996,8 +996,28 @@ async function callGroq(sys, userMsg) {
             temperature: 0.7, max_tokens: 1000
         })
     });
-    if(!res.ok) throw new Error(await res.text());
-    const data = await res.json();
+    // 1. Verificar si la respuesta es exitosa
+    if (!res.ok) {
+        const errText = await res.text();
+        console.error("Error HTTP:", res.status, errText);
+        throw new Error(`Servidor IA rechazó petición (${res.status}). Detalle: ${errText}`);
+    }
+
+    // 2. Intentar parsear JSON de forma segura
+    let data;
+    try {
+        data = await res.json();
+    } catch (parseErr) {
+        console.error("Error parseando JSON:", parseErr);
+        throw new Error("La IA devolvió un formato inválido (no es JSON).");
+    }
+
+    // 3. Validar estructura antes de acceder (evita 'undefined')
+    if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.warn("Estructura inesperada:", data);
+        throw new Error("Respuesta incompleta de Groq. Revisa logs.");
+    }
+
     return data.choices[0].message.content;
 }
 
