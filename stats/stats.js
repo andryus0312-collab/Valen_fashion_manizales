@@ -891,7 +891,7 @@ const AI_CONFIG = {
     name: "Groq", 
     icon: "⚡", 
     colorClass: "purple",
-    model: "qwen/qwen3.6-27b", // <-- CAMBIO CRÍTICO AQUÍ (Versión estable actual)
+    model: "qwen/qwen3.8-27b", // <-- CAMBIO CRÍTICO AQUÍ (Versión estable actual)
     description: "Razonamiento Profundo • Español Natural • Estabilidad Garantizada"
 },
     gemini: {
