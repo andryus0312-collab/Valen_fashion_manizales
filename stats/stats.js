@@ -1122,7 +1122,9 @@ Sé detallada pero concisa. Usa emojis.`;
         
     } catch(e) {
         removeLoading(loaderId);
-        addErrorMsg("No pude generar el informe inicial. Verifica claves API.");
+        // Muestra el error técnico real para diagnóstico sin consola
+        addErrorMsg(`❌ DETALLE ERROR:<br/><small>${e.message || e.toString()}</small>`);
+        console.error("Fallo IA:", e); 
     }
 }
 // ========================================================================
