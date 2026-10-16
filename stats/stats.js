@@ -885,19 +885,22 @@ function showToast(msg) {
 // URL DEL PUENTE SEGURO (CLOUDFLARE WORKER)
 const AI_PROXY_URL = "https://broken-frog-3909.andryus0312.workers.dev";
 
-// Configuración visual del motor (sin claves expuestas)
+// Configuración visual del motor (SIN NOMBRAR MODELOS ESPECÍFICOS AQUÍ)
+// El Worker de Cloudflare decide automáticamente cuál usar basándose en disponibilidad/gratuidad.
 const AI_CONFIG = {
     groq: {
-    name: "Groq", 
-    icon: "⚡", 
-    colorClass: "purple",
-    model: "qwen/qwen3.8-27b", // <-- CAMBIO CRÍTICO AQUÍ (Versión estable actual)
-    description: "Razonamiento Profundo • Español Natural • Estabilidad Garantizada"
-},
+        name: "Groq", 
+        icon: "⚡", 
+        colorClass: "purple",
+        description: "Velocidad Extrema • Análisis Texto Puro (Qwen Stable)"
+        // Nota: El modelo exacto está hardcodeado en el Worker para garantizar estabilidad Groq
+    },
     gemini: {
-        name: "Gemini", icon: "💎", colorClass: "blue",
-        model: "gemini-1.5-flash", 
-        description: "Multimodal • Reasoning Profundo"
+        name: "Gemini", 
+        icon: "💎", 
+        colorClass: "blue",
+        description: "Inteligencia Adaptativa • Multimodal Auto-Update (Latest Flash)"
+        // Nota: No ponemos 'model:' aquí porque el Worker usa aliases dinámicos inteligentes
     }
 };
 
@@ -993,68 +996,30 @@ async function callGroq(sys, userMsg) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            model: AI_CONFIG.groq.model,
             messages: [{role:"system",content:sys},{role:"user",content:userMsg}],
             temperature: 0.7, max_tokens: 1000
+            // NO enviamos 'model': el Worker inyecta automáticamente 'qwen/qwen3.8-27b'
         })
     });
-    // 1. Verificar si la respuesta es exitosa
-    if (!res.ok) {
-        const errText = await res.text();
-        console.error("Error HTTP:", res.status, errText);
-        throw new Error(`Servidor IA rechazó petición (${res.status}). Detalle: ${errText}`);
-    }
-
-    // 2. Intentar parsear JSON de forma segura
-    let data;
-    try {
-        data = await res.json();
-    } catch (parseErr) {
-        console.error("Error parseando JSON:", parseErr);
-        throw new Error("La IA devolvió un formato inválido (no es JSON).");
-    }
-
-    // 3. Validar estructura antes de acceder (evita 'undefined')
-    if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
-        console.warn("Estructura inesperada:", data);
-        throw new Error("Respuesta incompleta de Groq. Revisa logs.");
-    }
-
+    if(!res.ok) throw new Error(await res.text());
+    const data = await res.json();
     return data.choices[0].message.content;
 }
 
 async function callGemini(sys, userMsg) {
-    const res = await fetch(`${AI_PROXY_URL}/gemini/${AI_CONFIG.gemini.model}`, {
+    const res = await fetch(`${AI_PROXY_URL}/gemini/auto-update-mode`, {
+        // La ruta '/auto-update-mode' activa la lógica iterativa del Worker explicada arriba
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             contents: [{ parts: [{ text: sys + "\n\n" + userMsg }] }],
             generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+            // Tampoco enviamos modelo explícito; el Worker prueba 'latest', luego backups...
         })
     });
-    // 1. Verificar si la respuesta es exitosa
-    if (!res.ok) {
-        const errText = await res.text();
-        console.error("Error HTTP:", res.status, errText);
-        throw new Error(`Servidor IA rechazó petición (${res.status}). Detalle: ${errText}`);
-    }
-
-    // 2. Intentar parsear JSON de forma segura
-    let data;
-    try {
-        data = await res.json();
-    } catch (parseErr) {
-        console.error("Error parseando JSON:", parseErr);
-        throw new Error("La IA devolvió un formato inválido (no es JSON).");
-    }
-
-    // 3. Validar estructura antes de acceder (evita 'undefined')
-    if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
-        console.warn("Estructura inesperada:", data);
-        throw new Error("Respuesta incompleta de Groq. Revisa logs.");
-    }
-
-    return data.choices[0].message.content;
+    if(!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    return data.candidates[0].content.parts[0].text;
 }
 
 
