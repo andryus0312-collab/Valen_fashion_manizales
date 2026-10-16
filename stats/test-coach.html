@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Coach IA</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #0f0518; color: white; }
+        pre { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 10px 0; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>🤖 Test Directo Coach IA</h2>
+    
+    <button onclick="testGroq()">Probar Groq</button>
+    <button onclick="testGemini()">Probar Gemini</button>
+    
+    <h3>Resultado:</h3>
+    <pre id="result">Esperando...</pre>
+
+    <script>
+        const AI_PROXY_URL = "https://broken-frog-3909.andryus0312.workers.dev";
+
+        async function testGroq() {
+            document.getElementById('result').innerText = 'Probando Groq...';
+            try {
+                const res = await fetch(`${AI_PROXY_URL}/groq`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{role:"user",content:"Hola, di 'funciona'"}],
+                        temperature: 0.7, max_tokens: 100
+                    })
+                });
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                
+                const data = await res.json();
+                document.getElementById('result').innerHTML = 
+                    `<strong>✅ Éxito!</strong>\n\nJSON Completo:\n${JSON.stringify(data, null, 2)}\n\nMensaje Extraído:\n"${data.choices?.[0]?.message?.content || 'No encontrado'}"`;
+                    
+            } catch(e) {
+                document.getElementById('result').innerHTML = `<strong style="color:red">❌ Error:</strong>\n${e.message}\n\nStack:\n${e.stack}`;
+            }
+        }
+
+        async function testGemini() {
+            document.getElementById('result').innerText = 'Probando Gemini...';
+            try {
+                const res = await fetch(`${AI_PROXY_URL}/gemini/gemini-1.5-flash`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Hola, di 'funciona'" }] }],
+                        generationConfig: { temperature: 0.7, maxOutputTokens: 100 }
+                    })
+                });
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                
+                const data = await res.json();
+                document.getElementById('result').innerHTML = 
+                    `<strong>✅ Éxito!</strong>\n\nJSON Completo:\n${JSON.stringify(data, null, 2)}\n\nTexto Extraído:\n"${data.candidates?.[0]?.content?.parts?.[0]?.text || 'No encontrado'}"`;
+                    
+            } catch(e) {
+                document.getElementById('result').innerHTML = `<strong style="color:red">❌ Error:</strong>\n${e.message}\n\nStack:\n${e.stack}`;
+            }
+        }
+    </script>
+</body>
+</html>
