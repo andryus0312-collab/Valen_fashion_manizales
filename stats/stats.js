@@ -889,7 +889,8 @@ const AI_PROXY_URL = "https://broken-frog-3909.andryus0312.workers.dev";
 const AI_CONFIG = {
     groq: {
         name: "Groq", icon: "⚡", colorClass: "purple",
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant", // <-- Rápido, barato y siempre disponible
+// O si quieres más potencia: "mixtral-8x7b-32768"
         description: "Velocidad extrema • Análisis Texto"
     },
     gemini: {
