@@ -888,8 +888,10 @@ const AI_PROXY_URL = "https://broken-frog-3909.andryus0312.workers.dev";
 // Configuración visual del motor (sin claves expuestas)
 const AI_CONFIG = {
     groq: {
-        name: "Groq", icon: "⚡", colorClass: "purple",
-        model: "llama-3.1-8b-instant", // <-- Rápido, barato y siempre disponible
+    // ... otras config ...
+    model: "gemma2-9b-itgemma2-9b-itgemma2-9b-itgemma2-9b-it", // <-- CAMBIA A ESTE (Es super estable y gratis)
+    // ...
+    }2
 // O si quieres más potencia: "mixtral-8x7b-32768"
         description: "Velocidad extrema • Análisis Texto"
     },
