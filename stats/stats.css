@@ -438,3 +438,17 @@ body:not(.dark-mode) .console-context { color: #2d1b36; }
 .group-hover\:animate-shimmer-slow:hover span.absolute {
     animation: shimmer-slow 2s infinite linear;
 }
+
+/* ============ INDICADOR "PENSANDO" CHAT IA ============ */
+@keyframes thinking-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+.thinking-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: thinking-bounce 1.2s infinite ease-in-out;
+}
+.thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.3s; }
