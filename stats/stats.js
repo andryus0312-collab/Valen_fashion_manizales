@@ -984,7 +984,7 @@ FORMATO RESPUESTA: Usa Markdown (**negritas**, listas) para facilitar lectura r�
 
     } catch (err) {
         removeLoading(loaderId);
-        addErrorMsg("Ups, se me fue la señal mental. Revisa conexión o clave API.");
+        addErrorMsg(`Ups, se me fue la señal mental. <br/><small>${err.message || err.toString()}</small>`);
         console.error(err);
     }
 };
