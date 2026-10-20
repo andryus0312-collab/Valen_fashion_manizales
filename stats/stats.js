@@ -1081,19 +1081,38 @@ function addSystemMessage(txt) {
     scrollToBottom();
 }
 
+let thinkingTimers = {};
+
 function showAILoading() {
     const id = 'loader-'+Date.now();
     const area = document.getElementById('coach-chat-area');
+    const dotColor = currentEngine === 'groq' ? '#a855f7' : '#3b82f6';
     area.insertAdjacentHTML('beforeend', `
-    <div id="${id}" class="flex gap-3 mb-4 opacity-70">
-        <div class="w-8 h-8 rounded-full bg-gray-700 animate-pulse"></div>
-        <div class="flex-1 bg-black/20 rounded-2xl p-4 h-12 animate-pulse"></div>
+    <div id="${id}" class="flex gap-3 mb-4 animate-fade-in-up">
+        <div class="w-8 h-8 rounded-full ${currentEngine==='groq'?'bg-purple-600':'bg-blue-600'} flex items-center justify-center text-white text-xs shrink-0 shadow-lg">
+            ${AI_CONFIG[currentEngine].icon}
+        </div>
+        <div class="flex-1 bg-black/40 border border-white/10 rounded-2xl rounded-tl-sm p-4 flex items-center gap-3">
+            <span class="flex gap-1">
+                <span class="thinking-dot" style="background:${dotColor}"></span>
+                <span class="thinking-dot" style="background:${dotColor}"></span>
+                <span class="thinking-dot" style="background:${dotColor}"></span>
+            </span>
+            <span id="${id}-text" class="text-xs text-gray-400 italic">Pensando...</span>
+        </div>
     </div>`);
     scrollToBottom();
+
+    thinkingTimers[id] = setTimeout(() => {
+        const txt = document.getElementById(id + '-text');
+        if (txt) txt.innerText = 'Esto está tardando un poco más de lo usual, dame unos segundos más...';
+    }, 4000);
+
     return id;
 }
 
 function removeLoading(id) {
+    if (thinkingTimers[id]) { clearTimeout(thinkingTimers[id]); delete thinkingTimers[id]; }
     const el = document.getElementById(id);
     if(el) el.remove();
 }
