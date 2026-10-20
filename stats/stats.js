@@ -997,7 +997,7 @@ async function callGroq(sys, userMsg) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             messages: [{role:"system",content:sys},{role:"user",content:userMsg}],
-            temperature: 0.7, max_tokens: 1000
+            temperature: 0.7, max_tokens: 2048
             // NO enviamos 'model': el Worker inyecta automáticamente 'qwen/qwen3.8-27b'
         })
     });
