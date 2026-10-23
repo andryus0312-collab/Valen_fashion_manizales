@@ -1,6 +1,6 @@
 <div align="center">
 
-# 💜✨ VALEN FASHION MANIZALES ✨💜
+# 💜✨ VALEN FASHION MANIZALES ✨
 ### La boutique que no solo vende bonito… también piensa bonito 🧠🛍️
 
 ![Morado](https://img.shields.io/badge/Valen_Fashion-Manizales,_Colombia-8B5CF6?style=for-the-badge)
@@ -33,13 +33,13 @@ Imaginate **dos negocios en uno**:
         ⬇️
  GitHub Pages  →  la vitrina gratis donde vive la página
         ⬇️
-🔥 Firebase  →  el cuaderno donde se anota cada visita y cada clic
+ Firebase  →  el cuaderno donde se anota cada visita y cada clic
         ⬇️
-🔐 La dueña entra al panel (con usuario y clave)
+ La dueña entra al panel (con usuario y clave)
         ⬇️
 🧠 La Coach IA junta los números del día
         ⬇️
-☁️ Cloudflare Worker  →  el mayordomo que guarda las llaves secretas
+️ Cloudflare Worker  →  el mayordomo que guarda las llaves secretas
         ⬇️
 ⚡ Groq   o   💎 Gemini  →  los dos cerebros de la Coach
         ⬇️
@@ -60,6 +60,50 @@ Imaginate **dos negocios en uno**:
 
 ---
 
+## 🧰 TODO LO QUE HACE LA PÁGINA (desglose completo, botón por botón)
+
+Porque esta página tiene más botones que un control remoto, y cada uno hace su magia específica. Vamos por partes: 👇
+
+### ️ A. La vitrina pública (lo que ve cualquier visitante)
+
+| Botón / elemento | Qué hace exactamente |
+| :--- | :--- |
+| 🌗 **Modo claro / oscuro** | Cambia toda la página entre modo día (blanco, luminoso) y modo noche (oscuro, descansado), al gusto de cada visitante. |
+| 🔠 **Tamaño de letra** | Agranda el texto de toda la página para leer cómodo sin forzar la vista. Accesibilidad pura y dura. |
+| 🔍 **Búsqueda inteligente** | Busca de **tres formas distintas**: por texto (nombre o palabra clave), por **rango de precios** (de $X a $Y) o por **rango de fechas** (lo que llegó entre tal y tal día). |
+| 🖼️ **Imagen de portada** | Se sube tal cual sale del celular y la página la adapta solita con **tres modos de centrado**: nada de recortar fotos a mano ni peleas con el editor. |
+| 👤 **Foto de perfil con anillo** | La foto de la boutique lleva un borde de color alrededor, y ese color **se puede cambiar**: sólido o en degradado, como se vea más bonito ese día. |
+| 💬 **Botón WhatsApp** | Salta directo al chat de WhatsApp de la tienda, sin copiar números ni nada. |
+| 📸 **Botón Instagram** | Abre el perfil de Instagram de la boutique en un toque. |
+| 🔳 **Botón código QR** | Muestra un QR de la página para compartirla en físico: volantes, mostrador, tarjetas o pantalla. |
+| 📤 **Botón compartir** | Comparte el enlace de la página por cualquier red o app del celular. |
+
+### 🧸 B. Los productos, uno por uno
+
+Cada producto que se sube a la vitrina llega con su kit completo:
+
+- 🖼️ **Imagen clicable:** al tocarla, se **agranda** para ver el detalle bien bien (texturas, colores, acabados).
+- 👇 **Dos botones de acción rápida debajo:**
+  - 💬 Uno para **pedir o consultar ese producto directo por WhatsApp** (el mensaje ya sale listo, preguntando por ese producto específico).
+  - 📤 Uno para **compartir ese producto** con quien se quiera.
+
+### ⭐ C. Testimonios: dos puertas, dos mundos
+
+El módulo de testimonios tiene **dos enlaces distintos**:
+
+- 🌐 **Enlace público:** cualquier persona entra a ver los testimonios de las clientas felices. Sin clave, sin candados.
+- 🔐 **Enlace de administración:** con clave. Y al entrar por aquí se **desbloquean dos botones nuevos** que el público jamás ve:
+  - 🛠️ **Botón Admin (el backend):** el taller privado de la dueña. Aquí se ingresan productos nuevos, se editan precios y fotos, se cambia la portada, el perfil, los testimonios… todo el manejo de la tienda.
+  - 📊 **Botón Estadísticas:** el cuarto de los números, con **gráficas en tiempo real**: visitas, clics de WhatsApp, búsquedas, dispositivos, categorías top y más.
+
+### 🧠 D. Dentro de Estadísticas: la joya de la corona
+
+- 🤖 **Botón Coach IA:** abre el panel de inteligencia artificial con sus dos cerebros (⚡ Groq y 💎 Gemini), el **informe diario automático**, las **alertas estratégicas** y un **chat** para preguntarle lo que sea: *"¿qué vendo más?", "dame ideas para Halloween", "¿cómo estuvo mi semana?"*.
+
+> ✅ Resumen en una línea: *todo botón tiene oficio. Ninguno está de adorno.* 💅
+
+---
+
 ## 🧠 La Coach IA: dos cerebros, una empleada
 
 La Coach tiene **dos motores de inteligencia** y tú le escoges cuál usar con un botoncito:
@@ -77,7 +121,7 @@ La Coach tiene **dos motores de inteligencia** y tú le escoges cuál usar con u
 ### 🔄 Y aquí viene la magia: se actualiza SOLA
 Los nombres de los modelos de IA cambian cada pocos meses (Google y Groq los jubilan y sacan nuevos). Antes eso rompía todo. **Ya no.** Ahora el mayordomo de Cloudflare le pregunta directamente a Google y a Groq: *"¿cuáles modelos tienen disponibles hoy?"*, escoge el más nuevo que sirva, y lo guarda en memoria por 6 horas ⏳. Si mañana sale un modelo nuevo, **el sistema lo adopta solo, sin que nadie toque una línea de código**. Cero mantenimiento, cero sustos. 🪄
 
-Además tiene **doble red de seguridad**: si el modelo detectado falla o está saturado, prueba automáticamente un respaldo distinto, y cada intento tiene un límite de 15 segundos para no quedarse colgada. Nunca se queda muda: si algo falla, te lo dice clarito en pantalla (nada de silencios misteriosos). 🙅‍♀️
+Además tiene **doble red de seguridad**: si el modelo detectado falla o está saturado, prueba automáticamente un respaldo distinto, y cada intento tiene un límite de tiempo para no quedarse colgada. Nunca se queda muda: si algo falla, te lo dice clarito en pantalla (nada de silencios misteriosos). 🙅‍♀️
 
 ### ⏳ Los puntitos que piensan
 Mientras la IA responde, ves **tres puntitos rebotando** del color del motor (morado para Groq, azul para Gemini). Si tarda más de 4 segundos, aparece un mensajito tranquilo: *"esto está tardando un poquito más de lo usual…"*. Porque esperar sin saber qué pasa es horrible, y aquí nadie espera a ciegas. 💜
@@ -156,19 +200,11 @@ Porque una boutique sin paleta es como un tinto sin azúcar:
 
 ---
 
-##  Un poquito de historia (porque esta batalla merecía contarse)
+## 🐉 Un poquito de historia (porque esta batalla merecía contarse)
 
 Este proyecto se construyó **a seis manos**: una humana con paciencia de oro (desde un celular 📱, nada menos), y dos IAs que trabajaron en equipo híbrido: **Claude** 🧠 (el arquitecto detective que cazó errores invisibles de una sola letra) y **Qwen** 💜 (la ingeniera de campo que escribió parches listos para pegar sin romper nada).
 
 Hubo de todo: modelos jubilados por Google sin avisar 🪦, llaves con nombres cambiados 🏷️, puertas que se cerraban solas (CORS 🚪), y un silencio misterioso que resultó ser **una sola letra mal escrita** en una función. Moraleja grabada en piedra: *cuando algo "no hace nada", casi siempre está gritando por dentro y nadie lo escuchaba.* Ahora todos los errores se muestran claritos en pantalla. 📢
-
----
-
-## 🚧 Lo que se viene (próximas fases)
-
-- 📄 **Reporte en PDF** de la sesión de la Coach, con logo, fecha, hora y motor usado, para imprimir o compartir.
-- 🖼️ **Gemini mirando fotos**: análisis visual de publicaciones o catálogo más adelante.
-- 🔔 **Alertas automáticas** por WhatsApp cuando pase algo importante (pico de visitas, búsqueda caliente).
 
 ---
 
