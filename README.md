@@ -22,7 +22,7 @@ Imaginate **dos negocios en uno**:
 1. 🛍️ **La vitrina:** la página pública donde las clientas de Manizales (y del mundo entero) ven la ropa, las cositas de hogar 🏠 y los detalles de niños 🧸, y escriben directo por WhatsApp 💬.
 2. 📊 **El cuarto de los números:** un panel **privado** (solo entra la dueña con su clave 🔑) que anota todo lo que pasa: cuántas visitas llegaron, qué buscó la gente, cuántas escribieron por WhatsApp, desde qué celular… y además tiene una **Coach IA** que lee esos números y le explica a la dueña, en cristiano y con cariño, qué hacer hoy para vender más.
 
-> 💡 En una frase: *es una tienda que se mira al espejo todos los días y le cuenta a su dueña qué vio.* 😌🪞
+> 💡 En una frase: *es una tienda que se mira al espejo todos los días y le cuenta a su dueña qué vio.* 😌
 
 ---
 
@@ -35,13 +35,13 @@ Imaginate **dos negocios en uno**:
         ⬇️
  Firebase  →  el cuaderno donde se anota cada visita y cada clic
         ⬇️
- La dueña entra al panel (con usuario y clave)
+ La dueña entra por su enlace exclusivo (con usuario y clave)
         ⬇️
-🧠 La Coach IA junta los números del día
+ La Coach IA junta los números del día
         ⬇️
 ️ Cloudflare Worker  →  el mayordomo que guarda las llaves secretas
         ⬇️
-⚡ Groq   o   💎 Gemini  →  los dos cerebros de la Coach
+ Groq   o    Gemini  →  los dos cerebros de la Coach
         ⬇️
  Respuesta bonita y accionable en el chat del panel
 ```
@@ -64,7 +64,7 @@ Imaginate **dos negocios en uno**:
 
 Porque esta página tiene más botones que un control remoto, y cada uno hace su magia específica. Vamos por partes: 👇
 
-### ️ A. La vitrina pública (lo que ve cualquier visitante)
+### 🛍️ A. La vitrina pública (lo que ve cualquier visitante)
 
 | Botón / elemento | Qué hace exactamente |
 | :--- | :--- |
@@ -77,6 +77,7 @@ Porque esta página tiene más botones que un control remoto, y cada uno hace su
 | 📸 **Botón Instagram** | Abre el perfil de Instagram de la boutique en un toque. |
 | 🔳 **Botón código QR** | Muestra un QR de la página para compartirla en físico: volantes, mostrador, tarjetas o pantalla. |
 | 📤 **Botón compartir** | Comparte el enlace de la página por cualquier red o app del celular. |
+| ⭐ **Botón Testimonios** | Despliega una **barra lateral izquierda** con las fotos y mensajes de clientas reales (te lo cuento con detalle en la sección C). |
 
 ### 🧸 B. Los productos, uno por uno
 
@@ -87,16 +88,24 @@ Cada producto que se sube a la vitrina llega con su kit completo:
   - 💬 Uno para **pedir o consultar ese producto directo por WhatsApp** (el mensaje ya sale listo, preguntando por ese producto específico).
   - 📤 Uno para **compartir ese producto** con quien se quiera.
 
-### ⭐ C. Testimonios: dos puertas, dos mundos
+### ⭐ C. Testimonios: el botón que abre la vitrina del cariño
 
-El módulo de testimonios tiene **dos enlaces distintos**:
+- ⭐ En la página hay un **botón de Testimonios**: al presionarlo, se despliega una **barra lateral izquierda** que se desliza como una vitrina elegante.
+- Ahí dentro viven las **fotos y los mensajes de personas que compraron de verdad** y quedaron felices con su producto: ellas mismas los envían, **con su autorización**, para ser publicados.
+- 🎯 ¿Para qué? Para darle **prestigio y confianza** a la página: cualquiera que entre puede ver que lo que se vende aquí es **real, verificado y amado por clientas reales**. Prueba social con cara, nombre y corazón. 💌
 
-- 🌐 **Enlace público:** cualquier persona entra a ver los testimonios de las clientas felices. Sin clave, sin candados.
-- 🔐 **Enlace de administración:** con clave. Y al entrar por aquí se **desbloquean dos botones nuevos** que el público jamás ve:
+### 🔐 D. Las dos puertas de la tienda (los dos enlaces)
+
+La tienda se puede abrir desde **dos direcciones distintas**, y no es lo mismo entrar por una que por la otra:
+
+- 🌐 **Enlace público:** la dirección normal, la que se comparte por WhatsApp, redes o QR. Cualquier persona entra y ve la vitrina, los productos y los testimonios… **y hasta ahí llega**.
+- 👑 **Enlace único y exclusivo de la dueña:** una dirección privada, sin letrero, que solo conoce la administradora. **Solamente abriendo la página desde este enlace** se desbloquean los botones de mando que el público jamás ve:
   - 🛠️ **Botón Admin (el backend):** el taller privado de la dueña. Aquí se ingresan productos nuevos, se editan precios y fotos, se cambia la portada, el perfil, los testimonios… todo el manejo de la tienda.
   - 📊 **Botón Estadísticas:** el cuarto de los números, con **gráficas en tiempo real**: visitas, clics de WhatsApp, búsquedas, dispositivos, categorías top y más.
 
-### 🧠 D. Dentro de Estadísticas: la joya de la corona
+> 🚪 En corto: *la puerta del frente es para las clientas; la puerta de atrás, con llave secreta, es solo de la jefa.* 😎
+
+### 🧠 E. Dentro de Estadísticas: la joya de la corona
 
 - 🤖 **Botón Coach IA:** abre el panel de inteligencia artificial con sus dos cerebros (⚡ Groq y 💎 Gemini), el **informe diario automático**, las **alertas estratégicas** y un **chat** para preguntarle lo que sea: *"¿qué vendo más?", "dame ideas para Halloween", "¿cómo estuvo mi semana?"*.
 
