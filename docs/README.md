@@ -138,15 +138,15 @@ Se escriben el `README.md` (la carta de presentación) y este manual (la biblia 
 
 </div>
 
-```
+```text
 Valen_fashion_manizales/
 ├──  index.html            → La vitrina pública (todo lo que ve la clienta)
-├── 📄 README.md             → La carta de presentación del repo
+├──  README.md             → La carta de presentación del repo
 ├── 📁 .github/
-│   └── 📁 workflows/
-│       └──  keep-alive.yml      → El robot despertador (ping cada 45 min)
-├──  docs/
-│   └── 📄 MANUAL-PARTE-1.md       → Este manual 📘 (el que estás leyendo)
+│   └──  workflows/
+│       └── 📄 keep-alive.yml      → El robot despertador (ping cada 45 min)
+├── 📁 docs/
+│   └──  README.md         → Este manual  (el que estás leyendo)
 └── 📁 stats/
     ├── 📄 stats.html        → La puerta del panel (pide clave)
     ├── 📄 stats.css         → Toda la belleza visual y animaciones
@@ -154,12 +154,12 @@ Valen_fashion_manizales/
     └── 📄 test-coach.html   → Salita de pruebas temporal (borrable sin dolor)
 ```
 
-◆ **`index.html`** — La cara al público: productos, categorías (HOGAR 🏠, NIÑOS 🧸), testimonios, botones sociales y búsquedas.
-◆ **`stats/stats.html`** — El marco del panel: aquí viven el contenedor `coach-engine-container`, el área de chat `coach-chat-area`, los botones `btn-groq` y `btn-gemini`, y el botón de enviar `btn-send-msg`.
-◆ **`stats/stats.css`** — Colores de la casa, modo claro/oscuro, burbujas del chat, y las animaciones `animate-fade-in-up` y `thinking-bounce`.
-◆ **`stats/stats.js`** — El que piensa: lee Firebase, arma el informe, cambia de motor con `switchEngine()` y habla con el mayordomo mediante `callGroq()` y `callGemini()`.
-◆ **`.github/workflows/keep-alive.yml`** — El empleado que nunca duerme.
-◆ **Fuera del repo, a propósito:** el código del Worker vive en el panel de Cloudflare, junto a sus secretos. 🤫
+- ◆ `index.html` — La cara al público: productos, categorías (HOGAR 🏠, NIÑOS 🧸), testimonios, botones sociales y búsquedas.
+- ◆ `stats/stats.html` — El marco del panel: aquí viven el contenedor `coach-engine-container`, el área de chat `coach-chat-area`, los botones `btn-groq` y `btn-gemini`, y el botón de enviar `btn-send-msg`.
+- ◆ `stats/stats.css` — Colores de la casa, modo claro/oscuro, burbujas del chat, y las animaciones `animate-fade-in-up` y `thinking-bounce`.
+- ◆ `stats/stats.js` — El que piensa: lee Firebase, arma el informe, cambia de motor con `switchEngine()` y habla con el mayordomo mediante `callGroq()` y `callGemini()`.
+- ◆ `.github/workflows/keep-alive.yml` — El empleado que nunca duerme. 🤖
+- ◆ **Fuera del repo, a propósito:** el código del Worker vive en el panel de Cloudflare, junto a sus secretos. 🤫
 
 ---
 
