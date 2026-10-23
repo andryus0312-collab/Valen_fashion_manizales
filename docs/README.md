@@ -245,21 +245,24 @@ El CSS guarda dos vestuarios completos y el botón 🌗 solo le dice a la págin
 El JavaScript es el **sistema nervioso**: recibe toques, pide datos, llama a las IAs y dibuja las respuestas. Estos son sus órganos vitales, con nombre propio:
 
 ### ◆ Constantes y variables principales
-◆ `AI_PROXY_URL` — la dirección del mayordomo: `"https://broken-frog-3909.andryus0312.workers.dev"`. **Nunca** se llama directo a Groq o Google desde aquí.
-◆ `AI_CONFIG` — la ficha visual de cada motor: nombre, icono y color (`groq` → ⚡ morado; `gemini` → 💎 azul).
-◆ `currentEngine` — recuerda cuál cerebro está activo ahora (`'groq'` por defecto).
-◆ `sessionHistory` — guarda el chat de la sesión actual (para exportarlo más adelante).
+
+- ◆ `AI_PROXY_URL` — la dirección del mayordomo: `"https://broken-frog-3909.andryus0312.workers.dev"`. **Nunca** se llama directo a Groq o Google desde aquí.
+- ◆ `AI_CONFIG` — la ficha visual de cada motor: nombre, icono y color (`groq` → ⚡ morado; `gemini` → 💎 azul).
+- ◆ `currentEngine` — recuerda cuál cerebro está activo ahora (`'groq'` por defecto).
+- ◆ `sessionHistory` — guarda el chat de la sesión actual (para exportarlo más adelante).
 
 ### ◆ Funciones estrella
-◆ `switchEngine(engineKey)` — cambia de cerebro: actualiza icono, título, subtítulo y recolorea todo el contenedor `coach-engine-container` (morado ↔ azul) sin recargar nada.
-◆ `callGroq(sys, userMsg)` — envía el mensaje al mayordomo por la ruta `/groq` y devuelve la respuesta. Límite de respuesta: `max_tokens: 2048`.
-◆ `callGemini(sys, userMsg)` — envía por la ruta `/gemini/auto-update-mode` con el formato `contents → parts → text`. Límite: `maxOutputTokens: 2048`.
-◆ `showAILoading()` / `removeLoading(id)` — dibujan y retiran los **puntitos que piensan**; a los **4 segundos** el texto cambia a *"Esto está tardando un poco más de lo usual, dame unos segundos más…"* para que nadie espere a ciegas.
-◆ `addUserBubble(txt)` / `addAiBubble(htmlTxt)` — dibujan las burbujas del chat (la tuya a la derecha, la de la IA a la izquierda con su icono de motor).
-◆ `addErrorMsg(...)` — el cartel rojo de errores. **Sí, con ese nombre exacto**: una vez existió un typo (`addErrorMessage`) que silenció todos los errores del sistema. Nunca más. 📢
-◆ `getCoachContext()` — junta los números del día (visitas, clics WA, categorías, productos, testimonios) y los convierte en el resumen que la IA lee para informar.
+
+- ◆ `switchEngine(engineKey)` — cambia de cerebro: actualiza icono, título, subtítulo y recolorea todo el contenedor `coach-engine-container` (morado ↔ azul) sin recargar nada.
+- ◆ `callGroq(sys, userMsg)` — envía el mensaje al mayordomo por la ruta `/groq` y devuelve la respuesta. Límite de respuesta: `max_tokens: 2048`.
+- ◆ `callGemini(sys, userMsg)` — envía por la ruta `/gemini/auto-update-mode` con el formato `contents → parts → text`. Límite: `maxOutputTokens: 2048`.
+- ◆ `showAILoading()` / `removeLoading(id)` — dibujan y retiran los **puntitos que piensan**; a los **4 segundos** el texto cambia a *"Esto está tardando un poco más de lo usual, dame unos segundos más…"* para que nadie espere a ciegas.
+- ◆ `addUserBubble(txt)` / `addAiBubble(htmlTxt)` — dibujan las burbujas del chat (la tuya a la derecha, la de la IA a la izquierda con su icono de motor).
+- ◆ `addErrorMsg(...)` — el cartel rojo de errores. **Sí, con ese nombre exacto**: una vez existió un typo (`addErrorMessage`) que silenció todos los errores del sistema. Nunca más. 📢
+- ◆ `getCoachContext()` — junta los números del día (visitas, clics WA, categorías, productos, testimonios) y los convierte en el resumen que la IA lee para informar.
 
 ### ◆ El flujo de un mensaje, contado como cuento
+
 1️⃣ Tocas ➤ → 2️⃣ aparece tu burbuja → 3️⃣ aparecen los puntitos pensando → 4️⃣ `callGroq` o `callGemini` viaja al mayordomo → 5️⃣ el mayordomo habla con la IA usando SU llave → 6️⃣ la respuesta vuelve → 7️⃣ se retiran los puntitos y nace la burbuja de la IA → 8️⃣ todos felices. 💜
 
 ---
@@ -314,22 +317,27 @@ En el código aparece un `apiKey` de Firebase. **No es un descuido**: es públic
 </div>
 
 ### ◆ Las dos rutas del mayordomo
-◆ `POST /groq` → habla con Groq usando el modelo detectado automáticamente (respaldo fijo: `qwen/qwen3.8-27b`).
-◆ `POST /gemini/...` → habla con Gemini usando el modelo detectado (respaldos fijos: `gemini-flash-latest` y `gemini-3.8-flash`).
+
+- ◆ `POST /groq` → habla con Groq usando el modelo detectado automáticamente (respaldo fijo: `qwen/qwen3.8-27b`).
+- ◆ `POST /gemini/...` → habla con Gemini usando el modelo detectado (respaldos fijos: `gemini-flash-latest` y `gemini-3.8-flash`).
 
 ### ◆ Los secretos (las llaves del bolsillo)
+
 Viven en *Cloudflare → Workers & Pages → `broken-frog-3909` → Settings → Variables and Secrets*:
-◆ `GROQ_API_KEY` 🗝️⚡
-◆ `GEMINI_API_KEY` 🗝️💎
-**Regla sagrada:** jamás copiar estas llaves a ningún archivo de GitHub. Jamás. 🙅‍♀️
+
+- ◆ `GROQ_API_KEY` 🗝️⚡
+- ◆ `GEMINI_API_KEY` 🗝️💎
+
+**Regla sagrada:** jamás copiar estas llaves a ningún archivo de GitHub. Jamás. 🙅♀️
 
 ### ◆ Sus superpoderes, uno por uno
-**1. CORS completo en TODAS las respuestas** (`CORS_JSON`) — incluso en los errores. Sin esto, el navegador bloquea las respuestas y todo parece "Failed to fetch". Fue una de las grandes batallas. ⚔️
-**2. Lectura robusta del cuerpo** — lee el mensaje como texto (`.text()`) y luego lo convierte a JSON a mano, porque algunos navegadores de celular se ahogan con la lectura directa.
-**3. Auto-detección de modelos** — le pregunta a Google y a Groq *"¿qué modelos tienes hoy?"*, filtra los que sirven para chat, prefiere el alias `flash-latest` y si no, elige el de versión más alta. Guarda el resultado en **caché por 6 horas** (`CACHE_TTL`).
-**4. Doble respaldo distinto** — `GEMINI_FALLBACK_1` y `GEMINI_FALLBACK_2` son diferentes entre sí a propósito: así la lista de intentos **nunca** queda en un solo modelo (ese bug una vez nos dejó sin plan B).
-**5. Timeout de 15 segundos** (`TIMEOUT_MS`) con `AbortController` — si un modelo se demora, se aborta y se prueba el siguiente, en vez de esperar a que Cloudflare corte con un feo `HTTP 524`.
-**6. Diagnóstico hablador** — si todo falla, el error final lista **todos** los intentos con su motivo y el modelo detectado: `(detectado: nombre-del-modelo)`. Cero silencios misteriosos. 📢
+
+1. **CORS completo en TODAS las respuestas** (`CORS_JSON`) — incluso en los errores. Sin esto, el navegador bloquea las respuestas y todo parece "Failed to fetch". Fue una de las grandes batallas. ⚔️
+2. **Lectura robusta del cuerpo** — lee el mensaje como texto (`.text()`) y luego lo convierte a JSON a mano, porque algunos navegadores de celular se ahogan con la lectura directa.
+3. **Auto-detección de modelos** — le pregunta a Google y a Groq *"¿qué modelos tienes hoy?"*, filtra los que sirven para chat, prefiere el alias `flash-latest` y si no, elige el de versión más alta. Guarda el resultado en **caché por 6 horas** (`CACHE_TTL`).
+4. **Doble respaldo distinto** — `GEMINI_FALLBACK_1` y `GEMINI_FALLBACK_2` son diferentes entre sí a propósito: así la lista de intentos **nunca** queda en un solo modelo (ese bug una vez nos dejó sin plan B).
+5. **Timeout de 15 segundos** (`TIMEOUT_MS`) con `AbortController` — si un modelo se demora, se aborta y se prueba el siguiente, en vez de esperar a que Cloudflare corte con un feo `HTTP 524`.
+6. **Diagnóstico hablador** — si todo falla, el error final lista **todos** los intentos con su motivo y el modelo detectado: `(detectado: nombre-del-modelo)`. Cero silencios misteriosos. 📢
 
 ### ◆ Pedacito real del mayordomo
 ```javascript
@@ -352,12 +360,14 @@ const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/"
 
 **Qué problema resuelve:** los servicios gratuitos se duermen si nadie los usa, y despertarles toma segundos eternos. Este robot evita eso.
 
-**Dónde vive:** `.github/workflows/keep-alive.yml`
-**Cuándo trabaja:** con el horario `cron: '*/45 * * * *'` → cada 45 minutos, día y noche, para siempre. ⏰
-**Qué hace exactamente:**
-1️⃣ Manda un `POST` cortico a `/groq` con la palabra `"ping"` y 5 tokens de respuesta (un saludo mínimo, solo para despertar).
-2️⃣ Manda otro a `/gemini/auto-update-mode`; si Gemini anda saturado (503), **no se escandaliza**: registra el aviso y sigue.
-**Extra:** también se puede lanzar a mano desde la pestaña **Actions → Run workflow**, ideal para probar o para calentar todo antes de un día importante. 🎯
+**Qué problema resuelve:** los servicios gratuitos se duermen si nadie los usa, y despertarles toma segundos eternos. Este robot evita eso.
+
+- **📍 Dónde vive:** `.github/workflows/keep-alive.yml`
+- **⏰ Cuándo trabaja:** con el horario `cron: '*/45 * * * *'` → cada 45 minutos, día y noche, para siempre.
+- **⚙️ Qué hace exactamente:**
+  - 1️⃣ Manda un `POST` cortico a `/groq` con la palabra `"ping"` y 5 tokens de respuesta (un saludo mínimo, solo para despertar).
+  - 2️⃣ Manda otro a `/gemini/auto-update-mode`; si Gemini anda saturado (503), **no se escandaliza**: registra el aviso y sigue.
+- **🎯 Extra:** también se puede lanzar a mano desde la pestaña **Actions → Run workflow**, ideal para probar o para calentar todo antes de un día importante.
 
 ---
 
@@ -390,17 +400,18 @@ const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/"
 
 ─── 📄 **PÁGINA 11** ───
 # 💜 IDENTIDAD VISUAL: LOS COLORES DE LA CASA
-### La paleta oficial y dónde vive cada tono
 
 </div>
 
-◆ **💜 Morado Valen `#8B5CF6`** — el color del alma: Coach, botones principales, degradados del panel.
-◆ **✨ Dorado boutique `#D4AF37`** — el toque elegante: títulos de informes, bordes del Resumen Ejecutivo, alertas positivas.
-◆ **🌸 Rosa vitrina `#EC4899`** — el guiño femenino: acentos, detalles, badges.
-◆ **🖤 Negro uva `#1A1A2E`** — el fondo serio que hace brillar todo lo demás.
-◆ **⚡ `#a855f7` y 💎 `#3b82f6`** — los colores de trabajo de cada motor (puntitos, iconos, burbujas).
+### La paleta oficial y dónde vive cada tono
 
-**Filosofía de la paleta:** el morado manda, el dorado premia, el rosa enamora y el negro uva sostiene. Ningún color nuevo entra a la casa sin parecerse a la familia. 👨‍👩‍👧‍👦🎨
+- ◆ 💜 **Morado Valen** `#8B5CF6` — el color del alma: Coach, botones principales, degradados del panel.
+- ◆ ✨ **Dorado boutique** `#D4AF37` — el toque elegante: títulos de informes, bordes del Resumen Ejecutivo, alertas positivas.
+- ◆ 🌸 **Rosa vitrina** `#EC4899` — el guiño femenino: acentos, detalles, badges.
+- ◆ 🖤 **Negro uva** `#1A1A2E` — el fondo serio que hace brillar todo lo demás.
+- ◆ ⚡ `#a855f7` y 💎 `#3b82f6` — los colores de trabajo de cada motor (puntitos, iconos, burbujas).
+
+**Filosofía de la paleta:** el morado manda, el dorado premia, el rosa enamora y el negro uva sostiene. Ningún color nuevo entra a la casa sin parecerse a la familia. 👨‍👩‍‍🎨
 
 ---
 
@@ -408,24 +419,25 @@ const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/"
 
 ─── 📄 **PÁGINA 12** ───
 # 📖 GLOSARIO EN CRISTIANO
-### Las palabras raras, traducidas a humano
 
 </div>
 
-◆ **API** — un mostrador de atención: tú pides por una ventanilla y te responden con un formato fijo.
-◆ **Llave / API key** — la contraseña que abre esa ventanilla. Se cuida como cédula + tarjeta. 🗝️
-◆ **Endpoint / ruta** — la dirección exacta de una ventanilla (ej: `/groq`, `/gemini/...`).
-◆ **CORS** — el permiso que un servidor le da al navegador para aceptar su respuesta. Sin permiso, el navegador dice "no te conozco" y bota todo. 🚪
-◆ **Caché** — la memoria de corto plazo: guardar una respuesta para no volver a preguntar por 6 horas.
-◆ **Token** — pedacitos de texto que consume una IA; el límite de tokens es el "tamaño del plato". 🍽️
-◆ **Commit** — una foto del proyecto en un momento perfecto, guardada en GitHub.
-◆ **Deploy / desplegar** — publicar el cambio para que el mundo lo use.
-◆ **Nodo** — una carpeta/sección dentro de la base de datos.
-◆ **Alias** — un apodo que siempre apunta al modelo más nuevo (ej: `flash-latest`).
-◆ **Timeout** — el tiempo máximo de espera antes de decir "siguiente". ⏱️
-◆ **Fallback / respaldo** — el plan B (y C) que entra si el plan A falla.
-◆ **Ping** — un toquecito mínimo para saber si algo está despierto. 🏓
-◆ **Worker** — el mayordomo: código que vive en Cloudflare y hace mandados con las llaves. 🤵
+### Las palabras raras, traducidas a humano
+
+- ◆ **API** — un mostrador de atención: tú pides por una ventanilla y te responden con un formato fijo.
+- ◆ **Llave / API key** — la contraseña que abre esa ventanilla. Se cuida como cédula + tarjeta. 🗝️
+- ◆ **Endpoint / ruta** — la dirección exacta de una ventanilla (ej: `/groq`, `/gemini/...`).
+- ◆ **CORS** — el permiso que un servidor le da al navegador para aceptar su respuesta. Sin permiso, el navegador dice "no te conozco" y bota todo. 🚪
+- ◆ **Caché** — la memoria de corto plazo: guardar una respuesta para no volver a preguntar por 6 horas.
+- ◆ **Token** — pedacitos de texto que consume una IA; el límite de tokens es el "tamaño del plato". 🍽️
+- ◆ **Commit** — una foto del proyecto en un momento perfecto, guardada en GitHub.
+- ◆ **Deploy / desplegar** — publicar el cambio para que el mundo lo use.
+- ◆ **Nodo** — una carpeta/sección dentro de la base de datos.
+- ◆ **Alias** — un apodo que siempre apunta al modelo más nuevo (ej: `flash-latest`).
+- ◆ **Timeout** — el tiempo máximo de espera antes de decir "siguiente". ⏱️
+- ◆ **Fallback / respaldo** — el plan B (y C) que entra si el plan A falla.
+- ◆ **Ping** — un toquecito mínimo para saber si algo está despierto. 🏓
+- ◆ **Worker** — el mayordomo: código que vive en Cloudflare y hace mandados con las llaves. 🤵
 
 ---
 
@@ -433,18 +445,19 @@ const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/"
 
 ─── 📄 **PÁGINA 13** ───
 # 🏅 REGLAS DE ORO Y CICATRICES APRENDIDAS
-### Lo que este proyecto enseñó a punta de golpes y victorias
 
 </div>
 
-**Regla 1 · Lo que funciona, NO se toca.** ‍♀️ Mientras se arregla una cosa, las demás se dejan quietas. Así ningún arreglo rompe lo que ya brillaba.
-**Regla 2 · Las llaves nunca viven en el frontend.** 🗝️ Siempre en el bolsillo del mayordomo (Cloudflare Secrets).
-**Regla 3 · Un error que no se muestra es un error que gobierna en la sombra.** 📢 Por eso hoy todo fallo sale en pantalla con su motivo real (hubo un typo, `addErrorMessage` vs `addErrorMsg`, que silenció todo un sistema durante días).
-**Regla 4 · Verificar los nombres oficiales contra la documentación.** 📚 Un `:generate` en vez de `:generateContent` costó noches de misterio.
-**Regla 5 · Los errores de los proveedores se leen, no se temen.** 🔍 El mensaje 404 de Google decía textualmente qué modelo usar: la respuesta estaba en el propio error.
-**Regla 6 · Diseñar para el celular.** 📱 Lectura robusta del cuerpo, códigos sin caracteres traviesos, pasos cortos: porque este proyecto se construyó y se mantiene desde un teléfono.
-**Regla 7 · Dos cerebros piensan más que uno.** 🤝 Este proyecto se hizo en equipo híbrido humano + Claude 🧠 + Qwen 💜: uno diagnosticaba con lupa, el otro operaba con bisturí.
-**Regla 8 · Documentar o repetir.** 📜 Todo lo que no se escribe, se vuelve a descubrir a golpes. Por eso existe este manual.
+### Lo que este proyecto enseñó a punta de golpes y victorias
+
+- **Regla 1 · Lo que funciona, NO se toca.** 🙅‍♀️ Mientras se arregla una cosa, las demás se dejan quietas. Así ningún arreglo rompe lo que ya brillaba.
+- **Regla 2 · Las llaves nunca viven en el frontend.** 🗝️ Siempre en el bolsillo del mayordomo (Cloudflare Secrets).
+- **Regla 3 · Un error que no se muestra es un error que gobierna en la sombra.** 📢 Por eso hoy todo fallo sale en pantalla con su motivo real (hubo un typo, `addErrorMessage` vs `addErrorMsg`, que silenció todo un sistema durante días).
+- **Regla 4 · Verificar los nombres oficiales contra la documentación.** 📚 Un `:generate` en vez de `:generateContent` costó noches de misterio.
+- **Regla 5 · Los errores de los proveedores se leen, no se temen.** 🔍 El mensaje 404 de Google decía textualmente qué modelo usar: la respuesta estaba en el propio error.
+- **Regla 6 · Diseñar para el celular.** 📱 Lectura robusta del cuerpo, códigos sin caracteres traviesos, pasos cortos: porque este proyecto se construyó y se mantiene desde un teléfono.
+- **Regla 7 · Dos cerebros piensan más que uno.** 🤝 Este proyecto se hizo en equipo híbrido humano + Claude 🧠 + Qwen 💜: uno diagnosticaba con lupa, el otro operaba con bisturí.
+- **Regla 8 · Documentar o repetir.** 📜 Todo lo que no se escribe, se vuelve a descubrir a golpes. Por eso existe este manual.
 
 ---
 
