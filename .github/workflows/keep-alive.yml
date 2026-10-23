@@ -1,0 +1,25 @@
+name: Keep Alive Worker IA
+
+# Este robot se despierta cada 45 minutos (más frecuente que la caché de 6h)
+on:
+  schedule:
+    - cron: '*/45 * * * *' # Cada 45 min, todos los días
+  workflow_dispatch: # Permite ejecutarlo manualmente si quieres probar ya
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Golpear endpoint Groq para mantener caliente
+        run: |
+          curl -X POST https://broken-frog-3909.andryus0312.workers.dev/groq \
+            -H "Content-Type: application/json" \
+            -d '{"messages":[{"role":"user","content":"ping"}],"max_tokens":5}' \
+            --fail-with-body || echo "⚠️ Warning: Groq no respondió OK, pero seguimos intentando."
+      
+      - name: Golpear endpoint Gemini (opcional, ignora errores 503)
+        run: |
+          curl -X POST https://broken-frog-3909.andryus0312.workers.dev/gemini/auto-update-mode \
+            -H "Content-Type: application/json" \
+            -d '{"contents":[{"parts":[{"text":"ping"}]}]}' \
+            || echo "ℹ️ Info: Gemini puede estar saturado (503), es normal. El warm-up principal fue Groq."
