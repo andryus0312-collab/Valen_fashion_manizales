@@ -26,19 +26,19 @@
 
 ## 📑 ÍNDICE MAESTRO
 
-**1.** 🧰 La caja de herramientas: qué se usó y para qué
-**2.** 🐣 El nacimiento del proyecto, paso a paso
-**3.** 📁 La familia de archivos y carpetas (con nombres propios)
-**4.** 🦴 HTML: el esqueleto de la criatura
-**5.** 🎨 CSS: el maquillaje y el vestuario
-**6.** 🧠 JS: el sistema nervioso
-**7.** 🔥 Firebase: el cuaderno y la caja fuerte
-**8.** 🤵 El mayordomo de Cloudflare: el Worker
-**9.** 🤖 El robot despertador: keep-alive
-**10.** 💬 La Coach IA de dos cerebros
-**11.** 💜 Identidad visual: los colores de la casa
-**12.** 📖 Glosario en cristiano
-**13.** 🏅 Reglas de oro y cicatrices aprendidas
+- **1.** 🧰 [La caja de herramientas: qué se usó y para qué](#-la-caja-de-herramientas)
+- **2.** 🐣 [El nacimiento del proyecto, paso a paso](#-el-nacimiento-del-proyecto-paso-a-paso)
+- **3.** 📁 [La familia de archivos y carpetas (con nombres propios)](#-la-familia-de-archivos-y-carpetas)
+- **4.** 🦴 [HTML: el esqueleto de la criatura](#-html-el-esqueleto-de-la-criatura)
+- **5.** 🎨 [CSS: el maquillaje y el vestuario](#-css-el-maquillaje-y-el-vestuario)
+- **6.** 🧠 [JS: el sistema nervioso](#-js-el-sistema-nervioso)
+- **7.** 🔥 [Firebase: el cuaderno y la caja fuerte](#-firebase-el-cuaderno-y-la-caja-fuerte)
+- **8.** 🤵 [El mayordomo de Cloudflare: el Worker](#-el-mayordomo-de-cloudflare-el-worker)
+- **9.** 🤖 [El robot despertador: keep-alive](#-el-robot-despertador-keep-alive)
+- **10.** 💬 [La Coach IA de dos cerebros](#-la-coach-ia-de-dos-cerebros)
+- **11.** 💜 [Identidad visual: los colores de la casa](#-identidad-visual-los-colores-de-la-casa)
+- **12.** 📖 [Glosario en cristiano](#-glosario-en-cristiano)
+- **13.** 🏅 [Reglas de oro y cicatrices aprendidas](#-reglas-de-oro-y-cicatrices-aprendidas)
 
 ---
 
