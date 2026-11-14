@@ -229,3 +229,5 @@ Hubo de todo: modelos jubilados por Google sin avisar 🪦, llaves con nombres c
 ![Negro](https://img.shields.io/badge/🖤-1A1A2E-1A1A2E?style=flat-square)
 
 </div>
+
+<!-- 🛡️ Commit de seguridad antes de tematización diciembre · [fecha de hoy] -->
