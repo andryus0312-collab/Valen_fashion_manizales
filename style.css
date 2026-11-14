@@ -452,3 +452,131 @@ body.dark-mode [href*="instagram.com"] .shimmer { opacity: 0.8; }
 body.dark-mode .qr-btn-fixed .shimmer { 
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
                                          }
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 🎄 SISTEMA DE TEMPORADAS · DICIEMBRE                        */
+/* (Capa 1 — Franja superior · dormida por defecto)            */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* Contenedor principal de la franja (oculto por defecto) */
+.season-banner {
+  display: none; /* 🔒 APAGADO: no existe hasta que el JS la active */
+  position: relative;
+  width: 100%;
+  padding: 2.5rem 1rem 3.5rem; /* margen superior e inferior generosos */
+  margin-bottom: 2rem;         /* respira antes de la portada */
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Cuando el body tenga la clase activa, la franja se muestra */
+body.temp-active .season-banner { display: block; }
+
+/* Fondo con degradado que se FUNDE con el fondo existente (sin cortes rectos) */
+.season-diciembre {
+  background: 
+    radial-gradient(ellipse at top, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
+    linear-gradient(
+      to bottom,
+      rgba(15, 5, 24, 0.95) 0%,       /* arriba: morado profundo */
+      rgba(30, 10, 45, 0.75) 55%,     /* medio: transición suave */
+      rgba(253, 251, 247, 0.0) 100%   /* abajo: transparente total */
+    );
+}
+body.dark-mode .season-diciembre {
+  background:
+    radial-gradient(ellipse at top, rgba(212, 175, 55, 0.18) 0%, transparent 60%),
+    linear-gradient(
+      to bottom,
+      rgba(10, 2, 10, 0.95) 0%,
+      rgba(20, 5, 30, 0.75) 55%,
+      rgba(10, 2, 10, 0.0) 100%
+    );
+}
+
+/* Inner layout: tres columnas (deco · texto · deco) */
+.season-banner-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+/* Contenido central */
+.season-content {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+/* Título de temporada (tipografía elegante, misma familia del logo) */
+.season-title {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  text-shadow: 
+    0 0 20px rgba(212, 175, 55, 0.6),
+    0 2px 10px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Separador dorado */
+.season-separator {
+  color: #D4AF37;
+  font-size: 0.9rem;
+  letter-spacing: 6px;
+  margin: 0.75rem 0;
+  opacity: 0.9;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+}
+
+/* Frase fashion (cursiva elegante) */
+.season-phrase {
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  color: #f3e8ff;
+  margin: 0;
+  opacity: 0.95;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Decoraciones laterales */
+.season-deco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+.season-deco-right { /* espejo visual sutil */
+  transform: scaleX(-1);
+}
+.season-deco span {
+  display: block;
+  transition: transform 0.3s ease;
+}
+.season-deco span:hover { transform: scale(1.15) rotate(5deg); }
+
+/* ═══ RESPONSIVE: celular ═══ */
+@media (max-width: 640px) {
+  .season-banner { padding: 2rem 0.75rem 3rem; }
+  .season-banner-inner {
+    grid-template-columns: 0.5fr 2fr 0.5fr;
+    gap: 0.5rem;
+  }
+  .season-deco { font-size: 1.1rem; }
+  .season-separator { letter-spacing: 4px; font-size: 0.8rem; }
+}
+
+/* ═══ ACCESIBILIDAD: reducir movimiento ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .season-deco span { transition: none; }
+}
