@@ -271,7 +271,49 @@ window.saveProfile = () => {
     if(profileBase64Image)up.photo=profileBase64Image;
     withTimeout(set(ref(db,'valen_profile'),up),12000,'Timeout').then(()=>showToast('✅ Guardado')).catch(e=>alert('Error'));
 };
-onValue(ref(db, 'valen_profile'), (s) => { currentProfile=s.val()||defaultProfile; renderProfile(currentProfile); });
+
+
+onValue(ref(db, 'valen_profile'), (s) => { 
+  currentProfile = s.val() || defaultProfile; 
+  renderProfile(currentProfile); 
+  applySeasonTheme(currentProfile); // 🎄 NUEVO: motor de temporadas
+});
+
+// ═══════════════════════════════════════════════════════════
+// 🎄 MOTOR DE TEMPORADAS (Capa 1 — Franja superior)
+// ═══════════════════════════════════════════════════════════
+function applySeasonTheme(profile) {
+  try {
+    const theme = profile?.theme;
+    const body = document.body;
+    const banner = document.getElementById('season-banner');
+    
+    // 🔒 FRENO DE MANO: si no hay tema o está apagado, limpieza total
+    if (!theme || theme.activo !== true) {
+      body.classList.remove('temp-active', 'temp-diciembre');
+      if (banner) banner.setAttribute('aria-hidden', 'true');
+      return;
+    }
+    
+    // ✅ Tema activo: aplicar clase de la temporada
+    const temporada = theme.temporada;
+    
+    // Limpiar clases de temporadas previas (por si cambió)
+    body.classList.remove('temp-diciembre', 'temp-navidad-reyes');
+    
+    if (temporada === 'diciembre') {
+      body.classList.add('temp-active', 'temp-diciembre');
+      if (banner) banner.setAttribute('aria-hidden', 'false');
+    } else {
+      // Temporada no reconocida o "ninguna" → limpiar
+      body.classList.remove('temp-active');
+      if (banner) banner.setAttribute('aria-hidden', 'true');
+    }
+  } catch (err) {
+    // 🔐 BLINDAJE: si algo falla, NUNCA rompe la página
+    console.warn('Season theme error (non-blocking):', err);
+  }
+}
 
 function renderCategories() {
     document.getElementById('category-filters').innerHTML = categories.map(c => {
