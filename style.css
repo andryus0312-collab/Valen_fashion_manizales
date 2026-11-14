@@ -580,3 +580,109 @@ body.dark-mode .season-diciembre {
 @media (prefers-reduced-motion: reduce) {
   .season-deco span { transition: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 🎄 SISTEMA DE TEMPORADAS · DICIEMBRE                        */
+/* (Capa 2 — Corona del perfil + adornos sutiles en tarjetas)  */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* ─── CORONA NAVIDEÑA ALREDEDOR DEL PERFIL ─── */
+.season-wreath {
+  display: none; /* 🔒 APAGADO hasta que temp-diciembre esté activo */
+  position: absolute;
+  inset: -16px; /* un poco más grande que el círculo del perfil (w-28 = 112px) */
+  pointer-events: none;
+  z-index: 5;
+}
+body.temp-diciembre .season-wreath { display: block; }
+
+/* Elementos de la corona posicionados alrededor del círculo */
+.season-wreath span {
+  position: absolute;
+  font-size: 1.4rem;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+  animation: wreath-float 3s ease-in-out infinite;
+}
+.wreath-pine   { top: -10px; left: 50%; transform: translateX(-50%); animation-delay: 0s; }
+.wreath-berry  { top: 25%; right: -8px; animation-delay: 0.5s; }
+.wreath-light  { bottom: 25%; left: -8px; animation-delay: 1s; }
+.wreath-bow    { bottom: -10px; left: 50%; transform: translateX(-50%); animation-delay: 1.5s; }
+
+@keyframes wreath-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-4px) scale(1.08); }
+}
+/* Mantener el centrado horizontal en pine y bow durante la animación */
+.wreath-pine, .wreath-bow {
+  animation-name: wreath-float-centered;
+}
+@keyframes wreath-float-centered {
+  0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
+  50%      { transform: translateX(-50%) translateY(-4px) scale(1.08); }
+}
+
+/* ─── ADORNOS SUTILES EN TARJETAS DE PRODUCTO (Nivel 2 suave) ─── */
+body.temp-diciembre .card-bg {
+  position: relative;
+  overflow: hidden;
+}
+/* Copo ❄ sutil en la esquina superior derecha */
+body.temp-diciembre .card-bg::before {
+  content: '❄';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1rem;
+  opacity: 0.55;
+  z-index: 3;
+  pointer-events: none;
+  color: #D4AF37;
+  text-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+  animation: snowflake-twinkle 2.5s ease-in-out infinite;
+}
+/* Brillo dorado muy tenue en el fondo de la tarjeta */
+body.temp-diciembre .card-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.10) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes snowflake-twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.9) rotate(0deg); }
+  50%      { opacity: 0.75; transform: scale(1.15) rotate(15deg); }
+}
+
+/* ─── TINTE FESTIVO EN TESTIMONIOS ─── */
+body.temp-diciembre .testimonial-card {
+  border-color: rgba(212, 175, 55, 0.55);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.18);
+}
+body.temp-diciembre .testimonial-divider {
+  color: #D4AF37;
+  opacity: 0.9;
+}
+
+/* ─── BOTÓN TESTIMONIOS CON BRILLO NAVIDEÑO ─── */
+body.temp-diciembre .testimonials-float-btn {
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.65);
+}
+
+/* ═══ RESPONSIVE: celular ═══ */
+@media (max-width: 640px) {
+  .season-wreath { inset: -12px; }
+  .season-wreath span { font-size: 1.1rem; }
+  .wreath-pine  { top: -7px; }
+  .wreath-bow   { bottom: -7px; }
+  body.temp-diciembre .card-bg::before { font-size: 0.85rem; top: 8px; right: 8px; }
+}
+
+/* ═══ ACCESIBILIDAD: reducir movimiento ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .season-wreath span,
+  body.temp-diciembre .card-bg::before {
+    animation: none;
+  }
+}
