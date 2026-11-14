@@ -626,18 +626,21 @@ body.temp-diciembre .card-bg {
   position: relative;
   overflow: hidden;
 }
-/* Copo ❄ sutil en la esquina superior derecha */
+/* Copo ❄ sutil en la esquina superior derecha de la TARJETA COMPLETA */
+body.temp-diciembre .card-bg {
+  position: relative; /* Asegurar que sea el contexto de posicionamiento */
+}
 body.temp-diciembre .card-bg::before {
   content: '❄';
   position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1rem;
-  opacity: 0.55;
-  z-index: 3;
+  top: 12px;
+  right: 12px;
+  font-size: 1.1rem;
+  opacity: 0.7;
+  z-index: 20; /* Más alto que la imagen y las etiquetas */
   pointer-events: none;
   color: #D4AF37;
-  text-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.8), 0 0 4px rgba(255,255,255,0.5);
   animation: snowflake-twinkle 2.5s ease-in-out infinite;
 }
 /* Brillo dorado muy tenue en el fondo de la tarjeta */
@@ -645,9 +648,10 @@ body.temp-diciembre .card-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.10) 0%, transparent 55%);
+  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.12) 0%, transparent 60%);
   pointer-events: none;
-  z-index: 1;
+  z-index: 5; /* Por encima del fondo, por debajo del contenido */
+  border-radius: inherit; /* Respetar las esquinas redondeadas de la tarjeta */
 }
 
 @keyframes snowflake-twinkle {
